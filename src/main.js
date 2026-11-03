@@ -2,6 +2,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './styles.css';
 import { loadData } from './data.js';
+import { createMapTooltip } from './map-tooltip.js';
 import {
   INCOME_BINS, isNumber, colorFor, money, number, percent, bubbleRadius,
   searchFeatures, summarize, escapeHtml as esc, safeUrl, hashCode,
@@ -19,7 +20,7 @@ const state = {
   shortlist: [], selected: null, mode: 'count', bubbles: true, labels: true,
   searchMatches: [], activeSearch: -1,
 };
-let map, boundaries, bubbleGroup, labelGroup, roadGroup;
+let map, boundaries, bubbleGroup, labelGroup, roadGroup, mapTooltip;
 
 function setCollapsed(collapsed) {
   sidebar.classList.toggle('collapsed', collapsed);
@@ -160,7 +161,7 @@ function tooltip(p) {
 }
 
 function previewFeature(feature) {
-  if (mobile()) return;
+  if (mobile() || mapTooltip?.isMoving()) return;
   const layer = state.layers.get(feature.properties.code);
   layer?.setStyle({ weight: 2.3, color: '#486b60', fillOpacity: 0.88 });
   layer?.bringToFront();
@@ -180,10 +181,10 @@ function bindFeature(feature, layer) {
   layer.on('click', () => { selectCommunity(code, false); closeLayers(); });
   layer.on('mouseover', () => previewFeature(feature));
   layer.on('mouseout', stopPreview);
-  layer.bindTooltip(tooltip(feature.properties), {
-    className: 'community-tooltip', direction: 'top', sticky: true, offset: [0, -10], opacity: 0.98,
+  mapTooltip.bind(layer, {
+    content: tooltip(feature.properties),
+    anchor: event => event?.latlng || layer.getBounds().getCenter(),
   });
-  layer.on('tooltipopen', () => { if (mobile()) layer.closeTooltip(); });
 }
 
 function fitPadding(focus = false) {
@@ -199,7 +200,7 @@ function fitPadding(focus = false) {
 
 function fitCity() {
   if (!boundaries) return;
-  map.eachLayer(layer => layer.closeTooltip?.());
+  mapTooltip.close();
   map.fitBounds(boundaries.getBounds(), { ...fitPadding(), animate: !reducedMotion() });
 }
 
@@ -211,6 +212,7 @@ function fitCommunity(code) {
 function selectCommunity(code, zoom = true, expand = true) {
   const feature = state.byCode.get(code);
   if (!feature) return;
+  mapTooltip?.close();
   state.selected = code;
   if (mobile() && expand) setCollapsed(false);
   renderDetail(feature);
@@ -229,6 +231,7 @@ function selectCommunity(code, zoom = true, expand = true) {
 
 function updateBubbles() {
   if (!map) return;
+  mapTooltip.close();
   bubbleGroup.clearLayers();
   if (!state.bubbles) return;
   const key = state.mode === 'count' ? 'chineseCount' : 'chinesePct';
@@ -247,8 +250,9 @@ function updateBubbles() {
     circle.on('click', () => { selectCommunity(p.code, false); closeLayers(); });
     circle.on('mouseover', () => previewFeature(feature));
     circle.on('mouseout', stopPreview);
-    circle.bindTooltip(tooltip(p), { className: 'community-tooltip', direction: 'top', offset: [0, -radius - 3] });
-    circle.on('tooltipopen', () => { if (mobile()) circle.closeTooltip(); });
+    mapTooltip.bind(circle, {
+      content: tooltip(p), anchor: () => circle.getLatLng(), offset: [0, -radius - 3],
+    });
   }
 }
 
@@ -433,6 +437,12 @@ async function init() {
     renderMetadata();
     renderBubbleLegend();
     map = L.map('map', { zoomControl: false, zoomSnap: 0.25, zoomDelta: 0.5, minZoom: 8, maxZoom: 17, attributionControl: true });
+    mapTooltip = createMapTooltip({
+      map,
+      tooltip: L.tooltip({ className: 'community-tooltip', direction: 'top', opacity: 0.98 }),
+      enabled: () => !mobile(),
+      hoverEnabled: () => window.matchMedia('(any-hover: hover)').matches,
+    });
     for (const [name, zIndex] of [['water', 410], ['roads', 420], ['bubbles', 450], ['labels', 470]]) {
       map.createPane(name);
       map.getPane(name).style.zIndex = zIndex;
