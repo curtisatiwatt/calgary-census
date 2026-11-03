@@ -148,3 +148,43 @@ html[data-theme=dark] .method-grid p,html[data-theme=dark] .method-sources p{col
   .header-actions #method-button:after{content:'i';font:italic 600 17px Georgia,serif}
   .brand strong{font-size:17px}.brand small{letter-spacing:1.3px}
 }
+
+/* A reversible, browser-independent focus view for desktop and mobile. */
+.focus-map-button{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.focus-map-button svg{width:15px;height:15px;flex:none}
+.focus-map-button .focus-restore,.focus-map-button[aria-pressed=true] .focus-expand{display:none}
+.focus-map-button[aria-pressed=true] .focus-restore{display:block}
+.focus-map-button[aria-pressed=true]{border-color:var(--accent)}
+body.map-focus{overflow:hidden}
+.map-focus .app-header,.map-focus .viewbar,.map-focus .sidebar{display:none}
+.map-focus .workspace{height:100dvh;min-height:0;grid-template-columns:minmax(0,1fr)}
+.map-focus .map-workspace{min-height:0}
+.map-focus .map-status{display:none}
+.map-focus .composition-key{top:18px;width:220px;padding:9px 11px}
+.map-focus .composition-key>p,.map-focus .composition-key .declutter-note{display:none}
+.map-focus .composition-key .donut-key{margin-top:7px}
+.map-focus .map-legend{bottom:25px;padding:9px 11px}
+.map-focus .map-legend .legend-title{margin-bottom:7px}
+.map-focus .map-warning{bottom:125px}
+@media(max-width:760px){
+  .focus-map-button{padding:8px;gap:5px}
+  .focus-map-button svg{width:14px;height:14px}
+  .transit-legend{max-width:calc(100% - 132px)}
+  .map-focus .composition-key{display:none}
+  .map-focus .map-tools{right:max(12px,env(safe-area-inset-right))}
+  .map-focus .map-workspace:not(.comparing) .map-tools{top:max(12px,env(safe-area-inset-top))}
+  .map-focus .map-legend{bottom:max(22px,calc(env(safe-area-inset-bottom) + 16px));left:12px;max-width:calc(100% - 63px)}
+  .map-focus .map-warning{top:auto;bottom:125px}
+}
+
+/* Zoom-dependent orientation labels use their own subdued visual hierarchy. */
+.road-label{font-size:9px;letter-spacing:.05px}
+.water-label{font-size:11px;font-style:italic;font-weight:600;letter-spacing:.3px;text-align:center;white-space:nowrap;pointer-events:none!important;color:#37798a;text-shadow:0 0 3px #f6fbf5,0 0 3px #f6fbf5}
+.water-label span{background:#f6fbf538;border-radius:2px;padding:1px 2px}
+.orientation-label{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:650;color:#63516e;pointer-events:none!important;text-shadow:0 0 3px #fffffff0,0 0 3px #fffffff0,1px 1px 1px #fff}
+.orientation-label span{white-space:nowrap}
+.orientation-label:before{content:'';width:4px;height:4px;flex:none;border-radius:50%;background:#80628b;box-shadow:0 0 0 1px #fff}
+html[data-theme=dark] .water-label{color:#8fc4d5;text-shadow:0 0 3px #14272e,0 0 3px #14272e}
+html[data-theme=dark] .water-label span{background:#14272e38}
+html[data-theme=dark] .orientation-label{color:#d7c6e5;text-shadow:0 0 3px #14272e,0 0 3px #14272e,1px 1px 1px #14272e}
+html[data-theme=dark] .orientation-label:before{background:#c2a5d3;box-shadow:0 0 0 1px #14272e}

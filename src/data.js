@@ -5,7 +5,7 @@ async function readJson(path) {
 }
 
 export async function loadData() {
-  const [metadata, communities, populationData, basemap, operatingTransit, greenTransit, geographicContext] = await Promise.all([
+  const [metadata, communities, populationData, basemap, operatingTransit, greenTransit, geographicContext, orientationLandmarks] = await Promise.all([
     readJson('metadata.json'),
     readJson('communities.geojson'),
     readJson('population-groups.json'),
@@ -13,6 +13,7 @@ export async function loadData() {
     readJson('ctrain-operating.geojson').catch(() => null),
     readJson('ctrain-green.geojson').catch(() => null),
     readJson('geographic-context.geojson').catch(() => null),
+    readJson('orientation-landmarks.geojson').catch(() => null),
   ]);
   if (communities.type !== 'FeatureCollection' || !communities.features?.length) {
     throw new Error('社区边界数据格式不完整');
@@ -27,5 +28,5 @@ export async function loadData() {
     }
     return { ...feature, properties: { ...p, code: String(p.code) } };
   });
-  return { metadata, features, populationData, basemap, operatingTransit, greenTransit, geographicContext };
+  return { metadata, features, populationData, basemap, operatingTransit, greenTransit, geographicContext, orientationLandmarks };
 }

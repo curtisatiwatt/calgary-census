@@ -77,6 +77,10 @@
     {
       "label": "Natural Resources Canada · 原住民土地行政边界",
       "url": "https://open.canada.ca/data/en/dataset/522b07b9-78e2-4819-b736-ad9208eb1067"
+    },
+    {
+      "label": "City of Calgary · Landmark locations",
+      "url": "https://services1.arcgis.com/AVP60cs0Q9PEA8rH/ArcGIS/rest/services/Attractions/FeatureServer/0"
     }
   ],
   "populationGroupsDefinition": "人口视图采用市府社区档案的 13 个 Visible Minority（Racialized Population）互斥分类，默认勾选全市人数最多的五个可见少数族裔类别。非可见少数族裔为普查分类，包含原住民等人口，不可视作白人或欧洲裔。",

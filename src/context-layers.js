@@ -2,36 +2,12 @@ import L from 'leaflet';
 import { t, currentLanguage, localizeHtml } from './i18n.js';
 import { isDarkTheme } from './theme.js';
 import { escapeHtml as esc, safeUrl } from './map-utils.js';
+import { displayMapName, groupRoadLabels, visibleLineAnchors, visibleWaterAnchors } from './label-placement.js';
 
 export const LINE_COLORS = Object.freeze({ red: '#ca3544', blue: '#2879bd', green: '#22834b' });
 const lineName = id => ({ red: 'Red Line', blue: 'Blue Line', green: 'Green Line' }[id] || id);
 const statusName = status => ({ operating: '运营中', construction: '建设中 · 未运营', planned: '规划中 · 未运营' }[status] || '未运营');
 const features = data => data?.type === 'FeatureCollection' && Array.isArray(data.features) ? data.features : [];
-
-function midpoint(feature) {
-  const geometry = feature.geometry;
-  if (geometry?.type === 'Point') return geometry.coordinates;
-  const lines = geometry?.type === 'LineString' ? [geometry.coordinates]
-    : geometry?.type === 'MultiLineString' ? geometry.coordinates : [];
-  let best = null;
-  let bestLength = -1;
-  for (const line of lines) {
-    const lengths = line.slice(1).map((point, i) => Math.hypot((point[0] - line[i][0]) * .63, point[1] - line[i][1]));
-    const total = lengths.reduce((sum, length) => sum + length, 0);
-    if (total <= bestLength) continue;
-    let traveled = 0;
-    for (let i = 0; i < lengths.length; i++) {
-      if (traveled + lengths[i] >= total / 2) {
-        const t = lengths[i] ? (total / 2 - traveled) / lengths[i] : 0;
-        best = [line[i][0] + (line[i + 1][0] - line[i][0]) * t, line[i][1] + (line[i + 1][1] - line[i][1]) * t];
-        break;
-      }
-      traveled += lengths[i];
-    }
-    bestLength = total;
-  }
-  return best;
-}
 
 export function stationContent(properties) {
   const names = (properties.lineIds || []).map(lineName).join(' / ');
@@ -41,9 +17,9 @@ export function stationContent(properties) {
 }
 
 /** Context geometry never changes census statistics or the heat-map scale. */
-export function createContextLayers({ context, basemap, geography, operatingTransit, greenTransit, communityNames = [], visible, onStationOpen }) {
+export function createContextLayers({ context, basemap, geography, operatingTransit, greenTransit, orientationLandmarks, communityNames = [], visible, onStationOpen }) {
   const map = context.map;
-  const definitions = [['geography', 405], ['water', 410], ['roads', 420], ['roadLabels', 425], ['transit', 440], ['stations', 480], ['stationLabels', 485], ['landmarkLabels', 490]];
+  const definitions = [['geography', 405], ['water', 410], ['roads', 420], ['roadLabels', 425], ['waterLabels', 430], ['transit', 440], ['stations', 480], ['stationLabels', 485], ['landmarkLabels', 490]];
   for (const [name, zIndex] of definitions) {
     if (!map.getPane(name)) map.createPane(name);
     const pane = map.getPane(name);
@@ -51,12 +27,20 @@ export function createContextLayers({ context, basemap, geography, operatingTran
     if (name !== 'stations') pane.style.pointerEvents = 'none';
   }
   const roadLabels = L.layerGroup().addTo(map);
+  const waterLabels = L.layerGroup().addTo(map);
   const stationLabels = L.layerGroup().addTo(map);
   const landmarkLabels = L.layerGroup().addTo(map);
   const transitFeatures = [...features(operatingTransit), ...features(greenTransit)];
   const routes = transitFeatures.filter(f => f.properties.kind === 'transit_route');
   const stations = transitFeatures.filter(f => f.properties.kind === 'transit_station' && f.geometry?.type === 'Point');
   const roadFeatures = features(basemap).filter(f => f.properties.kind === 'road');
+  const roadLabelGroups = groupRoadLabels(roadFeatures);
+  const waterFeatures = features(basemap).filter(f => f.properties.kind === 'water' && f.properties.name && !/facility|storm.?water|management|industrial|energy park|pond [0-9]/i.test(f.properties.name))
+    .sort((a, b) => waterPriority(b.properties.name) - waterPriority(a.properties.name));
+  const orientationFeatures = features(orientationLandmarks).filter(f => f.properties.kind === 'orientation_landmark' && f.geometry?.type === 'Point' && f.properties.name)
+    .sort((a, b) => (b.properties.priority || 0) - (a.properties.priority || 0));
+  const project = coordinate => map.latLngToContainerPoint([coordinate[1], coordinate[0]]);
+  function waterPriority(name) { return /river/i.test(name) ? 4 : /reservoir/i.test(name) ? 3 : /creek/i.test(name) ? 2 : 1; }
   const areaFeatures = features(geography).filter(f => ['airport', 'park', 'reserve'].includes(f.properties.kind));
   const normalizeName = name => String(name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const parkLabelsByName = new Map();
@@ -196,6 +180,7 @@ export function createContextLayers({ context, basemap, geography, operatingTran
       }
     }
     roadLabels.clearLayers();
+    waterLabels.clearLayers();
     stationLabels.clearLayers();
     landmarkLabels.clearLayers();
     labelBoxes.length = 0;
@@ -205,6 +190,40 @@ export function createContextLayers({ context, basemap, geography, operatingTran
       labelBoxes.push(box);
       return true;
     };
+    // Geographic names use the portion currently on screen, not a fixed city-wide midpoint.
+    // Reserve their boxes before community labels are placed by the main renderer.
+    let watersShown = 0;
+    const placedWaterNames = new Set();
+    const waterLimit = zoom < 13 ? 2 : 4;
+    for (const feature of waterFeatures) {
+      const waterNameKey = normalizeName(feature.properties.name);
+      if (placedWaterNames.has(waterNameKey)) continue;
+      const priority = waterPriority(feature.properties.name);
+      if (zoom < (priority === 4 ? 11 : priority === 3 ? 11.5 : 13) || watersShown >= waterLimit) continue;
+      const text = displayMapName(feature.properties.name);
+      const width = Math.min(220, text.length * 6 + 8);
+      const pixel = visibleWaterAnchors(feature.geometry, project, size, width)
+        .find(point => reserveBox({ x: point.x - width / 2, y: point.y - 9, w: width, h: 18 }));
+      if (!pixel) continue;
+      watersShown++;
+      placedWaterNames.add(waterNameKey);
+      L.marker(map.containerPointToLatLng([pixel.x, pixel.y]), { pane: 'waterLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: 'water-label', html: `<span>${esc(text)}</span>`, iconSize: [width, 18], iconAnchor: [width / 2, 9] }) }).addTo(waterLabels);
+    }
+    let placesShown = 0;
+    const placedPlaceNames = [];
+    const placeLimit = Math.min(6, Math.max(2, Math.floor(size.x * size.y / 170000)));
+    if (visible.landmarks) for (const feature of orientationFeatures) {
+      const p = feature.properties;
+      if (zoom < (p.minZoom || 12) || placesShown >= placeLimit) continue;
+      const [lng, lat] = feature.geometry.coordinates;
+      if (!bounds.contains([lat, lng])) continue;
+      const pixel = project([lng, lat]);
+      const width = Math.min(215, p.name.length * 5.9 + 15);
+      if (!reserveBox({ x: pixel.x - 3, y: pixel.y - 9, w: width, h: 18 })) continue;
+      placesShown++;
+      placedPlaceNames.push(normalizeName(p.name));
+      L.marker([lat, lng], { pane: 'landmarkLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: 'orientation-label', html: `<span>${esc(p.name)}</span>`, iconSize: [width, 18], iconAnchor: [3, 9] }) }).addTo(landmarkLabels);
+    }
     let parksShown = 0;
     const candidates = [
       ...areaFeatures.filter(f => f.properties.kind !== 'park').map(feature => ({ feature, name: feature.properties.name, iconic: true })),
@@ -213,6 +232,8 @@ export function createContextLayers({ context, basemap, geography, operatingTran
     if (visible.landmarks) for (const { feature, name, iconic } of candidates) {
       const p = feature.properties;
       if (p.kind === 'park') {
+        const parkKey = normalizeName(name);
+        if (placedPlaceNames.some(key => key === parkKey || (Math.min(key.length, parkKey.length) >= 10 && (key.startsWith(parkKey) || parkKey.startsWith(key))))) continue;
         if (zoom < 11 || (zoom < 13 && (!iconic || parksShown >= 3))) continue;
         if (zoom >= 13 && !iconic && !(p.areaHa >= 20)) continue;
       }
@@ -228,6 +249,18 @@ export function createContextLayers({ context, basemap, geography, operatingTran
       if (p.kind === 'park') parksShown++;
       L.marker(point, { pane: 'landmarkLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: `landmark-label ${p.kind}-label`, html: `<span>${esc(text)}</span>`, iconSize: [width, height], iconAnchor: [width / 2, height / 2] }) }).addTo(landmarkLabels);
     }
+    let roadsShown = 0;
+    const roadLimit = Math.min(zoom < 13 ? 12 : zoom < 14 ? 22 : 30, Math.max(4, Math.floor(size.x * size.y / (zoom < 13 ? 70000 : 47000))));
+    if (visible.roads && zoom >= 12) for (const group of roadLabelGroups) {
+      if (roadsShown >= roadLimit) break;
+      if (zoom < 13 && group.priority < 2) continue;
+      const width = Math.min(190, group.name.length * 5.6 + 8);
+      const pixel = visibleLineAnchors(group.lines, project, size, width)
+        .find(point => reserveBox({ x: point.x - width / 2, y: point.y - 9, w: width, h: 18 }));
+      if (!pixel) continue;
+      roadsShown++;
+      L.marker(map.containerPointToLatLng([pixel.x, pixel.y]), { pane: 'roadLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: 'road-label', html: `<span>${esc(group.name)}</span>`, iconSize: [width, 18], iconAnchor: [width / 2, 9] }) }).addTo(roadLabels);
+    }
     if (visible.transit && zoom >= 13) for (const feature of stations) {
       const [lng, lat] = feature.geometry.coordinates;
       if (!bounds.contains([lat, lng])) continue;
@@ -238,15 +271,7 @@ export function createContextLayers({ context, basemap, geography, operatingTran
       if (!reserveBox({ x: point.x + 7, y: point.y - 8, w: width, h: 19 })) continue;
       L.marker([lat, lng], { pane: 'stationLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: `station-label${p.status === 'operating' ? '' : ' future-station-label'}`, html: `<span>${esc(text)}</span>`, iconSize: [width, 20], iconAnchor: [-7, 8] }) }).addTo(stationLabels);
     }
-    if (visible.roads && zoom >= 12) for (const feature of roadFeatures) {
-      const point = midpoint(feature);
-      if (!point || !bounds.contains([point[1], point[0]])) continue;
-      const text = feature.properties.name;
-      const pixel = map.latLngToContainerPoint([point[1], point[0]]);
-      const width = Math.min(150, text.length * 5.4);
-      if (!reserveBox({ x: pixel.x - width / 2, y: pixel.y - 8, w: width, h: 16 })) continue;
-      L.marker([point[1], point[0]], { pane: 'roadLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: 'road-label', html: `<span>${esc(text)}</span>`, iconSize: [width, 16], iconAnchor: [width / 2, 8] }) }).addTo(roadLabels);
-    }
+
   }
   setVisible(visible);
   return { setVisible, update, labelBoxes, stationCount: stations.length };

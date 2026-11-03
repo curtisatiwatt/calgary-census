@@ -16,10 +16,10 @@ const dialog = $('method-dialog');
 const PALETTE = ['#518a7b', '#c29b4d', '#7e85af', '#5c8eac', '#b67768', '#8d9963', '#947cac', '#bb8c67', '#688b92', '#a18696', '#7f8990', '#b7a268', '#c2c9bd'];
 const state = {
   features: [], byCode: new Map(), metadata: {}, counts: {}, data: null, basemap: null,
-  operatingTransit: null, greenTransit: null, geographicContext: null,
+  operatingTransit: null, greenTransit: null, geographicContext: null, orientationLandmarks: null,
   roads: true, labels: true, transit: true, landmarks: true,
   groups: [], groupById: new Map(), selectedGroups: [], colors: {}, selected: null,
-  mode: 'composition', income: true, contexts: [], comparisonContexts: [], composition: null,
+  mode: 'composition', focusMode: false, focusComparisonPageSize: null, income: true, contexts: [], comparisonContexts: [], composition: null,
   view: null, wholeCity: true, compareStart: 0, searchMatches: [], activeSearch: -1,
 };
 let syncing = false;
@@ -49,6 +49,51 @@ function toggleLayers(open) {
   $('layers-button').setAttribute('aria-expanded', String(open));
   if (open) { toggleGroups(false); closeTooltips(); }
 }
+function refreshFocusControl() {
+  const label = t(state.focusMode ? '退出专注' : '专注地图');
+  $('focus-map-label').textContent = label;
+  $('focus-map').setAttribute('aria-pressed', String(state.focusMode));
+  $('focus-map').setAttribute('aria-label', label);
+  $('focus-map').title = label;
+}
+
+function resizeMapsKeepingView() {
+  const contexts = activeContexts();
+  const current = contexts[0];
+  if (!current?.map._loaded) return;
+  const center = current.map.getCenter();
+  const zoom = current.map.getZoom();
+  cancelAnimationFrame(syncFrame); syncFrame = null;
+  syncing = true;
+  for (const context of contexts) {
+    context.map.invalidateSize({ pan: false });
+    // Leaflet's size change can shift the geographic centre even with pan disabled.
+    context.map.setView(center, zoom, { animate: false });
+  }
+  syncing = false;
+  syncMaps(current);
+  contexts.forEach(updateLabels);
+  updateDonuts();
+}
+
+function setFocusMode(focused) {
+  if (state.focusMode === focused) return;
+  closeTooltips(); toggleGroups(false); toggleLayers(false); closeSearch();
+  const current = activeContexts()[0];
+  if (current?.map._loaded) syncMaps(current);
+  // The visible comparison panels and paging controls must share the same size.
+  state.focusComparisonPageSize = focused ? (lastComparisonPageSize ?? comparisonPageSize()) : null;
+  state.focusMode = focused;
+  document.body.classList.toggle('map-focus', focused);
+  refreshFocusControl();
+  // Keep focus on an available control when the surrounding navigation disappears.
+  $('focus-map').focus({ preventScroll: true });
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    if (state.mode === 'distribution' && lastComparisonPageSize !== comparisonPageSize()) rebuildComparison({ preserveView: true });
+    else resizeMapsKeepingView();
+  }));
+}
+
 function updateLayerVisibility() {
   closeTooltips();
   for (const context of state.contexts) {
@@ -221,7 +266,7 @@ function createMap(element, groupId = null) {
     },
   }).addTo(map);
   if (!groupId) {
-    context.contextLayers = createContextLayers({ context, basemap: state.basemap, geography: state.geographicContext, operatingTransit: state.operatingTransit, greenTransit: state.greenTransit, communityNames: state.features.map(f => f.properties.name), visible: { roads: state.roads, transit: state.transit, landmarks: state.landmarks, communityLabels: state.labels }, onStationOpen: () => { closeTooltips(); toggleGroups(false); toggleLayers(false); if (mobile()) setCollapsed(true); } });
+    context.contextLayers = createContextLayers({ context, basemap: state.basemap, geography: state.geographicContext, orientationLandmarks: state.orientationLandmarks, operatingTransit: state.operatingTransit, greenTransit: state.greenTransit, communityNames: state.features.map(f => f.properties.name), visible: { roads: state.roads, transit: state.transit, landmarks: state.landmarks, communityLabels: state.labels }, onStationOpen: () => { closeTooltips(); toggleGroups(false); toggleLayers(false); if (mobile()) setCollapsed(true); } });
   } else {
     renderComparisonBasemap(context);
   }
@@ -300,7 +345,7 @@ function selectCommunity(code, zoom = true, expand = true) {
   if (!state.byCode.has(code)) return;
   closeTooltips();
   state.selected = code;
-  if (mobile() && expand) setCollapsed(false);
+  if (mobile() && expand && !state.focusMode) setCollapsed(false);
   renderDetail();
   refreshStyles();
   updateDonuts();
@@ -407,6 +452,7 @@ function updateLabels(context) {
 
 function comparisonPageSize() {
   if (mobile()) return 1;
+  if (state.focusMode && state.focusComparisonPageSize !== null) return state.focusComparisonPageSize;
   const width = document.querySelector('.map-workspace').clientWidth;
   return width >= 780 ? 3 : width >= 500 ? 2 : 1;
 }
@@ -421,7 +467,7 @@ function renderComparisonHeadings() {
   localize($('comparison-maps'), $('comparison-select'));
 }
 
-function rebuildComparison() {
+function rebuildComparison({ preserveView = state.focusMode } = {}) {
   cancelAnimationFrame(syncFrame); syncFrame = null;
   closeTooltips();
   for (const context of state.comparisonContexts) {
@@ -450,6 +496,7 @@ function rebuildComparison() {
   syncing = false;
   renderComparisonHeadings();
   requestAnimationFrame(() => {
+    if (preserveView && state.view) { resizeMapsKeepingView(); return; }
     for (const context of state.comparisonContexts) context.map.invalidateSize({ pan: false });
     if (state.wholeCity || !state.view) fitCity();
     else { refreshStyles(); state.comparisonContexts.forEach(updateLabels); }
@@ -500,7 +547,7 @@ function renderSearch() {
   $('search-results').hidden = false; $('search').setAttribute('aria-expanded', 'true');
   $('search-results').innerHTML = state.searchMatches.length ? state.searchMatches.map((feature, i) => {
     const p = feature.properties;
-    return `<button class="search-result" id="search-option-${i}" role="option" aria-selected="false" data-code="${esc(p.code)}"><span><strong>${esc(p.name)}</strong><small>${esc([p.sectorLabel, p.typeLabel].filter(Boolean).join(' · '))}</small></span><span>${money(p.income)}</span></button>`;
+    return `<button class="search-result" id="search-option-${i}" role="option" aria-selected="false" data-code="${esc(p.code)}"><span><strong>${esc(p.name)}</strong><small>${esc([p.sectorLabel, p.typeLabel].filter(Boolean).map(tag => t(tag)).join(' · '))}</small></span><span>${money(p.income)}</span></button>`;
   }).join('') : '<p class="no-results">没有找到社区，可输入英文名或社区代码。</p>';
   localize($('search-results'));
 }
@@ -509,15 +556,16 @@ function chooseSearchResult(code) {
 }
 
 function setReady(ready) {
-  document.querySelectorAll('.view-tabs button,#groups-button,#group-search,#default-groups,#all-groups,#clear-groups,#income-toggle,#layers-button,#roads-toggle,#labels-toggle,#transit-toggle,#landmarks-toggle,#search,#fit-city,#zoom-in,#zoom-out,#focus-community').forEach(control => { control.disabled = !ready; });
+  document.querySelectorAll('.view-tabs button,#groups-button,#group-search,#default-groups,#all-groups,#clear-groups,#income-toggle,#layers-button,#roads-toggle,#labels-toggle,#transit-toggle,#landmarks-toggle,#search,#fit-city,#zoom-in,#zoom-out,#focus-map,#focus-community').forEach(control => { control.disabled = !ready; });
 }
 
 function initializeControls() {
   setReady(false);
+  refreshFocusControl();
   $('language-toggle').addEventListener('click', () => {
     closeTooltips();
     setLanguage(currentLanguage() === 'zh' ? 'en' : 'zh');
-    applyStaticTranslations(); refreshThemeControl();
+    applyStaticTranslations(); refreshThemeControl(); refreshFocusControl();
     if (state.data) {
       renderMetadata(); renderGroupList(); renderDonutKey(); renderDetail(); renderComparisonHeadings();
       $('mode-description').textContent = t(state.mode === 'composition' ? '一个社区，一张构成图' : '同一色阶，查看聚居分布');
@@ -539,7 +587,7 @@ function initializeControls() {
   for (const layer of ['roads', 'labels', 'transit', 'landmarks']) $(`${layer}-toggle`).addEventListener('change', event => { state[layer] = event.target.checked; updateLayerVisibility(); });
   $('groups-button').addEventListener('click', () => toggleGroups($('groups-panel').hidden));
   $('close-groups').addEventListener('click', () => { toggleGroups(false); $('groups-button').focus(); });
-  $('empty-choose-groups').addEventListener('click', () => toggleGroups(true));
+  $('empty-choose-groups').addEventListener('click', () => { setFocusMode(false); toggleGroups(true); });
   $('group-search').addEventListener('input', renderGroupList);
   $('group-list').addEventListener('change', event => {
     const id = event.target.dataset.group;
@@ -553,6 +601,7 @@ function initializeControls() {
   $('previous-groups').addEventListener('click', () => { state.compareStart -= comparisonPageSize(); rebuildComparison(); });
   $('next-groups').addEventListener('click', () => { state.compareStart += comparisonPageSize(); rebuildComparison(); });
   $('comparison-select').addEventListener('change', event => { state.compareStart = Number(event.target.value); rebuildComparison(); });
+  $('focus-map').addEventListener('click', () => setFocusMode(!state.focusMode));
   $('fit-city').addEventListener('click', fitCity);
   $('zoom-in').addEventListener('click', () => activeContexts()[0]?.map.zoomIn(0.5));
   $('zoom-out').addEventListener('click', () => activeContexts()[0]?.map.zoomOut(0.5));
@@ -584,8 +633,15 @@ function initializeControls() {
     if (!event.target.closest('#groups-panel') && !event.target.closest('#groups-button') && !event.target.closest('#empty-choose-groups')) toggleGroups(false);
   });
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape') { closeTooltips(); if (!$('layers-panel').hidden) { toggleLayers(false); $('layers-button').focus(); } if (!$('groups-panel').hidden) { toggleGroups(false); $('groups-button').focus(); } }
-    if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) && !dialog.open) { event.preventDefault(); $('search').focus(); }
+    if (event.key === 'Escape' && !dialog.open) {
+      closeTooltips();
+      if (!$('layers-panel').hidden) { toggleLayers(false); $('layers-button').focus(); }
+      else if (!$('groups-panel').hidden) { toggleGroups(false); $('groups-button').focus(); }
+      else if (state.focusMode) { event.preventDefault(); setFocusMode(false); }
+    }
+    if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) && !dialog.open) {
+      event.preventDefault(); setFocusMode(false); $('search').focus();
+    }
   });
   window.addEventListener('hashchange', () => { const code = hashCode(location.hash, state.features); if (code && code !== state.selected) selectCommunity(code); });
   let resizeTimer;
@@ -612,7 +668,7 @@ async function init() {
   try {
     const data = await loadData();
     state.metadata = data.metadata; state.features = data.features; state.data = data.populationData; state.basemap = data.basemap;
-    state.operatingTransit = data.operatingTransit; state.greenTransit = data.greenTransit; state.geographicContext = data.geographicContext;
+    state.operatingTransit = data.operatingTransit; state.greenTransit = data.greenTransit; state.geographicContext = data.geographicContext; state.orientationLandmarks = data.orientationLandmarks;
     state.byCode = new Map(data.features.map(f => [f.properties.code, f])); state.counts = summarize(data.features);
     state.groups = data.populationData.groups; state.groupById = new Map(state.groups.map(g => [g.id, g]));
     state.colors = Object.fromEntries(state.groups.map((g, i) => [g.id, PALETTE[i % PALETTE.length]]));

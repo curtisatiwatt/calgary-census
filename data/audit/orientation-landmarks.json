@@ -1,0 +1,83 @@
+{
+  "preparedDate": "2026-11-03",
+  "purpose": "A small set of orientation landmarks, shown only at closer zooms. These records do not change census values or community boundaries.",
+  "coordinateMethod": "Official City point geometries reprojected by ArcGIS to EPSG:4326; coordinates rounded to 7 decimals. No manual relocation. Display names shortened for map legibility.",
+  "sources": [
+    {
+      "label": "City of Calgary — Attractions",
+      "url": "https://services1.arcgis.com/AVP60cs0Q9PEA8rH/ArcGIS/rest/services/Attractions/FeatureServer/0",
+      "queryUrl": "https://services1.arcgis.com/AVP60cs0Q9PEA8rH/ArcGIS/rest/services/Attractions/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=geojson",
+      "licenseUrl": "https://data.calgary.ca/d/Open-Data-Terms/u45n-7awa"
+    }
+  ],
+  "records": [
+    {
+      "sourceName": "Calgary Tower",
+      "displayName": "Calgary Tower",
+      "objectId": 170577,
+      "coordinates": [
+        -114.063126840186,
+        51.0444869845878
+      ],
+      "address": "101 9 AV SW",
+      "websiteUrl": "https://www.calgarytower.com/"
+    },
+    {
+      "sourceName": "Scotiabank Saddledome",
+      "displayName": "Saddledome",
+      "objectId": 170576,
+      "coordinates": [
+        -114.051984619526,
+        51.0374080795497
+      ],
+      "address": "555 Saddledome RI SE",
+      "websiteUrl": "https://www.scotiabanksaddledome.com/site/saddledome/"
+    },
+    {
+      "sourceName": "Calgary Zoo, Botanical Garden & Prehistoric Park",
+      "displayName": "Calgary Zoo",
+      "objectId": 170578,
+      "coordinates": [
+        -114.031653644396,
+        51.0440726432511
+      ],
+      "address": "1300 Zoo RD NE",
+      "websiteUrl": "https://www.calgaryzoo.com/"
+    },
+    {
+      "sourceName": "WinSport's Canada Olympic Park",
+      "displayName": "WinSport",
+      "objectId": 170554,
+      "coordinates": [
+        -114.215421187344,
+        51.0824064348463
+      ],
+      "address": "88 Canada Olympic RD SW",
+      "websiteUrl": "https://www.winsport.ca/"
+    },
+    {
+      "sourceName": "Heritage Park Historical Village",
+      "displayName": "Heritage Park",
+      "objectId": 170555,
+      "coordinates": [
+        -114.10825806916,
+        50.9848404389701
+      ],
+      "address": "1900 Heritage Dr SW",
+      "websiteUrl": "https://www.heritagepark.ca/"
+    },
+    {
+      "sourceName": "Olympic Oval - University of Calgary",
+      "displayName": "Olympic Oval · UCalgary",
+      "objectId": 170569,
+      "coordinates": [
+        -114.135702664686,
+        51.0770400509722
+      ],
+      "address": "188 University CO NW",
+      "websiteUrl": "https://oval.ucalgary.ca/"
+    }
+  ],
+  "featureCount": 6,
+  "outputSha256": "ae1d95d314b0dec14075e48231d2f8b0e0ba3ad3fa365eb240408d3dfd6ace9a"
+}

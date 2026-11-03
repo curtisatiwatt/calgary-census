@@ -16,6 +16,10 @@
 
 使用 **Vite + 原生 JavaScript + Leaflet 1.9.4**，依赖版本由 `package-lock.json` 锁定。社区统计、边界和道路／水域底图随网站托管，不需要 API key、数据库或外部地图瓦片服务。
 
+地图右上角的 **专注地图 / Focus map** 可收起顶部和社区详情栏，扩大地图浏览空间；同一按钮或 `Esc` 恢复。切换保留当前视野、已选社区与人口类别，手机同样可用。
+
+道路名称按当前可见路段定位，放大后逐步显示主要道路、河流水域和少量重点地标；它们参与标注避让，避免远景挤满文字。地理补充仅用于社区构成。
+
 ## 本地运行
 
 使用 Node.js 22.12+ 或 24 LTS，在仓库目录执行：
@@ -43,7 +47,7 @@ Vite 使用相对资源路径，兼容 GitHub Pages 的 `/calgary-census/` 子�
 
 仓库 **Settings → Pages → Build and deployment → Source** 应为 **GitHub Actions**。推送 `main` 后，工作流依次执行 `npm ci`、`npm run check`、`npm run build`，再将 `dist/` 发布到 Pages。也可手动运行 **Deploy Calgary map to GitHub Pages**。
 
-源码、校验脚本及审计清单不会被当作网站页面发布。网站中的源码链接指向本仓库。
+源码、校验脚本及审计清单不会被当作网站页面发布。页面不再展示源码入口；官方数据来源和第三方许可继续保留。
 
 ## 文件结构
 
@@ -57,6 +61,7 @@ Vite 使用相对资源路径，兼容 GitHub Pages 的 `/calgary-census/` 子�
 | `src/map-tooltip.js` | 每张地图唯一的提示框，防止拖动时提示堆叠 |
 | `src/styles.css` | 桌面及手机样式 |
 | `public/data/communities.geojson` | 313 个区域边界、统计、原有参考说明和来源 |
+| `public/data/orientation-landmarks.geojson` | 少量有官方来源的定位地标点 |
 | `public/data/basemap.geojson` | 官方主要道路和水域几何 |
 | `public/data/metadata.json` | 年份、统计口径、全市值和数据来源 |
 | `public/data/population-groups.json` | 206 个社区及全市的 13 类人口原始人数、原公布占比与分母 |
