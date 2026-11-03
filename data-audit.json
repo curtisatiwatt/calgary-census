@@ -1,0 +1,303 @@
+{
+  "preparedDate": "2026-11-03",
+  "features": 313,
+  "geometrySource": "https://data.calgary.ca/resource/surr-xmvs.json?$limit=1000",
+  "profileDirectory": "https://www.calgary.ca/communities/profiles.html",
+  "incomeYear": 2020,
+  "populationYear": 2021,
+  "cityIncomeMedian": 98000,
+  "cityChineseCount": 91415,
+  "cityChinesePct": 0.07,
+  "chineseDefinition": "2021 Census: Chinese category under Visible Minority (Racialized Population). Not citizenship, country of birth, or language.",
+  "chineseSourcePage": 11,
+  "sourcePages": {
+    "income": [
+      1,
+      16
+    ],
+    "children": 1,
+    "population": 1,
+    "householdSize": 3,
+    "chinese": 11
+  },
+  "incomeNumeric": 205,
+  "chineseNumeric": 206,
+  "chineseNull": 107,
+  "chineseZeroNames": [
+    "Eagle Ridge",
+    "Roxboro",
+    "Diamond Cove",
+    "Wolf Willow",
+    "Fish Creek Park",
+    "Shepard Industrial",
+    "Pine Creek"
+  ],
+  "sumPublishedCommunityChineseCounts": 91300,
+  "sumCaveat": "Published rounded community counts sum to 91,300 and do not exactly equal the published city total 91,415. Do not substitute the community sum for the city total. Individual values and percentages are retained exactly as published.",
+  "incomeBlankNames": [
+    "Pine Creek"
+  ],
+  "classificationCounts": {
+    "Residential": 223,
+    "Major Park": 4,
+    "Industrial": 43,
+    "Residual Sub Area": 43
+  },
+  "geometryTypes": {
+    "MultiPolygon": 313
+  },
+  "anchorMethods": {
+    "widest_interior_scanline_midpoint": 5,
+    "largest_outer_ring_centroid_inside_polygon": 308
+  },
+  "allAnchorsVerifiedInside": true,
+  "anchorNote": "centroid is a display anchor [longitude, latitude]: uses the largest component outer-ring planar centroid when interior; otherwise a verified interior scanline point. It does not locate individual people or homes.",
+  "geometrySimplified": false,
+  "sourceNotes": "Geometry and classifications are from the downloaded current City boundary registry. Census measures retain 2021 profile boundaries and are joined by community code/name; not recomputed for new boundaries.",
+  "notesSource": "Analytical community-selection notes; public edition removes personalized residence, school-history and workplace references. Not school or crime ratings.",
+  "parseExceptions": [],
+  "topChineseCount": [
+    {
+      "name": "Panorama Hills",
+      "code": "PAN",
+      "count": 6665,
+      "pct": 0.26,
+      "sourceLine": "Chinese                                6,665       26%                Chinese                             91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/panorama-hills.pdf"
+    },
+    {
+      "name": "Edgemont",
+      "code": "EDG",
+      "count": 4635,
+      "pct": 0.3,
+      "sourceLine": "Chinese                                4,635       30%                Chinese                         91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/edgemont.pdf"
+    },
+    {
+      "name": "Hamptons",
+      "code": "HAM",
+      "count": 2935,
+      "pct": 0.4,
+      "sourceLine": "Chinese                                2,935       40%                 Chinese                         91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/hamptons.pdf"
+    },
+    {
+      "name": "Evanston",
+      "code": "EVN",
+      "count": 2755,
+      "pct": 0.15,
+      "sourceLine": "Chinese                                 2,755       15%                Chinese                        91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/evanston.pdf"
+    },
+    {
+      "name": "Evergreen",
+      "code": "EVE",
+      "count": 1785,
+      "pct": 0.09,
+      "sourceLine": "Chinese                               1,785       9%                Chinese                           91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/evergreen.pdf"
+    },
+    {
+      "name": "Signal Hill",
+      "code": "SIG",
+      "count": 1640,
+      "pct": 0.13,
+      "sourceLine": "Chinese                                 1,640          13%                 Chinese                          91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/signal-hill.pdf"
+    },
+    {
+      "name": "Sandstone Valley",
+      "code": "SAN",
+      "count": 1610,
+      "pct": 0.28,
+      "sourceLine": "Chinese                               1,610       28%                  Chinese                         91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/sandstone-valley.pdf"
+    },
+    {
+      "name": "Aspen Woods",
+      "code": "ASP",
+      "count": 1595,
+      "pct": 0.17,
+      "sourceLine": "Chinese                               1,595          17%             Chinese                             91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/aspen-woods.pdf"
+    },
+    {
+      "name": "Royal Oak",
+      "code": "ROY",
+      "count": 1595,
+      "pct": 0.14,
+      "sourceLine": "Chinese                                1,595       14%               Chinese                           91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/royal-oak.pdf"
+    },
+    {
+      "name": "Coventry Hills",
+      "code": "COV",
+      "count": 1570,
+      "pct": 0.09,
+      "sourceLine": "Chinese                                 1,570       9%                  Chinese                         91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/coventry-hills.pdf"
+    },
+    {
+      "name": "Beddington Heights",
+      "code": "BED",
+      "count": 1565,
+      "pct": 0.14,
+      "sourceLine": "Chinese                                1,565       14%                  Chinese                        91,415         7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/beddington-heights.pdf"
+    },
+    {
+      "name": "Varsity",
+      "code": "VAR",
+      "count": 1545,
+      "pct": 0.13,
+      "sourceLine": "Chinese                                1,545       13%               Chinese                           91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/varsity.pdf"
+    },
+    {
+      "name": "Hidden Valley",
+      "code": "HID",
+      "count": 1495,
+      "pct": 0.13,
+      "sourceLine": "Chinese                                  1,495       13%                Chinese                        91,415         7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/hidden-valley.pdf"
+    },
+    {
+      "name": "Beltline",
+      "code": "BLN",
+      "count": 1450,
+      "pct": 0.06,
+      "sourceLine": "Chinese                                1,450       6%                  Chinese                           91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/beltline.pdf"
+    },
+    {
+      "name": "Hawkwood",
+      "code": "HAW",
+      "count": 1445,
+      "pct": 0.16,
+      "sourceLine": "Chinese                                1,445       16%                Chinese                          91,415         7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/hawkwood.pdf"
+    }
+  ],
+  "topChinesePct": [
+    {
+      "name": "Chinatown",
+      "code": "CHN",
+      "count": 1055,
+      "pct": 0.47,
+      "sourceLine": "Chinese                                 1,055          47%             Chinese                        91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/chinatown.pdf"
+    },
+    {
+      "name": "Hamptons",
+      "code": "HAM",
+      "count": 2935,
+      "pct": 0.4,
+      "sourceLine": "Chinese                                2,935       40%                 Chinese                         91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/hamptons.pdf"
+    },
+    {
+      "name": "Edgemont",
+      "code": "EDG",
+      "count": 4635,
+      "pct": 0.3,
+      "sourceLine": "Chinese                                4,635       30%                Chinese                         91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/edgemont.pdf"
+    },
+    {
+      "name": "Sandstone Valley",
+      "code": "SAN",
+      "count": 1610,
+      "pct": 0.28,
+      "sourceLine": "Chinese                               1,610       28%                  Chinese                         91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/sandstone-valley.pdf"
+    },
+    {
+      "name": "Panorama Hills",
+      "code": "PAN",
+      "count": 6665,
+      "pct": 0.26,
+      "sourceLine": "Chinese                                6,665       26%                Chinese                             91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/panorama-hills.pdf"
+    },
+    {
+      "name": "Sherwood",
+      "code": "SHW",
+      "count": 1260,
+      "pct": 0.19,
+      "sourceLine": "Chinese                                 1,260       19%                 Chinese                         91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/sherwood.pdf"
+    },
+    {
+      "name": "Aspen Woods",
+      "code": "ASP",
+      "count": 1595,
+      "pct": 0.17,
+      "sourceLine": "Chinese                               1,595          17%             Chinese                             91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/aspen-woods.pdf"
+    },
+    {
+      "name": "Livingston",
+      "code": "LIV",
+      "count": 690,
+      "pct": 0.17,
+      "sourceLine": "Chinese                                 690         17%                 Chinese                          91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/livingston.pdf"
+    },
+    {
+      "name": "Country Hills",
+      "code": "COU",
+      "count": 615,
+      "pct": 0.17,
+      "sourceLine": "Chinese                                615         17%                   Chinese                           91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/country-hills.pdf"
+    },
+    {
+      "name": "University District",
+      "code": "UND",
+      "count": 165,
+      "pct": 0.17,
+      "sourceLine": "Chinese                                165             17%                    Chinese                             91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/university-district.pdf"
+    },
+    {
+      "name": "Hawkwood",
+      "code": "HAW",
+      "count": 1445,
+      "pct": 0.16,
+      "sourceLine": "Chinese                                1,445       16%                Chinese                          91,415         7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/hawkwood.pdf"
+    },
+    {
+      "name": "Brentwood",
+      "code": "BRE",
+      "count": 1150,
+      "pct": 0.16,
+      "sourceLine": "Chinese                                 1,150       16%                Chinese                             91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/brentwood.pdf"
+    },
+    {
+      "name": "Evanston",
+      "code": "EVN",
+      "count": 2755,
+      "pct": 0.15,
+      "sourceLine": "Chinese                                 2,755       15%                Chinese                        91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/evanston.pdf"
+    },
+    {
+      "name": "Harvest Hills",
+      "code": "HAR",
+      "count": 1145,
+      "pct": 0.15,
+      "sourceLine": "Chinese                                1,145       15%                   Chinese                        91,415         7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/harvest-hills.pdf"
+    },
+    {
+      "name": "Shawnee Slopes",
+      "code": "SHS",
+      "count": 310,
+      "pct": 0.15,
+      "sourceLine": "Chinese                                310            15%               Chinese                           91,415          7%",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/shawnee-slopes.pdf"
+    }
+  ]
+}

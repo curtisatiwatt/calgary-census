@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#f7f7f2">
+  <meta name="description" content="探索卡尔加里各社区的家庭收入、华人人口与选区参考。官方社区边界与2021人口普查数据。">
+  <title>Calgary 社区观察 · 收入与华人人口地图</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect rx='16' width='64' height='64' fill='%23253d42'/%3E%3Cpath d='M14 45 25 18 34 34 50 14 42 48Z' fill='%23f1d66f'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./vendor/leaflet.css">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./vendor/leaflet.js" defer></script>
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="./" aria-label="Calgary 社区观察首页"><span class="brand-mark" aria-hidden="true">C<span>↗</span></span><span><strong>Calgary <span class="brand-zh">社区观察</span></strong><small>COMMUNITY ATLAS</small></span></a>
+    <div class="search-wrap">
+      <span class="search-icon" aria-hidden="true">⌕</span>
+      <input id="search" type="search" placeholder="搜索社区，例如 Aspen Woods" autocomplete="off" role="combobox" aria-label="搜索卡尔加里社区" aria-autocomplete="list" aria-expanded="false" aria-controls="search-results">
+      <kbd aria-hidden="true">/</kbd>
+      <div id="search-results" class="search-results" role="listbox" hidden></div>
+    </div>
+    <div class="header-actions"><span class="data-edition">2021 人口普查</span><button id="method-button" class="text-button">数据说明 <span aria-hidden="true">↗</span></button></div>
+  </header>
+  <main class="workspace">
+    <aside class="sidebar" aria-label="地图控制及社区详情">
+      <div class="sidebar-intro"><span class="eyebrow">CALGARY, ALBERTA</span><h1>收入与华人人口</h1><p>收入看底色，华人人口看圆点。</p></div>
+      <section class="layer-panel" aria-label="地图图层">
+        <div class="section-title"><h2>家庭年收入中位数</h2><span>CAD · 税前 2020</span></div>
+        <div class="income-ramp" id="income-ramp" aria-label="收入从低到高，蓝色到黄色再到红色"></div>
+        <div class="ramp-ticks"><span>低于 6 万</span><span>9.8 万</span><span>20 万以上</span></div>
+        <div class="legend-note"><span class="missing-swatch"></span>灰色：没有收入数据 <span class="city-marker">全市 $98,000</span></div>
+        <div class="population-heading"><h2>华人人口</h2><label class="switch"><input id="bubbles-toggle" type="checkbox" checked aria-label="显示华人人口圆点"><span class="switch-track"></span></label></div>
+        <div class="segmented" role="group" aria-label="华人人口圆点指标"><button id="count-mode" class="active" aria-pressed="true">人数</button><button id="percent-mode" aria-pressed="false">占比</button></div>
+        <div id="bubble-legend" class="bubble-legend" aria-label="圆点大小图例"></div>
+        <p class="layer-footnote" id="bubble-description">圆的面积与人数成正比，位置仅表示社区。</p>
+        <div class="map-options"><label><input type="checkbox" id="roads-toggle" checked> 道路底图</label><label><input type="checkbox" id="labels-toggle" checked> 社区标注</label></div>
+      </section>
+      <section class="detail-panel" id="detail-panel" aria-label="选中的社区">
+        <button id="mobile-detail-handle" class="mobile-detail-handle" aria-label="展开或收起社区详情" aria-expanded="true" aria-controls="detail-body"><span class="handle-bar"></span><span id="mobile-selection-label">社区详情</span><span id="mobile-chevron">⌄</span></button>
+        <div class="detail-topline"><span id="selection-status" class="eyebrow">关注社区</span><button id="focus-community" class="text-button">定位 <span aria-hidden="true">↗</span></button></div>
+        <h2 id="community-name">Aspen Woods</h2>
+        <div class="community-meta" id="community-meta">正在加载官方社区数据…</div>
+        <div class="collapsed-summary" id="collapsed-summary"></div>
+        <div id="detail-body">
+          <div class="income-summary"><span class="metric-label">家庭税前年收入 · 2020</span><div class="income-value" id="income-value">—</div><div id="income-context" class="metric-context"></div></div>
+          <div class="community-metrics"><div><span>华人人数</span><strong id="chinese-count">—</strong></div><div><span>华人占比</span><strong id="chinese-percent">—</strong></div></div>
+          <div class="secondary-metrics"><div><span>0–14 岁</span><strong id="children">—</strong></div><div><span>平均每户</span><strong id="household">—</strong></div><div><span>私人住户人口</span><strong id="population">—</strong></div></div>
+          <div class="selection-note"><span class="note-accent" aria-hidden="true"></span><div><h3>选区参考</h3><p id="community-note">正在加载…</p></div></div>
+          <p class="data-caveat" id="data-caveat" hidden></p>
+          <a id="source-link" class="source-link" target="_blank" rel="noopener">查看官方社区档案 <span aria-hidden="true">↗</span></a>
+        </div>
+      </section>
+      <div class="sidebar-footer">社区经济背景供比较，不能直接等同于学校质量或治安。</div>
+    </aside>
+    <section class="map-section" aria-label="卡尔加里互动社区地图">
+      <div id="map" role="region" aria-label="可缩放、拖动和点击的卡尔加里地图。也可以通过上方搜索选择社区。"></div>
+      <div class="map-topbar"><div class="map-status"><span class="status-dot"></span><span id="coverage-text">正在加载社区边界…</span></div><button class="map-button mobile-layers-button" id="mobile-layers-button" aria-expanded="false" aria-controls="mobile-layers">图层</button></div>
+      <div class="map-tools"><button id="fit-city" class="map-button" aria-label="查看整个卡尔加里">全市 <span aria-hidden="true">⤢</span></button><button id="zoom-in" class="map-button square" aria-label="放大地图">+</button><button id="zoom-out" class="map-button square" aria-label="缩小地图">−</button></div>
+      <div class="map-shortcuts"><span>关注社区</span><div id="shortcuts"></div></div>
+      <div class="map-hint" id="map-hint">悬停预览 · 点击固定社区</div>
+      <div id="map-warning" class="map-warning" hidden role="status"></div>
+      <div id="mobile-layers" class="mobile-layers" hidden></div>
+      <div id="loading-overlay" class="loading-overlay"><div class="loader"></div><strong>正在展开 Calgary</strong><span>读取官方社区边界与人口数据</span></div>
+    </section>
+  </main>
+  <div id="announcer" class="sr-only" aria-live="polite"></div>
+  <dialog id="method-dialog">
+    <div class="dialog-heading"><span class="eyebrow">ABOUT THE DATA</span><button id="close-method" class="icon-button" aria-label="关闭数据说明">×</button></div>
+    <h2>这张地图怎样读？</h2>
+    <div class="method-grid">
+      <section><h3>底色是收入，圆点是华人人口</h3><p>蓝色代表较低收入，黄色居中，红色较高。收入按区间分档，最高一档为 $200,000 及以上。圆的<strong>面积</strong>与所选的人数或占比成正比，圆心只是社区内的显示位置，不是居民住址。</p></section>
+      <section><h3>年份与“家庭”的定义</h3><p>收入是 2021 年人口普查里的 <strong>2020 年税前私人住户收入中位数</strong>。人口数据对应 2021 年；不是今天的收入。人口仅含私人住户居民，不含护理机构、收容所等集体住所。“住户”包括单人、家庭与合住者，不只统计有孩子的家庭。</p></section>
+      <section><h3>这里的“华人”指什么？</h3><p>使用普查人口类别 <strong>Chinese</strong> 的公布人数及占比，不等于中国国籍、中国出生或普通话使用者。全市官方人数为 91,415，占 7%。社区人数有取整，不宜简单加总替代全市值。</p></section>
+      <section><h3>覆盖与缺失值</h3><p>覆盖城市名录 313 个区域单元，其中 223 个为住宅类。205 个区域有收入数值，206 个有华人人口数值。灰色或“暂无数据”不是收入为零。小社区的 0 值也不能证明绝对没有该类居民。</p></section>
+      <section><h3>边界与参考说明</h3><p>底图使用整理时的官方社区边界；统计是 2021 年社区档案，按同名社区对应，未按新边界重算。参考说明考虑住房预算、实际通勤、公校与同龄孩子活动，属于分析判断。</p><p>Springbank、Bearspaw 等市外地区不在这套社区统计内。学校分配需按具体地址确认；收入不是学校或治安评分。</p></section>
+    </div>
+    <div class="method-sources"><h3>原始来源</h3><a href="https://www.calgary.ca/communities/profiles.html" target="_blank" rel="noopener">City of Calgary · 社区普查档案 ↗</a><a href="https://data.calgary.ca/Base-Maps/Community-District-Boundaries/surr-xmvs" target="_blank" rel="noopener">City of Calgary · 社区边界 ↗</a><a href="https://data.calgary.ca/Transportation-Transit/Major-Road-Network/tqjs-vnhy" target="_blank" rel="noopener">City of Calgary · 主要道路 ↗</a><a href="https://data.calgary.ca/resource/47bt-eefd.geojson" target="_blank" rel="noopener">City of Calgary · 河流水域 ↗</a><p>整理于 2026-11-03。Contains information licensed under the Open Government Licence – City of Calgary.</p></div>
+  </dialog>
+  <noscript>请启用 JavaScript 以查看互动地图。官方数据可从 https://www.calgary.ca/communities/profiles.html 查阅。</noscript>
+</body>
+</html>
