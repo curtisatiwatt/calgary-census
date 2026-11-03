@@ -1,0 +1,54 @@
+{
+  "cityName": "Calgary",
+  "populationYear": 2021,
+  "incomeYear": 2020,
+  "preparedDate": "2026-11-03",
+  "cityIncomeMedian": 98000,
+  "cityChineseCount": 91415,
+  "cityChinesePct": 0.07,
+  "populationLabel": "私人住户人口",
+  "populationDefinition": "采用市府 2021 年社区普查档案中的私人住户人口，不包含护理机构、收容所等集体住所居民。",
+  "incomeDefinition": "2021 年普查中的 2020 年私人住户税前总年收入中位数，单位为加元。不是个人工资、经济家庭收入、税后收入或当前收入。",
+  "chineseDefinition": "使用 2021 年普查 Visible Minority（Racialized Population）中的 Chinese 类别，采用市府社区档案直接公布的人数与占比。不是中国国籍、中国出生或普通话使用者；占比已取整，本图没有重新计算。",
+  "childrenDefinition": "0–14 岁人口占比采用市府社区档案概览直接公布的 2021 年比例，保留原始取整值，未使用其他人口指标重新计算。",
+  "householdSizeDefinition": "平均私人住户人数采用市府 2021 年社区档案直接公布的数值。",
+  "roundingNote": "普查人数和公布比例经过取整。社区 Chinese 人数之和为 91,300，与全市公布的 91,415 不完全相等；本图保留所有公布值，不以社区加总替代全市值。",
+  "boundaryNote": "底图使用数据整理时下载的官方社区边界名录；统计来自 2021 年社区档案，按社区代码／名称对应，未针对后续边界变化重新分配统计。圆心为经检查位于社区边界内的显示点，不是居民住址。",
+  "missingDataNote": "313 个官方区域单元包含 223 个住宅类、43 个工业类、4 个主要公园与 43 个余留分区。205 个区域有收入，206 个有华人人口数值；没有发布记录、保密抑制或不适用等情况保留为空。7 个明确公布为 0 的区域保留 0，与缺失值区分。",
+  "latestCensusNote": "2026 年联邦普查已完成采集，但截至 2026-11-03 尚未公布结果。首次人口结果计划于 2027-02-10 发布；收入为 2027-07-14；民族文化资料为 2027-10-27。本图仍使用已发布的 2021 年社区数据。",
+  "shortlist": [
+    "ASP",
+    "WSP",
+    "SPH",
+    "EPK",
+    "RID",
+    "AUB"
+  ],
+  "license": "Contains information licensed under the Open Government Licence – City of Calgary. Leaflet is distributed under its BSD 2-Clause licence.",
+  "sources": [
+    {
+      "label": "City of Calgary · 社区普查档案",
+      "url": "https://www.calgary.ca/communities/profiles.html"
+    },
+    {
+      "label": "City of Calgary · 社区边界",
+      "url": "https://data.calgary.ca/Base-Maps/Community-District-Boundaries/surr-xmvs"
+    },
+    {
+      "label": "City of Calgary · 主要道路",
+      "url": "https://data.calgary.ca/Transportation-Transit/Major-Road-Network/tqjs-vnhy"
+    },
+    {
+      "label": "City of Calgary · 河流水域",
+      "url": "https://data.calgary.ca/resource/47bt-eefd.geojson"
+    },
+    {
+      "label": "Statistics Canada · 2026 collection complete",
+      "url": "https://www.statcan.gc.ca/en/about/statistical-announcements/2026-09-14-exceptional-participation-2026-census"
+    },
+    {
+      "label": "Statistics Canada · 2026 release schedule",
+      "url": "https://www.statcan.gc.ca/en/census/census-engagement/community-supporter/posters/encourage-completion"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "description": "Byte-for-byte preservation of the published Calgary data during the Vite migration.",
+  "sourceCommit": "71790d2d554c3c84e2bfbf95b5647ecfd25dbceb",
+  "algorithm": "sha256",
+  "files": {
+    "public/data/communities.geojson": {
+      "originalPath": "dist/communities.geojson",
+      "bytes": 2335203,
+      "sha256": "9729c2830d269c8ca04474f98efa860e1ba1bf55dc5ef5bdc522756d7f062c75"
+    },
+    "public/data/basemap.geojson": {
+      "originalPath": "dist/basemap.geojson",
+      "bytes": 1620525,
+      "sha256": "8e4061339be0275e9ebe2c125ef5ad4fceef3318a7012e340cde39688aa0f5ca"
+    }
+  }
+}
