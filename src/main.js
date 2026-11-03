@@ -367,10 +367,13 @@ function updateLabels(context) {
     const prominent = p.code === state.selected;
     const label = p.name.toUpperCase();
     const size = prominent ? fontSize + 1 : fontSize;
-    const width = Math.min(145, Math.max(54, label.length * size * .57));
-    const height = label.length * size * .57 > 145 ? 28 : 15;
+    const estimatedWidth = label.length * size * .66 + 6;
+    const width = Math.min(145, Math.max(54, estimatedWidth));
+    const height = estimatedWidth > 145 ? 28 : 16;
     const point = map.latLngToContainerPoint([p.centroid[1], p.centroid[0]]);
-    const offset = comparison ? -height / 2 : 14;
+    let offset = comparison ? -height / 2 : 14;
+    const overlaps = box => occupied.some(a => box.x < a.x + a.w + 8 && box.x + box.w + 8 > a.x && box.y < a.y + a.h + 6 && box.y + box.h + 6 > a.y);
+    if (prominent) offset = [offset, -height - 18, 32].find(candidate => !overlaps({ x: point.x - width / 2, y: point.y + candidate, w: width, h: height })) ?? offset;
     const box = { x: point.x - width / 2, y: point.y + offset, w: width, h: height };
     if (!prominent && (box.x < 6 || box.y < 8 || box.x + width > viewport.x - 6 || box.y + height > viewport.y - 18)) continue;
     const gapX = zoom < 12 ? 16 : 10;
