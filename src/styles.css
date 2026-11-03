@@ -26,3 +26,12 @@ dialog{width:min(680px,calc(100vw - 32px));max-height:88dvh;border:1px solid #d8
 
 /* Labels gain detail with zoom instead of shrinking to fit every neighbourhood. */
 .hierarchy-community-label{color:#496153;line-height:1.15;letter-spacing:.12px;text-align:center;white-space:normal;font-weight:550;text-shadow:0 0 3px #fffffff0,0 0 3px #fffffff0,1px 1px 1px #fffffff0}.hierarchy-community-label>span{display:inline-block;max-width:100%;word-break:normal;overflow-wrap:normal}.hierarchy-community-label.focus-label{color:#1c4844;font-weight:750}.comparing .transit-legend{display:none!important}
+
+@media(max-width:760px){
+  .composition-key{width:auto;max-width:calc(100% - 84px);padding:7px 10px;pointer-events:none}
+  .composition-key>p,.composition-key .donut-key{display:none}
+  .composition-key>strong{font-size:9px;font-weight:500}
+  .income-legend{width:220px;padding:9px 11px}
+  .income-legend .legend-title{font-size:9px}
+  .income-legend .ramp-ticks,.income-legend>p{font-size:8px}
+}
