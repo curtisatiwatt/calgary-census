@@ -5,13 +5,17 @@ async function readJson(path) {
 }
 
 export async function loadData() {
-  const [metadata, communities, basemapResult] = await Promise.all([
+  const [metadata, communities, populationData, basemap] = await Promise.all([
     readJson('metadata.json'),
     readJson('communities.geojson'),
+    readJson('population-groups.json'),
     readJson('basemap.geojson').catch(() => null),
   ]);
   if (communities.type !== 'FeatureCollection' || !communities.features?.length) {
     throw new Error('社区边界数据格式不完整');
+  }
+  if (populationData.schemaVersion !== 1 || !populationData.groups?.length || !populationData.communities) {
+    throw new Error('社区人口分类数据格式不完整');
   }
   const features = communities.features.map(feature => {
     const p = feature.properties;
@@ -20,6 +24,5 @@ export async function loadData() {
     }
     return { ...feature, properties: { ...p, code: String(p.code) } };
   });
-  // Keep the published app's values, including its existing display ranks.
-  return { metadata, features, basemap: basemapResult };
+  return { metadata, features, populationData, basemap };
 }

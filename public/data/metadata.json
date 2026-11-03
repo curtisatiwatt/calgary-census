@@ -9,21 +9,13 @@
   "populationLabel": "私人住户人口",
   "populationDefinition": "采用市府 2021 年社区普查档案中的私人住户人口，不包含护理机构、收容所等集体住所居民。",
   "incomeDefinition": "2021 年普查中的 2020 年私人住户税前总年收入中位数，单位为加元。不是个人工资、经济家庭收入、税后收入或当前收入。",
-  "chineseDefinition": "使用 2021 年普查 Visible Minority（Racialized Population）中的 Chinese 类别，采用市府社区档案直接公布的人数与占比。不是中国国籍、中国出生或普通话使用者；占比已取整，本图没有重新计算。",
+  "chineseDefinition": "Chinese 是 2021 年普查 Visible Minority（Racialized Population）中的类别，不等于中国国籍、中国出生或普通话使用者。保留档案的原始人数和取整占比；新人口视图的占比统一按该表人数除以同表私人住户人口计算，显示一位小数。",
   "childrenDefinition": "0–14 岁人口占比采用市府社区档案概览直接公布的 2021 年比例，保留原始取整值，未使用其他人口指标重新计算。",
   "householdSizeDefinition": "平均私人住户人数采用市府 2021 年社区档案直接公布的数值。",
   "roundingNote": "普查人数和公布比例经过取整。社区 Chinese 人数之和为 91,300，与全市公布的 91,415 不完全相等；本图保留所有公布值，不以社区加总替代全市值。",
   "boundaryNote": "底图使用数据整理时下载的官方社区边界名录；统计来自 2021 年社区档案，按社区代码／名称对应，未针对后续边界变化重新分配统计。圆心为经检查位于社区边界内的显示点，不是居民住址。",
   "missingDataNote": "313 个官方区域单元包含 223 个住宅类、43 个工业类、4 个主要公园与 43 个余留分区。205 个区域有收入，206 个有华人人口数值；没有发布记录、保密抑制或不适用等情况保留为空。7 个明确公布为 0 的区域保留 0，与缺失值区分。",
   "latestCensusNote": "2026 年联邦普查已完成采集，但截至 2026-11-03 尚未公布结果。首次人口结果计划于 2027-02-10 发布；收入为 2027-07-14；民族文化资料为 2027-10-27。本图仍使用已发布的 2021 年社区数据。",
-  "shortlist": [
-    "ASP",
-    "WSP",
-    "SPH",
-    "EPK",
-    "RID",
-    "AUB"
-  ],
   "license": "Contains information licensed under the Open Government Licence – City of Calgary. Leaflet is distributed under its BSD 2-Clause licence.",
   "sources": [
     {
@@ -50,5 +42,7 @@
       "label": "Statistics Canada · 2026 release schedule",
       "url": "https://www.statcan.gc.ca/en/census/census-engagement/community-supporter/posters/encourage-completion"
     }
-  ]
+  ],
+  "populationGroupsDefinition": "人口视图采用市府社区档案的 13 个 Visible Minority（Racialized Population）互斥分类，默认勾选全市人数最多的五个可见少数族裔类别。非可见少数族裔为普查分类，包含原住民等人口，不可视作白人或欧洲裔。",
+  "populationChartNote": "普查人数经过取整，原表分类加总与私人住户人口可能存在差异。详情及分布图用人数除以同表人口计算占比。环形图以同表人口为分母；分类合计不足时以点纹留白显示统计差额，合计超出时仅为闭合一圈而按分类合计归一化。灰色代表未勾选类别；统计差额不是新增人口类别，缺失数据另行标记。"
 }

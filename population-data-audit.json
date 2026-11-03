@@ -1,0 +1,1354 @@
+{
+  "schemaVersion": 1,
+  "source": "City of Calgary 2021 Census community profiles, printed page 11, Visible Minority (Racialized Population)",
+  "sourceDirectoryUrl": "https://www.calgary.ca/communities/profiles.html",
+  "method": "Parse both labelled columns from official pdftotext -layout text, join source URLs to existing community codes, require all 13 categories, and verify every city reference and existing Chinese value.",
+  "censusYear": 2021,
+  "denominator": "Population in private households from the same population-group table (2021 Census 25% sample data).",
+  "classificationNote": "Not a visible minority is the official residual category; it includes Indigenous people and must not be relabelled White or European. Chinese is a population-group category, not citizenship, birthplace, or all Chinese ethnic-origin responses.",
+  "roundingNote": "Preserves published counts and source integer percentages separately. Derived shares use count / table population. Category counts do not always sum exactly to the denominator; source profiles warn about rounding. Do not silently alter the counts or assume every discrepancy can be explained by rounding alone. Missing community data is absent, never zero.",
+  "boundarySha256": "9729c2830d269c8ca04474f98efa860e1ba1bf55dc5ef5bdc522756d7f062c75",
+  "outputSha256": "c754de3ac7d4b525cffd9d4f3d68de54bf6a3a53fc556a163eaaedfcddf32da8",
+  "coverage": {
+    "boundaryCommunities": 313,
+    "withAll13Groups": 206,
+    "withoutOfficialProfile": 107,
+    "missingCodes": [
+      "01B",
+      "01C",
+      "01F",
+      "01H",
+      "01K",
+      "02B",
+      "02C",
+      "02E",
+      "02F",
+      "02K",
+      "02L",
+      "03W",
+      "05D",
+      "05E",
+      "05F",
+      "05G",
+      "06A",
+      "06B",
+      "06C",
+      "09D",
+      "09H",
+      "09O",
+      "09P",
+      "09Q",
+      "10D",
+      "10E",
+      "11B",
+      "12A",
+      "12B",
+      "12C",
+      "12J",
+      "12K",
+      "12L",
+      "13A",
+      "13C",
+      "13E",
+      "13F",
+      "13G",
+      "13H",
+      "13I",
+      "13J",
+      "13M",
+      "13N",
+      "ABP",
+      "ABR",
+      "ALP",
+      "AYB",
+      "BUR",
+      "BVD",
+      "CIA",
+      "COP",
+      "DBC",
+      "EFI",
+      "EFV",
+      "ESH",
+      "FHI",
+      "FLI",
+      "FRA",
+      "FVI",
+      "GBP",
+      "GLR",
+      "GPE",
+      "GPI",
+      "GPK",
+      "GRI",
+      "GTI",
+      "HIF",
+      "HKS",
+      "HOR",
+      "HSD",
+      "HSN",
+      "HUX",
+      "KSH",
+      "LEB",
+      "MCI",
+      "MDH",
+      "MER",
+      "MLI",
+      "MNI",
+      "MRN",
+      "NAW",
+      "NPK",
+      "OPH",
+      "OSH",
+      "PEG",
+      "RRC",
+      "RVW",
+      "RYV",
+      "S23",
+      "SAW",
+      "SFH",
+      "SGL",
+      "SKE",
+      "SKW",
+      "SRI",
+      "ST1",
+      "ST2",
+      "ST3",
+      "ST4",
+      "STD",
+      "STE",
+      "SUN",
+      "SVR",
+      "THS",
+      "UOC",
+      "VAF",
+      "WES"
+    ],
+    "zeroCountsByGroup": {
+      "south_asian": 14,
+      "chinese": 7,
+      "black": 12,
+      "filipino": 21,
+      "arab": 40,
+      "latin_american": 16,
+      "southeast_asian": 36,
+      "west_asian": 59,
+      "korean": 63,
+      "japanese": 62,
+      "visible_minority_nie": 91,
+      "multiple_visible_minorities": 28,
+      "not_visible_minority": 0
+    }
+  },
+  "checks": {
+    "all13CategoriesPresent": true,
+    "allCityReferencesAgree": true,
+    "existingChineseCountsAndPublishedPercentagesAgree": true,
+    "communityCategorySumMinusDenominator": {
+      "ABB": -20,
+      "ACA": 10,
+      "ALT": -10,
+      "ARB": -5,
+      "AUB": -10,
+      "BDO": -10,
+      "BED": -15,
+      "BEL": -15,
+      "BLM": -10,
+      "BNF": 5,
+      "BNK": 5,
+      "BOW": -10,
+      "BRA": -5,
+      "BRD": -5,
+      "BRE": 10,
+      "BRT": -30,
+      "CAM": -25,
+      "CAN": 15,
+      "CAS": -10,
+      "CHA": -5,
+      "CHK": -30,
+      "CHN": -10,
+      "CHV": -10,
+      "CLI": -20,
+      "COL": 5,
+      "COR": -5,
+      "COU": -25,
+      "COV": 10,
+      "CPF": -5,
+      "CRA": 5,
+      "CRE": 5,
+      "CRM": -30,
+      "CUR": -10,
+      "DAL": -5,
+      "DDG": -10,
+      "DIA": -30,
+      "DIS": -5,
+      "DNC": 15,
+      "DNE": -5,
+      "DNW": -10,
+      "DOV": -5,
+      "DRG": -45,
+      "DRN": -5,
+      "EAG": -15,
+      "EAU": -5,
+      "EPK": -5,
+      "ERI": -20,
+      "ERL": -5,
+      "EVE": 5,
+      "EVN": -5,
+      "EYA": -5,
+      "FAI": -10,
+      "FAL": -10,
+      "FHT": -10,
+      "FLN": -35,
+      "FPK": -15,
+      "GAG": 15,
+      "GAW": -5,
+      "GBK": -5,
+      "GRE": -50,
+      "GRV": -10,
+      "HAR": 5,
+      "HID": -5,
+      "HIW": -75,
+      "HOU": -25,
+      "HPK": 5,
+      "HUN": -5,
+      "ING": -5,
+      "KEL": -10,
+      "KIN": 5,
+      "LEG": 5,
+      "LIV": 15,
+      "LKB": -20,
+      "LKV": 15,
+      "MAC": -35,
+      "MAF": -25,
+      "MAH": 5,
+      "MAN": -5,
+      "MCT": -10,
+      "MEA": -20,
+      "MID": -10,
+      "MIS": 5,
+      "MON": -10,
+      "MOR": 5,
+      "MPK": 5,
+      "MPL": -20,
+      "MRL": -10,
+      "MRT": -15,
+      "NGM": 5,
+      "NHU": -5,
+      "NHV": -15,
+      "OAK": -20,
+      "OGD": -15,
+      "PAL": -10,
+      "PAN": -10,
+      "PAT": -10,
+      "PCK": -20,
+      "PIN": -10,
+      "PKD": -25,
+      "PKL": -30,
+      "POI": -15,
+      "PUM": -45,
+      "QLD": -5,
+      "QPK": -10,
+      "RAM": -10,
+      "RAN": 5,
+      "RCK": -15,
+      "RDL": -10,
+      "RED": -5,
+      "RIC": -20,
+      "RID": -40,
+      "RMT": -10,
+      "ROX": -35,
+      "ROY": -5,
+      "RSN": 5,
+      "RUN": -5,
+      "SAN": -5,
+      "SCA": -35,
+      "SDC": 5,
+      "SET": -25,
+      "SGH": 10,
+      "SHG": -25,
+      "SHI": -10,
+      "SHN": -10,
+      "SHS": -30,
+      "SHW": 5,
+      "SIG": 10,
+      "SIL": -5,
+      "SNA": -15,
+      "SOC": 15,
+      "SOM": -5,
+      "SOV": -10,
+      "SOW": -5,
+      "SPH": -5,
+      "SPR": -5,
+      "SSD": -10,
+      "SSW": -40,
+      "STA": -15,
+      "STR": -5,
+      "TAR": -10,
+      "THO": -20,
+      "TUX": -5,
+      "UMR": -5,
+      "UND": -15,
+      "UNI": -20,
+      "VAL": -5,
+      "VAR": 15,
+      "VIS": -10,
+      "WAL": -10,
+      "WBN": 5,
+      "WGT": -10,
+      "WHI": -5,
+      "WHL": -5,
+      "WIL": -20,
+      "WIN": -25,
+      "WLD": -10,
+      "WND": 5,
+      "WOO": -5,
+      "WSP": -5,
+      "WWO": -10,
+      "YKV": -15
+    },
+    "cityCategorySumMinusDenominator": 15
+  },
+  "reviewedSourceDiscrepancies": [
+    {
+      "code": "HIW",
+      "name": "Highwood",
+      "printedPage": 11,
+      "population": 2205,
+      "sumOf13Categories": 2130,
+      "difference": -75,
+      "verification": "Visually checked against the rendered official PDF page: every extracted count and the denominator match the printed table. The publication gives no specific explanation for this discrepancy; all published values are retained.",
+      "sourceUrl": "https://www.calgary.ca/content/dam/www/programs-services/property-housing-and-neighbourhoods/neighbourhood-and-community-relationships/profiles/highwood.pdf"
+    }
+  ],
+  "sourceTextFiles": [
+    {
+      "code": "ABB",
+      "textFile": "abbeydale.txt",
+      "sha256": "acb45d5e77e0c79b00186e711c8ea7fc6f715646dc76c5a6ac2496236d50f2cb"
+    },
+    {
+      "code": "ACA",
+      "textFile": "acadia.txt",
+      "sha256": "b92b90489cd7b7ab9c0a26f8baa4cfb107852dc0702aa730c216a33175af7eb0"
+    },
+    {
+      "code": "ALB",
+      "textFile": "albert-park-radisson-heights.txt",
+      "sha256": "e06298ccd4c3a545e3b6d2516dbb7e114da812970185e9e22e15b1b4c54eef45"
+    },
+    {
+      "code": "ALT",
+      "textFile": "altadore.txt",
+      "sha256": "f8935818ca486ecd1b1c5d52a8f841c79bbd43f3ed843e9c6923f2a659350f1a"
+    },
+    {
+      "code": "APP",
+      "textFile": "applewood-park.txt",
+      "sha256": "e5b0a9223300d7b59470c5c7d20f4e2ccd00b0c968120568fbda40313e200b42"
+    },
+    {
+      "code": "ARB",
+      "textFile": "arbour-lake.txt",
+      "sha256": "11ad9cb5c909b9bc280e6912edda92964e682810492be14be962f093fc7dbbc4"
+    },
+    {
+      "code": "ASP",
+      "textFile": "aspen-woods.txt",
+      "sha256": "28300051997cce2511debedc0cc86a69039f7bc872c8904daeb273a40b00550f"
+    },
+    {
+      "code": "AUB",
+      "textFile": "auburn-bay.txt",
+      "sha256": "9b473d5ef02df810f9be715b4b9e4d55a3fff58ace22a83abd67fca94b42df95"
+    },
+    {
+      "code": "BDO",
+      "textFile": "bonavista-downs.txt",
+      "sha256": "90ce137e64889664d3246808edc623ce16c6b1d46a252d03aa8a923a3438bf13"
+    },
+    {
+      "code": "BED",
+      "textFile": "beddington-heights.txt",
+      "sha256": "6e017c338513cb00d91c6b4137b2b43c66a018a19688f3e724e51ef58380aa47"
+    },
+    {
+      "code": "BEL",
+      "textFile": "bel-aire.txt",
+      "sha256": "4a5c180f60e393585746fc45006a4807265a442bcb38e846925fdeabba2592fa"
+    },
+    {
+      "code": "BLM",
+      "textFile": "belmont.txt",
+      "sha256": "65b725f48f0b76ad79e761b9324f91b8fbbbc0fa628247d982a9f933b6eb5bb1"
+    },
+    {
+      "code": "BLN",
+      "textFile": "beltline.txt",
+      "sha256": "66c40f2190e6136afeeff31eb67bf738a9137aece2388ccbff4492ba44e9533f"
+    },
+    {
+      "code": "BNF",
+      "textFile": "banff-trail.txt",
+      "sha256": "6249b311817fa78df0b4b0b801c1409d0c96e2d410d4cbf9b8b4f520b3d1006a"
+    },
+    {
+      "code": "BNK",
+      "textFile": "bankview.txt",
+      "sha256": "cf46b8655f2676920a61af9e963c6a617a7a36d97fa55e367da37ab71054de59"
+    },
+    {
+      "code": "BOW",
+      "textFile": "bowness.txt",
+      "sha256": "e30ef77f76357028a80a9c02b045e0d0a2338185263f72bd8127d3686324bf60"
+    },
+    {
+      "code": "BRA",
+      "textFile": "braeside.txt",
+      "sha256": "15c7f3cfd394d58c9b45f561edb63f0c85b640ff9e4faaabcf636c547e88547a"
+    },
+    {
+      "code": "BRD",
+      "textFile": "bridgeland-riverside.txt",
+      "sha256": "bc06570e9b30f2037324df4877f80066898fb50dff39833ce014c81eeea9c4ee"
+    },
+    {
+      "code": "BRE",
+      "textFile": "brentwood.txt",
+      "sha256": "067ec7878634170850f014342952bfbd654e37cb5b5501c8104859e8b36cde3a"
+    },
+    {
+      "code": "BRI",
+      "textFile": "bridlewood.txt",
+      "sha256": "c743214f8d08ff30dd3cb3951f126fd47c063683dbe79a0e4611fb283f005793"
+    },
+    {
+      "code": "BRT",
+      "textFile": "britannia.txt",
+      "sha256": "71433f61bc658a81149c41441e69835f4ab799d6b82c2e7852a89ab01e8a8d1e"
+    },
+    {
+      "code": "BYV",
+      "textFile": "bayview.txt",
+      "sha256": "4bf0f3adf51e397edbc2c0bbc988e6a5b5548865cdf3b8d0047ed69273770470"
+    },
+    {
+      "code": "CAM",
+      "textFile": "cambrian-heights.txt",
+      "sha256": "ee17a057595fa004d8ce3fa94d5892b433d28993292143b4174039c76882d3d1"
+    },
+    {
+      "code": "CAN",
+      "textFile": "canyon-meadows.txt",
+      "sha256": "523cf2ad9e0540b4f3f902bdf6d439ffa4e514950363543e91ee6f8d4a25f233"
+    },
+    {
+      "code": "CAP",
+      "textFile": "capitol-hill.txt",
+      "sha256": "b5c6a4df48378ebba9cdb3c60df4a35e4a5d0f7e0c61df0259d80655056c2aa9"
+    },
+    {
+      "code": "CAR",
+      "textFile": "carrington.txt",
+      "sha256": "0c738cd29ccf40ffa408947feed95a116fafb1eb056aca7c64fb11ba02a78826"
+    },
+    {
+      "code": "CAS",
+      "textFile": "castleridge.txt",
+      "sha256": "e0d1965d5cc8978c6cfd518917f4b674f0cb7e13205710d8306637a5dfa42986"
+    },
+    {
+      "code": "CED",
+      "textFile": "cedarbrae.txt",
+      "sha256": "69668709347076c5d67f9ca8c67da441d51878c691ea2496482ba0084da7df27"
+    },
+    {
+      "code": "CGR",
+      "textFile": "cougar-ridge.txt",
+      "sha256": "7a43b3c809d6d41d6fb4e8a0c6437f748dd64dff51787fef349bcdc87172c284"
+    },
+    {
+      "code": "CHA",
+      "textFile": "chaparral.txt",
+      "sha256": "9765dc543593f864d8a836c751d37c633608ba53f1b0d5e95cd9778f8d6e516a"
+    },
+    {
+      "code": "CHK",
+      "textFile": "chinook-park.txt",
+      "sha256": "91b12f323a2fca5c4d0e42f969a5f764d7881cb84212dc09f775740cecd330c8"
+    },
+    {
+      "code": "CHN",
+      "textFile": "chinatown.txt",
+      "sha256": "b18e79e39e0a94aea9aed770894baad09b3ad0fb4a1eabedfa2723746bb8cbcc"
+    },
+    {
+      "code": "CHR",
+      "textFile": "christie-park.txt",
+      "sha256": "97134c52d2df11ce44145bd0eedcc68153e5d13738f2a92b971f0aecf25993d3"
+    },
+    {
+      "code": "CHV",
+      "textFile": "country-hills-village.txt",
+      "sha256": "c792ff95b619af2fa6989c63f85e76987ac5dd07671d3ea898aa078354b2ff15"
+    },
+    {
+      "code": "CHW",
+      "textFile": "charleswood.txt",
+      "sha256": "b7ad8d398fd7f0e3685f820fd43ab87a71317d195eb6c384209d3b5222c28804"
+    },
+    {
+      "code": "CIT",
+      "textFile": "citadel.txt",
+      "sha256": "21471b3a422b0d2e156f4c817e3de4ccc64ced5159c778884e556b0ba604ce15"
+    },
+    {
+      "code": "CLI",
+      "textFile": "cliff-bungalow.txt",
+      "sha256": "daeea03d4a811e5cfb147ce46d5f5a588134ec5cf75d88c197c5c3573b2017a8"
+    },
+    {
+      "code": "CNS",
+      "textFile": "cornerstone.txt",
+      "sha256": "b8c5113d978e604abc33b61e684e85449c874031f79f582527d926b521abded8"
+    },
+    {
+      "code": "COA",
+      "textFile": "coach-hill.txt",
+      "sha256": "8bb541593de28ec74b76e75dd30d13d62d3a742e65746bdf6dd1c0cfb56d7d9e"
+    },
+    {
+      "code": "COL",
+      "textFile": "collingwood.txt",
+      "sha256": "a9b048cea0a62ba03b976a338fbb3a1ea7e5063db246d42a9cad13d3232e82d9"
+    },
+    {
+      "code": "COR",
+      "textFile": "coral-springs.txt",
+      "sha256": "c6e80a25611fedf962b819c341986037b8173b42ae49cf3695dc27c3479d61b8"
+    },
+    {
+      "code": "COU",
+      "textFile": "country-hills.txt",
+      "sha256": "2382b396d2f8c5ee3182fe1819a7e76ce51136ad1c255c15cfa2a38bfceea3b0"
+    },
+    {
+      "code": "COV",
+      "textFile": "coventry-hills.txt",
+      "sha256": "8644ec9989d2ff7ea56a53e3d8c1941ba43d68d788e78e389b8cc7576f581945"
+    },
+    {
+      "code": "CPF",
+      "textFile": "copperfield.txt",
+      "sha256": "840f1056b997221dec09d35033a6b3ca6ab37ede931ba9323ab63bdf8adfae99"
+    },
+    {
+      "code": "CRA",
+      "textFile": "cranston.txt",
+      "sha256": "3c7d533c1e560321f182f3bd7e2c780d3a0da031e7064e581596c7b8e29e5437"
+    },
+    {
+      "code": "CRE",
+      "textFile": "crescent-heights.txt",
+      "sha256": "a05af95aab55fcc94fb53d3b96ea8a4d72840024ae2d0638c87a49571f04c1e9"
+    },
+    {
+      "code": "CRM",
+      "textFile": "crestmont.txt",
+      "sha256": "5882e290a785da2d099c9a9a307483f468728da842f7ff0c79c174c5adad2dbf"
+    },
+    {
+      "code": "CSC",
+      "textFile": "cityscape.txt",
+      "sha256": "36eedd24581cf4f99ccdd8efde40c832ae7afe85f34a466c3005f0f3ec8d43e6"
+    },
+    {
+      "code": "CUR",
+      "textFile": "currie-barracks.txt",
+      "sha256": "849721aa6359db377e8636bc66547f262cc3bb58baaeeec8913bf1774ba481e1"
+    },
+    {
+      "code": "DAL",
+      "textFile": "dalhousie.txt",
+      "sha256": "2387e172c16b9441bdf65b8ee97f48672e2e123410e891965ab001d02790b6e0"
+    },
+    {
+      "code": "DDG",
+      "textFile": "douglasdale-glen.txt",
+      "sha256": "cfbd720057640053e9fc32da56fb124e89bfb90642af23ed5565134a16f562ec"
+    },
+    {
+      "code": "DIA",
+      "textFile": "diamond-cove.txt",
+      "sha256": "81b9cb8bd8ffa75c3d9283107feba1ee8e4aade22cf6ef925a49e82346eff830"
+    },
+    {
+      "code": "DIS",
+      "textFile": "discovery-ridge.txt",
+      "sha256": "2ccf4d55d90858825d3d50ce88ab3a82be20ee1f2226ee5007aa9e37474d5b32"
+    },
+    {
+      "code": "DNC",
+      "textFile": "downtown-commercial-core.txt",
+      "sha256": "a636d04186ce8353e0d6b505942dce242ef21e6a5b60e7313538554398a81aa9"
+    },
+    {
+      "code": "DNE",
+      "textFile": "downtown-east-village.txt",
+      "sha256": "f037eb827925fb718388e99ddef1713bf2aa8f0d38947ed52f5ffa8f22184e1e"
+    },
+    {
+      "code": "DNW",
+      "textFile": "downtown-west-end.txt",
+      "sha256": "305f3959369a0cc2f05bdccfe42081ef87dae80192b6d6e07ee225cc40c5bcd3"
+    },
+    {
+      "code": "DOV",
+      "textFile": "dover.txt",
+      "sha256": "d030173a662569baf41fd9860e86c83a51ac8e1831e478583aa9abc7858e7d71"
+    },
+    {
+      "code": "DRG",
+      "textFile": "deer-ridge.txt",
+      "sha256": "680b2354c58741138f49a84246bddd1661794b06a0781c93de033f13b6bf0eee"
+    },
+    {
+      "code": "DRN",
+      "textFile": "deer-run.txt",
+      "sha256": "6c1b882640935f2cfcd4c6f935bdd4af0c1d3f394128191f4d97fc6ae5888cc8"
+    },
+    {
+      "code": "EAG",
+      "textFile": "eagle-ridge.txt",
+      "sha256": "8d5f5ffff082040903982d9fb21ce4bd48cc9cbee1117927cf3d924c5fa02cb5"
+    },
+    {
+      "code": "EAU",
+      "textFile": "eau-claire.txt",
+      "sha256": "7aaea645ed26e50576f121787b79df982330c426f7189046788ea6388f1cd0ec"
+    },
+    {
+      "code": "EDG",
+      "textFile": "edgemont.txt",
+      "sha256": "19c45525726dc871236beb5cabbb2bcf563848a4d26ac89d9266848cc78bc0fc"
+    },
+    {
+      "code": "EPK",
+      "textFile": "elbow-park.txt",
+      "sha256": "b5ec7e6f0b57059fbff08f805813fada7788fe1845afe90269ef08165a16d95a"
+    },
+    {
+      "code": "ERI",
+      "textFile": "erin-woods.txt",
+      "sha256": "c60fb158c8c9ae0b2c7aab4f3b956422e21a2da42d8913af12e0f425f9cb5cdc"
+    },
+    {
+      "code": "ERL",
+      "textFile": "erlton.txt",
+      "sha256": "7040b89425705253990fe31417bc4226974195fc4a620bdad1c48ca0fc74b2e7"
+    },
+    {
+      "code": "EVE",
+      "textFile": "evergreen.txt",
+      "sha256": "5ab938192ab8ee505a62c6ba51d6251683639fe065227494eb1195b6b53735d1"
+    },
+    {
+      "code": "EVN",
+      "textFile": "evanston.txt",
+      "sha256": "9220cba641ac8c754d9f9d3227c884fc29ca2866674ba2167c7d6a28a36e2581"
+    },
+    {
+      "code": "EYA",
+      "textFile": "elboya.txt",
+      "sha256": "c5e6ca03120bfbe4a6764324ebf745e91c17637e5e9bc68b2d07b4901208cdba"
+    },
+    {
+      "code": "FAI",
+      "textFile": "fairview.txt",
+      "sha256": "a7abb1a1cf63bb0a0e39776f1eea9283b690e79a1fd88f75b1b54b9d77512ba1"
+    },
+    {
+      "code": "FAL",
+      "textFile": "falconridge.txt",
+      "sha256": "2b2c1b4130e32869649b7c81415e5778267d8a97f8823d28c82e502d203f3c06"
+    },
+    {
+      "code": "FHT",
+      "textFile": "forest-heights.txt",
+      "sha256": "b23e08f9a30312bd1049b06dde4fda1969dd34783888bb6d80ee02a702728b8b"
+    },
+    {
+      "code": "FLN",
+      "textFile": "forest-lawn.txt",
+      "sha256": "3e815594898d895a3275b5e0f644dbf81acc33ed98d2d29beb272f9792a397f8"
+    },
+    {
+      "code": "FPK",
+      "textFile": "fish-creek-park.txt",
+      "sha256": "fcb9b890a6c696cd23b647667dec0ad3e9664bfd3a0b9e09fb8bf122adde5a1d"
+    },
+    {
+      "code": "GAG",
+      "textFile": "garrison-green.txt",
+      "sha256": "6582fdaa44480a4b25b74f089bb9436442350251d8ff749377b9d150ce0d92bd"
+    },
+    {
+      "code": "GAW",
+      "textFile": "garrison-woods.txt",
+      "sha256": "e10279c403a2058e26a69fba1a76b5b88e8e5283995d847e805903883a56d035"
+    },
+    {
+      "code": "GBK",
+      "textFile": "glenbrook.txt",
+      "sha256": "f3fb3eb5dd1149acf4e8da6d71da93d89f2dbcccf4af15f78ed297a7d57b7639"
+    },
+    {
+      "code": "GDL",
+      "textFile": "glendale.txt",
+      "sha256": "3091df9b16bdfce72b2a8ed800065fe9290aa34b96ad61fba9d610ac946b05d9"
+    },
+    {
+      "code": "GLA",
+      "textFile": "glamorgan.txt",
+      "sha256": "a3f7951d004f78514287486f110d1b2067e46f3b7d50b4ba96c03f6b7cb68ca3"
+    },
+    {
+      "code": "GRE",
+      "textFile": "greenwood-greenbriar.txt",
+      "sha256": "a967b9f5ac31afb9e5b599830e1e7ec2ba5f0f3ba20bd941d67db0d61d6602c0"
+    },
+    {
+      "code": "GRV",
+      "textFile": "greenview.txt",
+      "sha256": "96d1a2c3477808b3c4abf7cdbd21b8c7e22eefc064690d63c09d1af82c0c9502"
+    },
+    {
+      "code": "HAM",
+      "textFile": "hamptons.txt",
+      "sha256": "da85a3c1cf6a97cec9be51b67f4b70d57da5644ab9b5aca861f6c86a54eccb73"
+    },
+    {
+      "code": "HAR",
+      "textFile": "harvest-hills.txt",
+      "sha256": "3dc3d666d242b8db809c8e594eb4f782e89d4004b58a374cbbf4c1cf6cfce681"
+    },
+    {
+      "code": "HAW",
+      "textFile": "hawkwood.txt",
+      "sha256": "e007de16aad2092b0637ab0944dced00c81d4350e6ee28c620b6558ae358a6de"
+    },
+    {
+      "code": "HAY",
+      "textFile": "haysboro.txt",
+      "sha256": "b610c017949add220a896b5e5ae897785e0387a3d66f81468b6655f8b71fa330"
+    },
+    {
+      "code": "HID",
+      "textFile": "hidden-valley.txt",
+      "sha256": "d20809370c44f433a9258e6742db19c2de6229b78297b7add24312b9cdad0e55"
+    },
+    {
+      "code": "HIL",
+      "textFile": "hillhurst.txt",
+      "sha256": "e9dffe434ca22e2c3576e06985680c8f9268ad03b239bcbb2f1ca90a6e84aaf7"
+    },
+    {
+      "code": "HIW",
+      "textFile": "highwood.txt",
+      "sha256": "125594f0b47ea67f3cd040d1fb2ce44bac9061610859d395eb3f6355107adee1"
+    },
+    {
+      "code": "HOU",
+      "textFile": "hounsfield-heights-briar-hill.txt",
+      "sha256": "1010384e563f6d397559ed25841718ab3f782cb5b174b829e39a8d4d4006fe9f"
+    },
+    {
+      "code": "HPK",
+      "textFile": "highland-park.txt",
+      "sha256": "fa564605038d983e224f4e1d243aefc3b74ef9f98fed77e7006005f69d39b416"
+    },
+    {
+      "code": "HUN",
+      "textFile": "huntington-hills.txt",
+      "sha256": "8aa1a3c83565ce795db1ce575530ba5c26213116f15d69e1e2bdfa241a89c142"
+    },
+    {
+      "code": "ING",
+      "textFile": "inglewood.txt",
+      "sha256": "e369586abc77e4fbc5c96db2d4efe2d07d7aed41275230c71fe3232fd1b0310c"
+    },
+    {
+      "code": "KCA",
+      "textFile": "kincora.txt",
+      "sha256": "6cf04517d9b984969a627ce0bfd5439866e846691161edbac3c9b20e4393dd3e"
+    },
+    {
+      "code": "KEL",
+      "textFile": "kelvin-grove.txt",
+      "sha256": "12c36e4e53e4725f934fc0ab7949a8479e183885a46ace40c006961c1fa2b775"
+    },
+    {
+      "code": "KIL",
+      "textFile": "killarney-glengarry.txt",
+      "sha256": "f3a0f3dcfe53fb36bc13f3fe52f52724e9a74040df12edb49e43be78edb06d96"
+    },
+    {
+      "code": "KIN",
+      "textFile": "kingsland.txt",
+      "sha256": "0c0050dca6c99ae40ffdcb7f7476e12897929cc208d0fd714f64e1d0cb4e330b"
+    },
+    {
+      "code": "LEG",
+      "textFile": "legacy.txt",
+      "sha256": "9b25e05f9f8f708a1a4262b5ed2ebd192d81b914c054648a8a7e9558e2b36ad0"
+    },
+    {
+      "code": "LIV",
+      "textFile": "livingston.txt",
+      "sha256": "67d16bde6a33517099722dfd94a371f82848778ba693c2bc5d503f889dab0cc1"
+    },
+    {
+      "code": "LKB",
+      "textFile": "lake-bonavista.txt",
+      "sha256": "dc8a6c4b6d113ee3aa0e23c5d8e991939c7aae2cf70cb9cf35247db9cc55ad5f"
+    },
+    {
+      "code": "LKV",
+      "textFile": "lakeview.txt",
+      "sha256": "202b08015d1803f994f3ce33b3230619cbeb6992912efe70db23a8f1a2e5e04a"
+    },
+    {
+      "code": "LMR",
+      "textFile": "lower-mount-royal.txt",
+      "sha256": "b2db8ce258447bded4e816c16b68f8af23bf7fe4db1360052a72d5c64a1e85ba"
+    },
+    {
+      "code": "LPK",
+      "textFile": "lincoln-park.txt",
+      "sha256": "05f031fef0a9505913ac4da1ba9341c9169c703d68174f970b4035f59793de6c"
+    },
+    {
+      "code": "MAC",
+      "textFile": "macewan-glen.txt",
+      "sha256": "5d039e51b7ea5280e0fddea6f3273e0d017b77eeaef5c108818a61c29655e8f9"
+    },
+    {
+      "code": "MAF",
+      "textFile": "mayfair.txt",
+      "sha256": "8a91f87c3e8987bd0d4c6c8b80d0078079d5cbae3845961fbc970fe0e08004f7"
+    },
+    {
+      "code": "MAH",
+      "textFile": "mahogany.txt",
+      "sha256": "f970d58cbf75d183144eae0de67199aa04f8afa037223039ea588cb885851e30"
+    },
+    {
+      "code": "MAL",
+      "textFile": "mayland-heights.txt",
+      "sha256": "2fea4c53ba5991cab976a821bc7eb55d666988b8aee769a4ed483a88fff1b1f2"
+    },
+    {
+      "code": "MAN",
+      "textFile": "manchester.txt",
+      "sha256": "42e8c1a1e4ebcd3e6f6c586079108c3cae215ad8d5b20a88989f9a8f97892f9f"
+    },
+    {
+      "code": "MCK",
+      "textFile": "mckenzie-lake.txt",
+      "sha256": "65ddbd44b9df79c8297648997ebe90544e43c2e21ad652e5c8860c12ad7fe02a"
+    },
+    {
+      "code": "MCT",
+      "textFile": "mckenzie-towne.txt",
+      "sha256": "f5e6a41b48765a5d2d40d77be8cb621c76b11b04342120643d238761eef197b3"
+    },
+    {
+      "code": "MEA",
+      "textFile": "meadowlark-park.txt",
+      "sha256": "a17461fee66f7266c233899898244890a8df05296eb2c7105226b621630c0dc1"
+    },
+    {
+      "code": "MID",
+      "textFile": "midnapore.txt",
+      "sha256": "196a77fda4e53ede1176820087dbebc13b059f6aab2432b9da852b1652e2e0be"
+    },
+    {
+      "code": "MIS",
+      "textFile": "mission.txt",
+      "sha256": "122bb57554173a3bb5131b86e55b0f2a4be8f37efc7548f4cec3f5cbe5c2dabe"
+    },
+    {
+      "code": "MLR",
+      "textFile": "millrise.txt",
+      "sha256": "15f5a4a844312f59022c6474b908daf7b8b71663a7ee7b20e06632c08fca02d0"
+    },
+    {
+      "code": "MON",
+      "textFile": "montgomery.txt",
+      "sha256": "84b3c822eb45bc1219e3c5df0468715420abd59f78bcbe4ce3fc5b28f7ff701a"
+    },
+    {
+      "code": "MOP",
+      "textFile": "mount-pleasant.txt",
+      "sha256": "8751770487301fa8955cc9d33eff2e64bd6292ff276274b77676d937fd1fad7f"
+    },
+    {
+      "code": "MOR",
+      "textFile": "monterey-park.txt",
+      "sha256": "8c115548c73bcdd0d509db54427cf1a6e0d3a0a60b45d63808128d98f6354341"
+    },
+    {
+      "code": "MPK",
+      "textFile": "marlborough-park.txt",
+      "sha256": "49fd73f95a8d26637c203a7ba2dc3164d3ac58695c1cdb183604005c976719af"
+    },
+    {
+      "code": "MPL",
+      "textFile": "maple-ridge.txt",
+      "sha256": "d15b194192fe0c33853ca6d9542fdfc9e852fb5d7cd259a66b2b9da4f531bf7b"
+    },
+    {
+      "code": "MRL",
+      "textFile": "marlborough.txt",
+      "sha256": "a8097a3a4d37aaff5f449265b13be1b7336c4ef67d3c6fd0fc48f834b6561d61"
+    },
+    {
+      "code": "MRT",
+      "textFile": "martindale.txt",
+      "sha256": "911e918f1d66fee77dfe46e848081909f13113a250bc3995089d1cdcf9a53cff"
+    },
+    {
+      "code": "NEB",
+      "textFile": "new-brighton.txt",
+      "sha256": "286eaa0c2d7d95df60a3e8c0ff3c22fb95f3d6e32f2a9770d74461bdc979c0b3"
+    },
+    {
+      "code": "NGM",
+      "textFile": "north-glenmore-park.txt",
+      "sha256": "d9030ac1bf01192d8c9bf116659dd84736ed691956e47288b42660ce83fc7528"
+    },
+    {
+      "code": "NHU",
+      "textFile": "north-haven-upper.txt",
+      "sha256": "41e9967d510880a25aaf230c82d99f925c6dbc984861fa6669d546f6a97b8a33"
+    },
+    {
+      "code": "NHV",
+      "textFile": "north-haven.txt",
+      "sha256": "4f7a2cc57e19d558360cd1aed352ba50f9ae93cdae476074d482e54052162885"
+    },
+    {
+      "code": "NOL",
+      "textFile": "nolan-hill.txt",
+      "sha256": "9e4a77c3e6454442ad9f50f5b19242820eb299a0a5e1e9e16508a4a427817a12"
+    },
+    {
+      "code": "OAK",
+      "textFile": "oakridge.txt",
+      "sha256": "ddfb25d5ed999c46f72fefcabfc19286f575a80f03801ec749bdccab39b13ca0"
+    },
+    {
+      "code": "OGD",
+      "textFile": "ogden.txt",
+      "sha256": "0148022035a5f5ed80e3ac058a8c46f103e105836c0613430201b2143bebdc3e"
+    },
+    {
+      "code": "PAL",
+      "textFile": "palliser.txt",
+      "sha256": "5afa544077a8073183b12b26eb5f4315d3bdabb3bb006c25ba83c93bec7bd661"
+    },
+    {
+      "code": "PAN",
+      "textFile": "panorama-hills.txt",
+      "sha256": "cfb115516e0b9f895090418fb13a626724f8ee9692ab4334ff1898d9f7e9dae9"
+    },
+    {
+      "code": "PAT",
+      "textFile": "patterson.txt",
+      "sha256": "e2e895f73916a395e71f706203f32f3c4fe34105b6850256e9b4f3f88ed980d7"
+    },
+    {
+      "code": "PCK",
+      "textFile": "pine-creek.txt",
+      "sha256": "bfe8f24826a1d7387a44d0a5fd004deff8e2707b57f871d87f91e52b33967ce3"
+    },
+    {
+      "code": "PEN",
+      "textFile": "penbrooke-meadows.txt",
+      "sha256": "02d5959aefd0f65f93cbb91e839386f687f43852de5b12a45859b175b802ff04"
+    },
+    {
+      "code": "PIN",
+      "textFile": "pineridge.txt",
+      "sha256": "e4730363239160df9d2c7715601de70c3e3c1f0f1402bd8ebe22b99f1e3d0de0"
+    },
+    {
+      "code": "PKD",
+      "textFile": "parkdale.txt",
+      "sha256": "7bb2aaa379db46a5f8e5b27b98dd2dbb49aaa36efd6e275202b1887b6057871b"
+    },
+    {
+      "code": "PKH",
+      "textFile": "parkhill.txt",
+      "sha256": "908ccf89442050e342dc45c3ee26f674c55c8bde2bd8b5b1b293795359d0f02e"
+    },
+    {
+      "code": "PKL",
+      "textFile": "parkland.txt",
+      "sha256": "e8fac75b05b4a7ca2be3b3b73d9279fd2ec0032ca023d0ec3bde22458a2f3618"
+    },
+    {
+      "code": "POI",
+      "textFile": "point-mckay.txt",
+      "sha256": "a3d7de4e51c08a54c5e53c5f72dd4e783b8e418b4c4eb5dc13a33ce8c7fba0eb"
+    },
+    {
+      "code": "PUM",
+      "textFile": "pump-hill.txt",
+      "sha256": "a299eae851d5d877233a0b6816e20c173e1f2b70134c4369e810f8e03ec51ef3"
+    },
+    {
+      "code": "QLD",
+      "textFile": "queensland.txt",
+      "sha256": "85963dd03499146f165b4d9f6c9038dd1b700f489909fc8399b992464944c9cc"
+    },
+    {
+      "code": "QPK",
+      "textFile": "queens-park-village.txt",
+      "sha256": "fa58786e38695229060844daa065b8ac124d1d5b74e0dbee81aefa882cba9d2e"
+    },
+    {
+      "code": "RAM",
+      "textFile": "ramsay.txt",
+      "sha256": "2bdd93ca712366c536cf88e09b62a82f42a73e403de53465c0b7b320c5a017cc"
+    },
+    {
+      "code": "RAN",
+      "textFile": "ranchlands.txt",
+      "sha256": "a5a1e8068748c56f46eb95dcc28a3e177abc611f15e1b188d5affe4b940ac90d"
+    },
+    {
+      "code": "RCK",
+      "textFile": "rosscarrock.txt",
+      "sha256": "8dcbc4079620e4b3a0a63dddd2e920b66f06afbc5a385b6e05eed5ddba8f9f2d"
+    },
+    {
+      "code": "RDL",
+      "textFile": "rosedale.txt",
+      "sha256": "0264ff3f8fb699b89dd84d192964612d739e8f1d514e987a76483aca1bc1e341"
+    },
+    {
+      "code": "RED",
+      "textFile": "red-carpet.txt",
+      "sha256": "f443a37f4277e5ad764038321f8fc114b4f400e03f408afd743d0da6938ed24b"
+    },
+    {
+      "code": "REN",
+      "textFile": "renfrew.txt",
+      "sha256": "03d0f71ea89239f5dbeda12671e59828cd6f0d25a40d950ddfcaced70e4ca820"
+    },
+    {
+      "code": "RIC",
+      "textFile": "richmond.txt",
+      "sha256": "f88a3a6fd92879cf6bf7e7ee58ecd867ca4dc949ed6d391ac0271f283b883176"
+    },
+    {
+      "code": "RID",
+      "textFile": "rideau-park.txt",
+      "sha256": "f68d58ec9efaf88807c912fef54ce0bc4827a6fd7e7e6a6db1cf3d0f49811f06"
+    },
+    {
+      "code": "RIV",
+      "textFile": "riverbend.txt",
+      "sha256": "294cb4b9b7f353a0fdfcb633b2ede121b1fdf5d6a0ea59887da771874c932600"
+    },
+    {
+      "code": "RMT",
+      "textFile": "rosemont.txt",
+      "sha256": "80d1eb0dd4979c6e9ad4a00ce2a413b2be945429e4aff42aa7d38122e97b02f9"
+    },
+    {
+      "code": "ROC",
+      "textFile": "rocky-ridge.txt",
+      "sha256": "dd803b8f700c194137c613ad6ac94e8f5cad2bb7c595f4b1c269c5dd9c987dcc"
+    },
+    {
+      "code": "ROX",
+      "textFile": "roxboro.txt",
+      "sha256": "6a13c19564336ae17f6e8e77b6aec5a092abc8e2eb783cd4aa102f32837841ae"
+    },
+    {
+      "code": "ROY",
+      "textFile": "royal-oak.txt",
+      "sha256": "55d67b4e033e4a99cdb6d8f851b695055a78c2c04a91e291fd8d9d39088800f7"
+    },
+    {
+      "code": "RSN",
+      "textFile": "redstone.txt",
+      "sha256": "ab6e97b3e0f60e8778506b9f96a375d75da258d5cf540214641069c5106d0a22"
+    },
+    {
+      "code": "RUN",
+      "textFile": "rundle.txt",
+      "sha256": "5bc2fae6f4ccbc8c05b72edd19e0cbcc524bfac5a877df21a437663afa630295"
+    },
+    {
+      "code": "RUT",
+      "textFile": "rutland-park.txt",
+      "sha256": "5f7d29711b388570a3c7659e0ee8077036e1ff699531b8cc6a6bb4294c085df0"
+    },
+    {
+      "code": "SAD",
+      "textFile": "saddle-ridge.txt",
+      "sha256": "d05965a5f0b7aa0e946e28fdcd211097c65641d4406ac6be6c0ea88a3f44318e"
+    },
+    {
+      "code": "SAN",
+      "textFile": "sandstone-valley.txt",
+      "sha256": "9562c27055f17f7e6fa1ddb9bad28bf47d163f43a07550e6274b22a5b58e8a37"
+    },
+    {
+      "code": "SCA",
+      "textFile": "scarboro.txt",
+      "sha256": "61862bf69afa8d7c3565fa9cd458828623d0392ecdaed674c6b327f96b15d92f"
+    },
+    {
+      "code": "SCE",
+      "textFile": "scenic-acres.txt",
+      "sha256": "d6f7c18a4489dbcdf1e0444313046a019a61af6dfc50071fe00237a3d607f250"
+    },
+    {
+      "code": "SDC",
+      "textFile": "sundance.txt",
+      "sha256": "30ceb120c306ddee55562e59a49cb293de32fab8a66edb31d0e9088e45637c39"
+    },
+    {
+      "code": "SET",
+      "textFile": "seton.txt",
+      "sha256": "5a7c2ea0f9f89709d1c861f6d536bc46fde5abdfa57e27a2c6c16ac74b01ca66"
+    },
+    {
+      "code": "SGH",
+      "textFile": "sage-hill.txt",
+      "sha256": "7e6b41b4ecfcf0e7b4b87879ef4f890a77a873f4dc0491d526b026a23c41a414"
+    },
+    {
+      "code": "SHG",
+      "textFile": "shaganappi.txt",
+      "sha256": "9ca87d7e9ec3c16abd633b28fb781c2e22aaa7c88403d57e158a5fd6cf3a9231"
+    },
+    {
+      "code": "SHI",
+      "textFile": "shepard-industrial.txt",
+      "sha256": "d0cbd2d34173dc5eaa79e4accd19ef4411184b2d1784e234f44e8faea3e97165"
+    },
+    {
+      "code": "SHN",
+      "textFile": "shawnessy.txt",
+      "sha256": "7d7381d668b6febfb9ca20f85e1f5efb6ea50c5e75003e7cb80b883a920e5dda"
+    },
+    {
+      "code": "SHS",
+      "textFile": "shawnee-slopes.txt",
+      "sha256": "068d1374d31fa45fa45fe362e70c731c8a32fc1bf99af6c7696fd4cd00b8e6eb"
+    },
+    {
+      "code": "SHW",
+      "textFile": "sherwood.txt",
+      "sha256": "6927d5ee02ff4537ab683ef7ced8c0fe5ddba44996cd86a89043629ee7bfd607"
+    },
+    {
+      "code": "SIG",
+      "textFile": "signal-hill.txt",
+      "sha256": "756294f7db733d3a79731b408e8d65cae83ea5f856dbb4c8c2f44bf74a0e7aaa"
+    },
+    {
+      "code": "SIL",
+      "textFile": "silver-springs.txt",
+      "sha256": "c847a3b298f0d409fb0366a0c8192e53cdcb66c23644d7f89815e09e2974ab31"
+    },
+    {
+      "code": "SKR",
+      "textFile": "skyview-ranch.txt",
+      "sha256": "97798bc3dd46a2249f531ed5bd8c678b8f68d92dd2071acb5dd0b28e16743c4f"
+    },
+    {
+      "code": "SNA",
+      "textFile": "sunalta.txt",
+      "sha256": "54f650cf20858021bf00d355d7a7fbcc8c7136068768509f2f2355b240752b51"
+    },
+    {
+      "code": "SOC",
+      "textFile": "south-calgary.txt",
+      "sha256": "eccb4b90f42f755ee0bc23f825a72499a19cb36ece1f62f00c121474392fc31b"
+    },
+    {
+      "code": "SOM",
+      "textFile": "somerset.txt",
+      "sha256": "3dab01efc8de644a64e58204ac85b0f17b20e04ba320decc2878463c7bc7ce2e"
+    },
+    {
+      "code": "SOV",
+      "textFile": "southview.txt",
+      "sha256": "8a3fe6cddfd90bbfa7df3cb9aff31d0b738d2608f34b91e1a2bfc599e9f9c494"
+    },
+    {
+      "code": "SOW",
+      "textFile": "southwood.txt",
+      "sha256": "ab3943576edd8948e8e734c299f9eed12b15fbc171c3b7e44831d09e0f390b38"
+    },
+    {
+      "code": "SPH",
+      "textFile": "springbank-hill.txt",
+      "sha256": "6dfeca4bc9be42cf8e469268b3edee0dfb5b1241fec2c8165068e21efd5a1fdb"
+    },
+    {
+      "code": "SPR",
+      "textFile": "spruce-cliff.txt",
+      "sha256": "49c9ba41db5b8ee9614c409fc76fe53e89469cef52766ebf4c539a4b491135eb"
+    },
+    {
+      "code": "SSD",
+      "textFile": "sunnyside.txt",
+      "sha256": "1f9e5acbfcf98d43343b2207600ec5d30587ca197b9b8a530fa77bc60619f0e8"
+    },
+    {
+      "code": "SSW",
+      "textFile": "scarboro-sunalta-west.txt",
+      "sha256": "649c3dccf7ef60b09b0ad63c91ba6b25cabce93371513cdaba39e566319963b3"
+    },
+    {
+      "code": "STA",
+      "textFile": "st-andrews-heights.txt",
+      "sha256": "13bbef2ccbebb963e43b792bcd963a467a6bfebb446b011bab86844ddadc0038"
+    },
+    {
+      "code": "STR",
+      "textFile": "strathcona-park.txt",
+      "sha256": "b3d2f97fe97cf2381f8355cb55af23cc5a3b320976a985ea7c436b693ee23264"
+    },
+    {
+      "code": "SVO",
+      "textFile": "silverado.txt",
+      "sha256": "709574f11f81b66ed4005d40d996f7ea2579723baa734ef963f6950cab937341"
+    },
+    {
+      "code": "TAR",
+      "textFile": "taradale.txt",
+      "sha256": "b70c6fe899a0bc7f5a34e31b094c945dd828f25434b15f2f1933da249059de4b"
+    },
+    {
+      "code": "TEM",
+      "textFile": "temple.txt",
+      "sha256": "bf468068e087162e829e4000a13a88b6f910d0e25928dc835fbf9c48d7e524c1"
+    },
+    {
+      "code": "THO",
+      "textFile": "thorncliffe.txt",
+      "sha256": "de8ade39a3fccb5dc2e1d21f9ae55029bae4cb4dafe407badcc3b04855ae3370"
+    },
+    {
+      "code": "TUS",
+      "textFile": "tuscany.txt",
+      "sha256": "5fd51098a28f4d1695fd5c3ad032625a7fe53868069206410eeff6e9c9c4ecd8"
+    },
+    {
+      "code": "TUX",
+      "textFile": "tuxedo-park.txt",
+      "sha256": "7552e7d33da0cb4c0394cb82e8750289afa357fde5d2d0db816a89467f7e8356"
+    },
+    {
+      "code": "UMR",
+      "textFile": "upper-mount-royal.txt",
+      "sha256": "21af8e2465965f2c838aad7af822d94db6fa36b80c3d2d077694da2f7a4a2e76"
+    },
+    {
+      "code": "UND",
+      "textFile": "university-district.txt",
+      "sha256": "c3d4e7d5e482a8214f7334e2bd8972f9b3604d429dca9fdab39f79c1f24a950c"
+    },
+    {
+      "code": "UNI",
+      "textFile": "university-heights.txt",
+      "sha256": "3d0e37823a7e7451d2263ed8d6eb191074031606e92a27f50d2227ef3458e36b"
+    },
+    {
+      "code": "VAL",
+      "textFile": "valley-ridge.txt",
+      "sha256": "06ead303673bff6862faec59f998f9a4be1895b46576125b30242dd79870ea80"
+    },
+    {
+      "code": "VAR",
+      "textFile": "varsity.txt",
+      "sha256": "7134dac56a1417c1f545df1fef56366a366249eda84f5a0e7df730d8f291541d"
+    },
+    {
+      "code": "VIS",
+      "textFile": "vista-heights.txt",
+      "sha256": "0904f8730432b4325a12756994163dd43eeb15f96e5c3fb3980833faeac07c29"
+    },
+    {
+      "code": "WAL",
+      "textFile": "walden.txt",
+      "sha256": "80681405e90da60d9d4ca77a24e0d8b6002f55dfdd23183cb4070071f746d0c2"
+    },
+    {
+      "code": "WBN",
+      "textFile": "woodbine.txt",
+      "sha256": "56dfd7981a35535b4882caf796b3467b7bd055f7013246927f896c25411941cd"
+    },
+    {
+      "code": "WGT",
+      "textFile": "westgate.txt",
+      "sha256": "d4b19705c812570c6faeb6b8e5469f1323adf762aebc7ecd6572f019c51f8078"
+    },
+    {
+      "code": "WHI",
+      "textFile": "whitehorn.txt",
+      "sha256": "fc49379854122eea7d2295534a1fb2b8577126fa143b3fddc4b51da9155d825c"
+    },
+    {
+      "code": "WHL",
+      "textFile": "west-hillhurst.txt",
+      "sha256": "091d1b774b7f55b7abd8014461cc21d829eba119ab3c0d7053006478483e53f9"
+    },
+    {
+      "code": "WIL",
+      "textFile": "willow-park.txt",
+      "sha256": "48f8c1e3054585bfa4f47aabd7d598498c30ef3738410cb2b83141a9e0da1418"
+    },
+    {
+      "code": "WIN",
+      "textFile": "winston-heights.txt",
+      "sha256": "8186d416ab4b348472845a781713949012007c9a546c6d44c927900430d33c79"
+    },
+    {
+      "code": "WLD",
+      "textFile": "wildwood.txt",
+      "sha256": "b7f492ef92b1544e9bf97f8c885faba4ea4a7a55a4d8e245a2a4f5fa500b1e1c"
+    },
+    {
+      "code": "WND",
+      "textFile": "windsor-park.txt",
+      "sha256": "726dfe9f5fade624c2e3de2a7ca9463cbdbb2aa0977ea1907495b4efd6bf067b"
+    },
+    {
+      "code": "WOO",
+      "textFile": "woodlands.txt",
+      "sha256": "ccf1f2089bf9721bbb86889fe3a6dbdaf6bf0f70590d8e3ccaa1cd84fc803432"
+    },
+    {
+      "code": "WSP",
+      "textFile": "west-springs.txt",
+      "sha256": "5d61489abd0bda5efbeabf9fa7bfb2a1161d9c0220eaab88717f05dcc81f7c40"
+    },
+    {
+      "code": "WWO",
+      "textFile": "wolf-willow.txt",
+      "sha256": "b19464a240ff3cec8b548e5cf003c031b92ef329b145ff20c2e43439f499ff61"
+    },
+    {
+      "code": "YKV",
+      "textFile": "yorkville.txt",
+      "sha256": "74bbefe0b29a32e410b3565355582db3caa020b6e61bcee335cc3a6fc9e33418"
+    }
+  ]
+}

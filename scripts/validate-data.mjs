@@ -85,6 +85,5 @@ assert.equal(basemap.features.filter(f => f.properties.kind === 'road').length, 
 assert.equal(basemap.features.filter(f => f.properties.kind === 'water').length, basemapAudit.waterFeatures);
 assert.equal(searchFeatures(communities.features, 'aspen woods')[0].properties.code, 'ASP');
 assert.equal(searchFeatures(communities.features, 'AUB')[0].properties.code, 'AUB');
-assert.ok(metadata.shortlist.every(code => communities.features.some(f => f.properties.code === code)));
 
 console.log(`PASS: original data SHA-256 matches; 313 unique Calgary areas; ${counts.income} income and ${counts.chinese} Chinese values; 7 published zeros; all anchors inside boundaries; metadata, sources and basemap valid.`);
