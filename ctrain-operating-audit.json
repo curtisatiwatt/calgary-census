@@ -1,0 +1,1073 @@
+{
+  "schemaVersion": 1,
+  "retrievedAt": "2026-11-03",
+  "sourceDates": {
+    "routeDataUpdated": "2026-09-30T16:00:29+00:00",
+    "stationDataUpdated": "2026-11-03T11:06:45.753000+00:00",
+    "gtfsUpdated": "2026-10-13T17:45:45+00:00"
+  },
+  "sources": [
+    {
+      "label": "Calgary Transit Routes",
+      "url": "https://data.calgary.ca/Transportation-Transit/Calgary-Transit-Routes/hpnd-riq4"
+    },
+    {
+      "label": "City of Calgary LRT Stations",
+      "url": "https://services1.arcgis.com/AVP60cs0Q9PEA8rH/arcgis/rest/services/LRT_Stations/FeatureServer/0"
+    },
+    {
+      "label": "Calgary Transit GTFS",
+      "url": "https://data.calgary.ca/Transportation-Transit/Calgary-Transit-Scheduling-Data/npk7-z3bj"
+    }
+  ],
+  "nameReferenceUrl": "https://www.calgarytransit.com/rider-information/lrt-and-bus-station-maps.html",
+  "licenseUrl": "https://data.calgary.ca/d/Open-Data-Terms/u45n-7awa",
+  "method": "Select only official LRT route rows 201/202. Join Current GIS station records to GTFS stops served by route_type 0 trips on routes 201/202. Normalize direction prefixes and name aliases for joins; verify exact station and line membership agreement. Preserve one official GIS point per station, choosing the lowest OBJECTID where opposite platforms duplicate a station. Geometry rounded to 7 decimals; no routes or station coordinates are hand-drawn.",
+  "counts": {
+    "routes": 2,
+    "rawGisStationPoints": 47,
+    "distinctStations": 45,
+    "gtfsPlatforms": 83,
+    "redStations": 28,
+    "blueStations": 25,
+    "sharedStations": 8
+  },
+  "gtfsServiceRange": {
+    "start": "20261013",
+    "end": "20261220"
+  },
+  "excludedGisRecords": [],
+  "limitations": [
+    "Geographic overview, not a live timetable or closure feed.",
+    "Opposite platform points are represented by one published station coordinate; use the official station maps for entrances/accessibility.",
+    "Shared downtown Red/Blue route geometry overlaps; the renderer should retain both line identities."
+  ],
+  "sourceSha256": {
+    "routes": "c3dbe73238f76d0a3a8cb050d5aff8699d814f57456e67ca15a76c523ce70027",
+    "stations": "cdad806c63e28a7413274941aa6b1d057f3fa5b373507174854045f569728cf9",
+    "gtfs": "fc11f07852e09f26eb809e9c93994ee835900b3c3c244cd8b5c29978dea0ef1e",
+    "stationMetadata": "a9243a5123c66a8104ff2483017de8b1e1ee50e8b157091900299bd482c7ae96",
+    "routeMetadata": "599507d702c07f4a978f9bb1acfc1542e0ab1f8fa65c35755d7a776fb0e0ffe9",
+    "gtfsMetadata": "174dc169fa3ee362b178991e7782b669faac688c2fa7555a6e06cc83e05b7ff2"
+  },
+  "outputSha256": "3f0479faede092c99a0da3a087e1ad9c44aae9005178be6523fd31e58ed3ca7f",
+  "stations": [
+    {
+      "id": "1street",
+      "name": "1 Street SW",
+      "lineIds": [
+        "red",
+        "blue"
+      ],
+      "gisNames": [
+        "1st Street SW Station"
+      ],
+      "gisObjectIds": [
+        320708
+      ],
+      "gtfsStops": [
+        {
+          "id": "6823",
+          "name": "WB 1 Street SW Station (Free Fare Zone)"
+        }
+      ]
+    },
+    {
+      "id": "39avenue",
+      "name": "39 Avenue",
+      "lineIds": [
+        "red"
+      ],
+      "gisNames": [
+        "39 Avenue Station"
+      ],
+      "gisObjectIds": [
+        320696
+      ],
+      "gtfsStops": [
+        {
+          "id": "6805",
+          "name": "NB 39 Avenue CTrain Station"
+        },
+        {
+          "id": "8558",
+          "name": "SB 39 Avenue CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "3street",
+      "name": "3 Street SW",
+      "lineIds": [
+        "red",
+        "blue"
+      ],
+      "gisNames": [
+        "3rd Street SW Station"
+      ],
+      "gisObjectIds": [
+        320679
+      ],
+      "gtfsStops": [
+        {
+          "id": "6829",
+          "name": "EB 3 Street SW Station (Free Fare Zone)"
+        }
+      ]
+    },
+    {
+      "id": "45street",
+      "name": "45 Street",
+      "lineIds": [
+        "blue"
+      ],
+      "gisNames": [
+        "45 Street SW Station"
+      ],
+      "gisObjectIds": [
+        9
+      ],
+      "gtfsStops": [
+        {
+          "id": "3630",
+          "name": "WB 45 Street CTrain Station"
+        },
+        {
+          "id": "3631",
+          "name": "EB 45 Street CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "4street",
+      "name": "4 Street SW",
+      "lineIds": [
+        "red",
+        "blue"
+      ],
+      "gisNames": [
+        "4th Street SW Station"
+      ],
+      "gisObjectIds": [
+        320707
+      ],
+      "gtfsStops": [
+        {
+          "id": "6824",
+          "name": "WB 4 Street SW Station (Free Fare Zone)"
+        }
+      ]
+    },
+    {
+      "id": "69street",
+      "name": "69 Street",
+      "lineIds": [
+        "blue"
+      ],
+      "gisNames": [
+        "69 Street SW Station"
+      ],
+      "gisObjectIds": [
+        10
+      ],
+      "gtfsStops": [
+        {
+          "id": "3626",
+          "name": "WB 69 Street CTrain Station"
+        },
+        {
+          "id": "3627",
+          "name": "EB 69 Street CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "6street",
+      "name": "6 Street SW",
+      "lineIds": [
+        "red",
+        "blue"
+      ],
+      "gisNames": [
+        "6th Street SW Station"
+      ],
+      "gisObjectIds": [
+        320673
+      ],
+      "gtfsStops": [
+        {
+          "id": "6828",
+          "name": "EB 6 Street SW Station (Free Fare Zone)"
+        }
+      ]
+    },
+    {
+      "id": "7street",
+      "name": "7 Street SW",
+      "lineIds": [
+        "red",
+        "blue"
+      ],
+      "gisNames": [
+        "7th Street SW Station"
+      ],
+      "gisObjectIds": [
+        320678
+      ],
+      "gtfsStops": [
+        {
+          "id": "6825",
+          "name": "WB 7 Street SW Station (Free Fare Zone)"
+        }
+      ]
+    },
+    {
+      "id": "8street",
+      "name": "8 Street SW",
+      "lineIds": [
+        "red",
+        "blue"
+      ],
+      "gisNames": [
+        "8th Street SW Station"
+      ],
+      "gisObjectIds": [
+        320692
+      ],
+      "gtfsStops": [
+        {
+          "id": "6827",
+          "name": "EB 8 Street SW Station (Free Fare Zone)"
+        }
+      ]
+    },
+    {
+      "id": "anderson",
+      "name": "Anderson",
+      "lineIds": [
+        "red"
+      ],
+      "gisNames": [
+        "Anderson Station"
+      ],
+      "gisObjectIds": [
+        320706
+      ],
+      "gtfsStops": [
+        {
+          "id": "6801",
+          "name": "NB Anderson CTrain Station"
+        },
+        {
+          "id": "9263",
+          "name": "SB Anderson CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "banfftrail",
+      "name": "Banff Trail",
+      "lineIds": [
+        "red"
+      ],
+      "gisNames": [
+        "Banff Trail Station"
+      ],
+      "gisObjectIds": [
+        320676
+      ],
+      "gtfsStops": [
+        {
+          "id": "6817",
+          "name": "NB Banff Trail CTrain Station"
+        },
+        {
+          "id": "8565",
+          "name": "SB Banff Trail CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "barlowmaxbell",
+      "name": "Barlow / Max Bell",
+      "lineIds": [
+        "blue"
+      ],
+      "gisNames": [
+        "Barlow/Max Bell Station"
+      ],
+      "gisObjectIds": [
+        320687
+      ],
+      "gtfsStops": [
+        {
+          "id": "6812",
+          "name": "EB Barlow - Max Bell CTrain Station"
+        },
+        {
+          "id": "8569",
+          "name": "WB Barlow - Max Bell CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "brentwood",
+      "name": "Brentwood",
+      "lineIds": [
+        "red"
+      ],
+      "gisNames": [
+        "Brentwood Station"
+      ],
+      "gisObjectIds": [
+        320689
+      ],
+      "gtfsStops": [
+        {
+          "id": "4934",
+          "name": "NB Brentwood CTrain Station"
+        },
+        {
+          "id": "6815",
+          "name": "SB Brentwood CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "bridgelandmemorial",
+      "name": "Bridgeland / Memorial",
+      "lineIds": [
+        "blue"
+      ],
+      "gisNames": [
+        "Bridgeland Station"
+      ],
+      "gisObjectIds": [
+        320685
+      ],
+      "gtfsStops": [
+        {
+          "id": "6814",
+          "name": "EB Bridgeland - Memorial CTrain Station"
+        },
+        {
+          "id": "8567",
+          "name": "WB Bridgeland - Memorial CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "canyonmeadows",
+      "name": "Canyon Meadows",
+      "lineIds": [
+        "red"
+      ],
+      "gisNames": [
+        "Canyon Meadows Station"
+      ],
+      "gisObjectIds": [
+        320682
+      ],
+      "gtfsStops": [
+        {
+          "id": "9262",
+          "name": "NB Canyon Meadows CTrain Station"
+        },
+        {
+          "id": "9264",
+          "name": "SB Canyon Meadows CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "centrestreet",
+      "name": "Centre Street",
+      "lineIds": [
+        "red",
+        "blue"
+      ],
+      "gisNames": [
+        "Centre Street Station"
+      ],
+      "gisObjectIds": [
+        320680
+      ],
+      "gtfsStops": [
+        {
+          "id": "6830",
+          "name": "EB Centre Street Station (Free Fare Zone)"
+        }
+      ]
+    },
+    {
+      "id": "chinook",
+      "name": "Chinook",
+      "lineIds": [
+        "red"
+      ],
+      "gisNames": [
+        "Chinook Station"
+      ],
+      "gisObjectIds": [
+        320697
+      ],
+      "gtfsStops": [
+        {
+          "id": "6804",
+          "name": "NB Chinook CTrain Station"
+        },
+        {
+          "id": "8559",
+          "name": "SB Chinook CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "cityhallbowvalleycollege",
+      "name": "City Hall / Bow Valley College",
+      "lineIds": [
+        "red",
+        "blue"
+      ],
+      "gisNames": [
+        "City Hall Station"
+      ],
+      "gisObjectIds": [
+        320684,
+        320709
+      ],
+      "gtfsStops": [
+        {
+          "id": "6822",
+          "name": "WB City Hall/Bow Valley College (Free Fare Zone)"
+        },
+        {
+          "id": "6831",
+          "name": "EB City Hall/Bow Valley College (Free Fare Zone)"
+        }
+      ]
+    },
+    {
+      "id": "crowfoot",
+      "name": "Crowfoot",
+      "lineIds": [
+        "red"
+      ],
+      "gisNames": [
+        "Crowfoot Station"
+      ],
+      "gisObjectIds": [
+        320703
+      ],
+      "gtfsStops": [
+        {
+          "id": "3816",
+          "name": "NB Crowfoot CTrain Station"
+        },
+        {
+          "id": "3817",
+          "name": "SB Crowfoot CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "dalhousie",
+      "name": "Dalhousie",
+      "lineIds": [
+        "red"
+      ],
+      "gisNames": [
+        "Dalhousie Station"
+      ],
+      "gisObjectIds": [
+        320693
+      ],
+      "gtfsStops": [
+        {
+          "id": "3960",
+          "name": "SB Dalhousie CTrain Station"
+        },
+        {
+          "id": "4155",
+          "name": "NB Dalhousie CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "downtownwestkerby",
+      "name": "Downtown West / Kerby",
+      "lineIds": [
+        "blue"
+      ],
+      "gisNames": [
+        "Downtown West - Kerby Station"
+      ],
+      "gisObjectIds": [
+        320694,
+        320701
+      ],
+      "gtfsStops": [
+        {
+          "id": "3638",
+          "name": "WB Downtown-West Kerby Station (Free Fare Zone)"
+        },
+        {
+          "id": "3639",
+          "name": "EB Downtown West-Kerby Station (Free Fare Zone)"
+        }
+      ]
+    },
+    {
+      "id": "erltonstampede",
+      "name": "Erlton / Stampede",
+      "lineIds": [
+        "red"
+      ],
+      "gisNames": [
+        "Erlton/Stampede Station"
+      ],
+      "gisObjectIds": [
+        320691
+      ],
+      "gtfsStops": [
+        {
+          "id": "6806",
+          "name": "NB Erlton / Stampede CTrain Staion"
+        },
+        {
+          "id": "8557",
+          "name": "SB Erlton / Stampede Station"
+        }
+      ]
+    },
+    {
+      "id": "fishcreeklacombe",
+      "name": "Fish Creek–Lacombe",
+      "lineIds": [
+        "red"
+      ],
+      "gisNames": [
+        "Fish Creek - Lacombe Station"
+      ],
+      "gisObjectIds": [
+        320681
+      ],
+      "gtfsStops": [
+        {
+          "id": "9261",
+          "name": "NB Fish Creek - Lacombe CTrain Station"
+        },
+        {
+          "id": "9387",
+          "name": "SB Fish Creek - Lacombe CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "franklin",
+      "name": "Franklin",
+      "lineIds": [
+        "blue"
+      ],
+      "gisNames": [
+        "Franklin Station"
+      ],
+      "gisObjectIds": [
+        320677
+      ],
+      "gtfsStops": [
+        {
+          "id": "6811",
+          "name": "NB Franklin CTrain Station"
+        },
+        {
+          "id": "8570",
+          "name": "SB Franklin CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "heritage",
+      "name": "Heritage",
+      "lineIds": [
+        "red"
+      ],
+      "gisNames": [
+        "Heritage Station"
+      ],
+      "gisObjectIds": [
+        320698
+      ],
+      "gtfsStops": [
+        {
+          "id": "6803",
+          "name": "NB Heritage CTrain Station"
+        },
+        {
+          "id": "8560",
+          "name": "SB Heritage CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "lionspark",
+      "name": "Lions Park",
+      "lineIds": [
+        "red"
+      ],
+      "gisNames": [
+        "Lions Park Station"
+      ],
+      "gisObjectIds": [
+        320700
+      ],
+      "gtfsStops": [
+        {
+          "id": "6818",
+          "name": "NB Lions Park CTrain Station"
+        },
+        {
+          "id": "8564",
+          "name": "SB Lions Park CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "marlborough",
+      "name": "Marlborough",
+      "lineIds": [
+        "blue"
+      ],
+      "gisNames": [
+        "Marlborough Station"
+      ],
+      "gisObjectIds": [
+        320690
+      ],
+      "gtfsStops": [
+        {
+          "id": "6810",
+          "name": "NB Marlborough CTrain Station"
+        },
+        {
+          "id": "8571",
+          "name": "SB Marlborough CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "martindale",
+      "name": "Martindale",
+      "lineIds": [
+        "blue"
+      ],
+      "gisNames": [
+        "Martindale Station"
+      ],
+      "gisObjectIds": [
+        24
+      ],
+      "gtfsStops": [
+        {
+          "id": "6747",
+          "name": "SB Martindale CTrain Station"
+        },
+        {
+          "id": "9396",
+          "name": "NB Martindale CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "mcknightwestwinds",
+      "name": "McKnight–Westwinds",
+      "lineIds": [
+        "blue"
+      ],
+      "gisNames": [
+        "McKnight Westwinds Station"
+      ],
+      "gisObjectIds": [
+        320683
+      ],
+      "gtfsStops": [
+        {
+          "id": "9896",
+          "name": "NB McKnight - Westwinds CTrain Station"
+        },
+        {
+          "id": "9897",
+          "name": "SB McKnight - Westwinds CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "rundle",
+      "name": "Rundle",
+      "lineIds": [
+        "blue"
+      ],
+      "gisNames": [
+        "Rundle Station"
+      ],
+      "gisObjectIds": [
+        320674
+      ],
+      "gtfsStops": [
+        {
+          "id": "6809",
+          "name": "NB Rundle CTrain Station"
+        },
+        {
+          "id": "8572",
+          "name": "SB Rundle CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "saddletowne",
+      "name": "Saddletowne",
+      "lineIds": [
+        "blue"
+      ],
+      "gisNames": [
+        "Saddletowne Station"
+      ],
+      "gisObjectIds": [
+        27
+      ],
+      "gtfsStops": [
+        {
+          "id": "9398",
+          "name": "NB Saddletowne CTrain Station"
+        },
+        {
+          "id": "9781",
+          "name": "SB Saddletowne CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "saitauartsjubilee",
+      "name": "SAIT / AUArts / Jubilee",
+      "lineIds": [
+        "red"
+      ],
+      "gisNames": [
+        "SAIT/ACAD/Jubilee Station"
+      ],
+      "gisObjectIds": [
+        320710
+      ],
+      "gtfsStops": [
+        {
+          "id": "6819",
+          "name": "NB SAIT / AUArts / Jubilee CTrain Stn"
+        },
+        {
+          "id": "8563",
+          "name": "SB SAIT / AUArts / Jubilee CTrain Stn"
+        }
+      ]
+    },
+    {
+      "id": "shaganappipoint",
+      "name": "Shaganappi Point",
+      "lineIds": [
+        "blue"
+      ],
+      "gisNames": [
+        "Shaganappi Point Station"
+      ],
+      "gisObjectIds": [
+        31
+      ],
+      "gtfsStops": [
+        {
+          "id": "3634",
+          "name": "WB Shaganappi Point CTrain Station"
+        },
+        {
+          "id": "3635",
+          "name": "EB Shaganappi Point CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "shawnessy",
+      "name": "Shawnessy",
+      "lineIds": [
+        "red"
+      ],
+      "gisNames": [
+        "Shawnessy Station"
+      ],
+      "gisObjectIds": [
+        320699
+      ],
+      "gtfsStops": [
+        {
+          "id": "9391",
+          "name": "NB Shawnessy CTrain Station"
+        },
+        {
+          "id": "9392",
+          "name": "SB Shawnessy CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "sirocco",
+      "name": "Sirocco",
+      "lineIds": [
+        "blue"
+      ],
+      "gisNames": [
+        "Sirocco Station"
+      ],
+      "gisObjectIds": [
+        33
+      ],
+      "gtfsStops": [
+        {
+          "id": "3628",
+          "name": "WB Sirocco CTrain Station"
+        },
+        {
+          "id": "3629",
+          "name": "EB Sirocco CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "somersetbridlewood",
+      "name": "Somerset–Bridlewood",
+      "lineIds": [
+        "red"
+      ],
+      "gisNames": [
+        "Somerset-Bridlewood Station"
+      ],
+      "gisObjectIds": [
+        320704
+      ],
+      "gtfsStops": [
+        {
+          "id": "9386",
+          "name": "SB Somerset - Bridlewood CTrain Station"
+        },
+        {
+          "id": "9390",
+          "name": "NB Somerset - Bridlewood CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "southland",
+      "name": "Southland",
+      "lineIds": [
+        "red"
+      ],
+      "gisNames": [
+        "Southland Station"
+      ],
+      "gisObjectIds": [
+        320688
+      ],
+      "gtfsStops": [
+        {
+          "id": "6802",
+          "name": "NB Southland CTrain Station"
+        },
+        {
+          "id": "8561",
+          "name": "SB Southland CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "sunalta",
+      "name": "Sunalta",
+      "lineIds": [
+        "blue"
+      ],
+      "gisNames": [
+        "Sunalta Station"
+      ],
+      "gisObjectIds": [
+        36
+      ],
+      "gtfsStops": [
+        {
+          "id": "3636",
+          "name": "WB Sunalta CTrain Station"
+        },
+        {
+          "id": "3637",
+          "name": "EB Sunalta CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "sunnyside",
+      "name": "Sunnyside",
+      "lineIds": [
+        "red"
+      ],
+      "gisNames": [
+        "Sunnyside Station"
+      ],
+      "gisObjectIds": [
+        320695
+      ],
+      "gtfsStops": [
+        {
+          "id": "6820",
+          "name": "NB Sunnyside CTrain Station"
+        },
+        {
+          "id": "8562",
+          "name": "SB Sunnyside CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "tuscany",
+      "name": "Tuscany",
+      "lineIds": [
+        "red"
+      ],
+      "gisNames": [
+        "Tuscany Station"
+      ],
+      "gisObjectIds": [
+        38
+      ],
+      "gtfsStops": [
+        {
+          "id": "3640",
+          "name": "NB Tuscany CTrain Station"
+        },
+        {
+          "id": "3641",
+          "name": "SB Tuscany CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "university",
+      "name": "University",
+      "lineIds": [
+        "red"
+      ],
+      "gisNames": [
+        "University Station"
+      ],
+      "gisObjectIds": [
+        320675
+      ],
+      "gtfsStops": [
+        {
+          "id": "6816",
+          "name": "NB University CTrain Station"
+        },
+        {
+          "id": "8566",
+          "name": "SB University CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "victoriaparkstampede",
+      "name": "Victoria Park / Stampede",
+      "lineIds": [
+        "red"
+      ],
+      "gisNames": [
+        "Victoria Park/Stampede Station"
+      ],
+      "gisObjectIds": [
+        320702
+      ],
+      "gtfsStops": [
+        {
+          "id": "6807",
+          "name": "NB Victoria Park / Stampede CTrain Station"
+        },
+        {
+          "id": "8556",
+          "name": "SB Victoria Park / Stampede CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "westbrook",
+      "name": "Westbrook",
+      "lineIds": [
+        "blue"
+      ],
+      "gisNames": [
+        "Westbrook Station"
+      ],
+      "gisObjectIds": [
+        41
+      ],
+      "gtfsStops": [
+        {
+          "id": "3632",
+          "name": "WB Westbrook CTrain Station"
+        },
+        {
+          "id": "3633",
+          "name": "EB Westbrook CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "whitehorn",
+      "name": "Whitehorn",
+      "lineIds": [
+        "blue"
+      ],
+      "gisNames": [
+        "Whitehorn Station"
+      ],
+      "gisObjectIds": [
+        320686
+      ],
+      "gtfsStops": [
+        {
+          "id": "6808",
+          "name": "SB Whitehorn CTrain Station"
+        },
+        {
+          "id": "9385",
+          "name": "NB Whitehorn CTrain Station"
+        }
+      ]
+    },
+    {
+      "id": "zoo",
+      "name": "Calgary Zoo",
+      "lineIds": [
+        "blue"
+      ],
+      "gisNames": [
+        "Zoo Station"
+      ],
+      "gisObjectIds": [
+        320705
+      ],
+      "gtfsStops": [
+        {
+          "id": "6813",
+          "name": "EB Zoo CTrain Station"
+        },
+        {
+          "id": "8568",
+          "name": "WB Zoo CTrain Station"
+        }
+      ]
+    }
+  ]
+}

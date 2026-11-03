@@ -1,0 +1,23 @@
+{
+  "description": "Official transport and geographic context snapshot, audited separately from unchanged census geometry and statistics.",
+  "asOf": "2026-11-03",
+  "files": {
+    "public/data/ctrain-operating.geojson": {
+      "bytes": 79874,
+      "sha256": "3f0479faede092c99a0da3a087e1ad9c44aae9005178be6523fd31e58ed3ca7f"
+    },
+    "public/data/ctrain-green.geojson": {
+      "bytes": 98304,
+      "sha256": "59e7ff7a0851366667ce9b53cf91fa29f21de01be8ad60747e09bc9ee9adf7d8"
+    },
+    "public/data/geographic-context.geojson": {
+      "bytes": 958271,
+      "sha256": "ac537f8272cb04fc979bb351a345f44d056b63144447d7db0c3b23ab34b4613f"
+    }
+  },
+  "expected": {
+    "operatingStations": 45,
+    "sharedStations": 8,
+    "greenStations": 28
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-11-03",
+  "sourceMap": "https://maps.calgary.ca/greenline/",
+  "sourceMapItem": "https://www.arcgis.com/sharing/rest/content/items/e0444d1c2ada4758a7d6ca15caa890a6/data?f=json",
+  "sources": [
+    {
+      "url": "https://services1.arcgis.com/AVP60cs0Q9PEA8rH/arcgis/rest/services/Approved%20Green%20Line%20Alignment%20with%20elevations/FeatureServer/0",
+      "query": "where=1%3D1&outFields=%2A&outSR=4326&f=json",
+      "rawSha256": "5575bd5749b5d6d4779929963a6f6afe5fa569050651b57440ea6b9cb06207fa",
+      "rawFeatureCount": 58,
+      "serviceItemId": "ea67fac93f054502a8dbdbb21a657513",
+      "owner": "calgary.ca",
+      "accessInformation": "The City of Calgary",
+      "copyrightText": "",
+      "itemLicenseInfo": "Subject to The City of Calgary Open Data Terms of Use at https://data.calgary.ca/d/Open-Data-Terms/u45n-7awa"
+    },
+    {
+      "url": "https://services1.arcgis.com/AVP60cs0Q9PEA8rH/arcgis/rest/services/Green_Line_Stations_for_CSC_Green_Line_Embedded_Web_Map/FeatureServer/0",
+      "query": "where=1%3D1&outFields=%2A&outSR=4326&f=json",
+      "rawSha256": "dce89f6b3347faffb11d3023784703561351f7b7789062cd916d40905414baf4",
+      "rawFeatureCount": 29,
+      "serviceItemId": "c505433ba443449daec5b170ba2b2a4c",
+      "owner": "calgary.ca",
+      "accessInformation": null,
+      "copyrightText": "Subject to The City of Calgary Open Data Terms of Use at https://data.calgary.ca/d/Open-Data-Terms/u45n-7awa",
+      "itemLicenseInfo": null
+    },
+    {
+      "url": "https://www.calgary.ca/green-line/downtown-segment.html",
+      "role": "2026-09-22 approved 10 Avenue surface route to 2 Street SW; exact station site and northern connection are not yet finalized."
+    },
+    {
+      "url": "https://www.calgary.ca/green-line/about/future-extensions/expanding-south.html",
+      "role": "Official five future southern station names and unfunded expansion status."
+    },
+    {
+      "url": "https://www.calgary.ca/green-line/about/future-extensions/expanding-north.html",
+      "role": "Official eleven future northern station names and unfunded expansion status."
+    }
+  ],
+  "license": "City of Calgary Open Data Terms of Use: https://data.calgary.ca/d/Open-Data-Terms/u45n-7awa",
+  "method": "Use the official map's WGS84 line and point queries. Keep source geometry at seven decimal places; remove consecutive duplicate coordinates. No inferred routing, snapping, geocoding or fabricated connecting segments.",
+  "outputSha256": "59e7ff7a0851366667ce9b53cf91fa29f21de01be8ad60747e09bc9ee9adf7d8",
+  "counts": {
+    "routeSegments": 56,
+    "stations": 28,
+    "stationsByPhase": {
+      "phase_1_southeast": 10,
+      "future_south": 5,
+      "future_north": 12,
+      "phase_1_downtown": 1
+    }
+  },
+  "spatialChecks": {
+    "allStationPointsWithin50MetresOfSamePhaseRoute": true,
+    "maximumDistanceMetres": 12.55,
+    "stationDistancesMetres": {
+      "green-station-1": 0.41,
+      "green-station-2": 0.65,
+      "green-station-3": 0.81,
+      "green-station-4": 0.14,
+      "green-station-5": 3.84,
+      "green-station-6": 0.34,
+      "green-station-7": 2.24,
+      "green-station-8": 0.37,
+      "green-station-9": 0.29,
+      "green-station-10": 0.07,
+      "green-station-11": 0.51,
+      "green-station-12": 0.63,
+      "green-station-13": 0.25,
+      "green-station-14": 0.05,
+      "green-station-15": 4.93,
+      "green-station-16": 1.38,
+      "green-station-17": 0.1,
+      "green-station-19": 0.22,
+      "green-station-20": 0.41,
+      "green-station-21": 1.34,
+      "green-station-22": 0.36,
+      "green-station-23": 0.13,
+      "green-station-24": 0.18,
+      "green-station-25": 0.74,
+      "green-station-29": 3.6,
+      "green-station-30": 0.15,
+      "green-station-32": 12.55,
+      "green-station-35": 0.0
+    }
+  },
+  "excludedLegacyFeatures": {
+    "routeSourceObjectIds": [
+      44,
+      59
+    ],
+    "stations": [
+      {
+        "sourceObjectId": 33,
+        "name": "7 Avenue SW"
+      }
+    ],
+    "reason": "Latest downtown project page says any additional downtown stations and the connection to the north corridor remain to be determined; the old 7 Avenue SW station and its connecting segments are not treated as an approved current alignment."
+  },
+  "statusOverrides": [
+    {
+      "name": "Event Centre/Grand Central Station",
+      "status": "construction",
+      "reason": "Station GIS calls this Downtown Segment, but current project pages explicitly include Event Centre/Grand Central Station as the northern end of the SE construction segment."
+    }
+  ],
+  "limitations": [
+    "Official GIS geometry is for map context, not final engineering or property boundaries.",
+    "2 Street SW uses an official planning point; the City states its exact station location remains to be determined.",
+    "North and south extensions are unfunded. Locations and sequencing may change.",
+    "Eau Claire is retained as an official future station point; no speculative connection to the current 2 Street SW terminus is drawn.",
+    "Snapshot checked on 2026-11-03, not a live construction or service feed."
+  ]
+}

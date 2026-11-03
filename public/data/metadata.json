@@ -16,7 +16,7 @@
   "boundaryNote": "底图使用数据整理时下载的官方社区边界名录；统计来自 2021 年社区档案，按社区代码／名称对应，未针对后续边界变化重新分配统计。圆心为经检查位于社区边界内的显示点，不是居民住址。",
   "missingDataNote": "313 个官方区域单元包含 223 个住宅类、43 个工业类、4 个主要公园与 43 个余留分区。205 个区域有收入，206 个有华人人口数值；没有发布记录、保密抑制或不适用等情况保留为空。7 个明确公布为 0 的区域保留 0，与缺失值区分。",
   "latestCensusNote": "2026 年联邦普查已完成采集，但截至 2026-11-03 尚未公布结果。首次人口结果计划于 2027-02-10 发布；收入为 2027-07-14；民族文化资料为 2027-10-27。本图仍使用已发布的 2021 年社区数据。",
-  "license": "Contains information licensed under the Open Government Licence – City of Calgary. Leaflet is distributed under its BSD 2-Clause licence.",
+  "license": "Contains information licensed under the Open Government Licence – City of Calgary and the Open Government Licence – Canada. Leaflet is distributed under its BSD 2-Clause licence.",
   "sources": [
     {
       "label": "City of Calgary · 社区普查档案",
@@ -41,8 +41,46 @@
     {
       "label": "Statistics Canada · 2026 release schedule",
       "url": "https://www.statcan.gc.ca/en/census/census-engagement/community-supporter/posters/encourage-completion"
+    },
+    {
+      "label": "Calgary Transit · Red / Blue 线路",
+      "url": "https://data.calgary.ca/Transportation-Transit/Calgary-Transit-Routes/hpnd-riq4"
+    },
+    {
+      "label": "Calgary Transit · 站点与时刻表数据",
+      "url": "https://data.calgary.ca/Transportation-Transit/Calgary-Transit-Scheduling-Data/npk7-z3bj"
+    },
+    {
+      "label": "Green Line · 官方规划地图",
+      "url": "https://maps.calgary.ca/greenline/"
+    },
+    {
+      "label": "Green Line · 现行市中心方案",
+      "url": "https://www.calgary.ca/green-line/downtown-segment.html"
+    },
+    {
+      "label": "Green Line · 远期北延伸",
+      "url": "https://www.calgary.ca/green-line/about/future-extensions/expanding-north.html"
+    },
+    {
+      "label": "Green Line · 远期南延伸",
+      "url": "https://www.calgary.ca/green-line/about/future-extensions/expanding-south.html"
+    },
+    {
+      "label": "City of Calgary · 非轻轨铁路",
+      "url": "https://data.calgary.ca/Transportation-Transit/Tracks-Non-LRT/cq6k-mmku"
+    },
+    {
+      "label": "City of Calgary · 公园与开放空间",
+      "url": "https://data.calgary.ca/Recreation-and-Culture/Parks-Sites/kami-qbfh"
+    },
+    {
+      "label": "Natural Resources Canada · 原住民土地行政边界",
+      "url": "https://open.canada.ca/data/en/dataset/522b07b9-78e2-4819-b736-ad9208eb1067"
     }
   ],
   "populationGroupsDefinition": "人口视图采用市府社区档案的 13 个 Visible Minority（Racialized Population）互斥分类，默认勾选全市人数最多的五个可见少数族裔类别。非可见少数族裔为普查分类，包含原住民等人口，不可视作白人或欧洲裔。",
-  "populationChartNote": "普查人数经过取整，原表分类加总与私人住户人口可能存在差异。详情及分布图用人数除以同表人口计算占比。环形图以同表人口为分母；分类合计不足时以点纹留白显示统计差额，合计超出时仅为闭合一圈而按分类合计归一化。灰色代表未勾选类别；统计差额不是新增人口类别，缺失数据另行标记。"
+  "populationChartNote": "普查人数经过取整，原表分类加总与私人住户人口可能存在差异。详情及分布图用人数除以同表人口计算占比。环形图以同表人口为分母；分类合计不足时以点纹留白显示统计差额，合计超出时仅为闭合一圈而按分类合计归一化。灰色代表未勾选类别；统计差额不是新增人口类别，缺失数据另行标记。",
+  "geographyPreparedDate": "2026-11-03",
+  "transitDefinition": "Red / Blue Line 为运营线路；Green Line 包含在建及规划部分，全部未运营，远期延伸尚未落实建设资金。线路与站点按官方资料快照展示，规划站址及走线可能调整，不提供实时班次。"
 }

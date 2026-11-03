@@ -7,6 +7,8 @@
 
 族群通过可搜索的普通复选框选择，默认选择全市人数最多的五个可见少数族裔类别：南亚裔、华人、菲律宾裔、黑人和拉丁美洲裔。支持全部 13 个原始普查分类，移除了旧版“关注社区”快捷栏。搜索、社区链接、收入资料及来源说明仍可使用。
 
+“地图图层”提供普通复选框：**道路与铁路底图、社区标注、CTrain**。两种视图共享图层选择。地图上的社区名统一大写，详情保留原始名称；缩小地图也显示社区名，悬停提示保留选区参考。机场、公园及邻近原住民保留区提供额外地理参照。
+
 - 分享地图：<https://curtisatiwatt.github.io/calgary-census/>
 - 源码：<https://github.com/curtisatiwatt/calgary-census>
 
@@ -56,12 +58,17 @@ Vite 使用相对资源路径，兼容 GitHub Pages 的 `/calgary-census/` 子�
 | `public/data/basemap.geojson` | 官方主要道路和水域几何 |
 | `public/data/metadata.json` | 年份、统计口径、全市值和数据来源 |
 | `public/data/population-groups.json` | 206 个社区及全市的 13 类人口原始人数、原公布占比与分母 |
+| `public/data/ctrain-operating.geojson` | 官方 Red/Blue Line 走线及运营站点 |
+| `public/data/ctrain-green.geojson` | Green Line 在建、规划走线及站点，均为未运营 |
+| `public/data/geographic-context.geojson` | 非轻轨铁路、机场、公园及邻近保留区边界 |
 | `public/licenses/leaflet.txt` | Leaflet 许可证 |
 | `tests/map-utils.test.js` | 分档、缺失值、比例面积、搜索及链接测试 |
 | `scripts/validate-data.mjs` | 原数据指纹、覆盖、坐标、来源与显示点校验 |
 | `scripts/validate-population-data.mjs` | 人口分类、来源、覆盖、取整差异和原华人人数一致性校验 |
 | `scripts/extract-population-groups.py` | 从官方 PDF 文本重建人口快照 |
 | `population-data-audit.json` | 人口表提取来源及一致性审计 |
+| `scripts/validate-geography.mjs`、`geography-integrity.json` | 地理快照指纹、坐标、站点去重与线路状态校验 |
+| `ctrain-operating-audit.json`、`ctrain-green-audit.json`、`geographic-context-audit.json` | 交通及地理资料来源、处理方法和限制 |
 | `data-integrity.json` | Vite 迁移前原始数据的 SHA-256、字节数及 Git 版本 |
 | `data-audit.json`、`basemap-audit.json` | 原有来源与整理审计记录 |
 | `.github/workflows/pages.yml` | 检查、构建和 GitHub Pages 部署 |
@@ -101,13 +108,26 @@ npm run check
 
 Python 仅用于维护人员重新提取数据；开发、构建及运行网站只需 Node.js。
 
+## 交通与地理背景
+
+- Red Line 与 Blue Line 使用市府线路几何、官方站点及 GTFS 交叉核对的站名和线路归属。共 45 个运营站点，8 个市中心站点由两条线共用；同一站不按方向或月台重复计数。数据是整理时的静态快照，不提供实时班次或临时停运信息。
+- Green Line 采用当前官方规划 GIS。实线红蓝表示运营线路，绿色虚线表示**未运营**的在建或规划线路，远期延伸另行区分。2026 年 9 月 22 日批准的市中心段沿 10 Avenue 通往 2 Street SW；最终站址仍待设计确定。北部与当前市中心方案之间尚未确定的连接不补画成既定线路。
+- 铁路底图采用市府的非 LRT 铁路轨道数据，与道路共用开关；CTrain 有独立开关。
+- 公园图层为官方公园／开放空间用地，不代表所有植被覆盖。机场及部分大型公园使用社区边界作为显示代理，并在来源审计中注明。保留区采用官方行政界线作地理背景，不提供界址或产权判断。
+- 地理图层独立于 2021 年人口和 2020 年收入快照。着色的地理参照不代表该区域有相同口径的人口或收入数据，也不增加市外社区的普查统计。
+
 ## 来源与许可
 
 - [City of Calgary 社区普查档案](https://www.calgary.ca/communities/profiles.html)
 - [Community District Boundaries](https://data.calgary.ca/Base-Maps/Community-District-Boundaries/surr-xmvs)
 - [Major Road Network](https://data.calgary.ca/Transportation-Transit/Major-Road-Network/tqjs-vnhy)
 - [Cartographic Hydrology](https://data.calgary.ca/resource/47bt-eefd.geojson)
+- [Calgary Transit Routes](https://data.calgary.ca/Transportation-Transit/Calgary-Transit-Routes/hpnd-riq4) 与 [GTFS](https://data.calgary.ca/Transportation-Transit/Calgary-Transit-Scheduling-Data/npk7-z3bj)
+- [Green Line 官方地图](https://maps.calgary.ca/greenline/) 与 [现行市中心方案](https://www.calgary.ca/green-line/downtown-segment.html)
+- [Tracks (Non-LRT)](https://data.calgary.ca/Transportation-Transit/Tracks-Non-LRT/cq6k-mmku)
+- [Parks Sites](https://data.calgary.ca/Recreation-and-Culture/Parks-Sites/kami-qbfh)
+- [NRCan · Aboriginal Lands of Canada Legislative Boundaries](https://open.canada.ca/data/en/dataset/522b07b9-78e2-4819-b736-ad9208eb1067)
 - [Statistics Canada · 2026 普查采集完成](https://www.statcan.gc.ca/en/about/statistical-announcements/2026-09-14-exceptional-participation-2026-census)
 - [Statistics Canada · 2026 普查发布时间表](https://www.statcan.gc.ca/en/census/census-engagement/community-supporter/posters/encourage-completion)
 
-Contains information licensed under the Open Government Licence – City of Calgary. Leaflet 许可证见 `public/licenses/leaflet.txt`。这些第三方许可不改变项目自有代码的权利归属。
+Contains information licensed under the Open Government Licence – City of Calgary and the Open Government Licence – Canada. Leaflet 许可证见 `public/licenses/leaflet.txt`。各地理来源及许可链接另见审计文件；这些第三方许可不改变项目自有代码的权利归属。

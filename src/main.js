@@ -3,6 +3,7 @@ import 'leaflet/dist/leaflet.css';
 import './styles.css';
 import { loadData } from './data.js';
 import { createMapTooltip } from './map-tooltip.js';
+import { createContextLayers } from './context-layers.js';
 import { INCOME_BINS, isNumber, colorFor, money, number, percent, searchFeatures, summarize, escapeHtml as esc, safeUrl, hashCode } from './map-utils.js';
 import { POPULATION_BINS, populationShare, populationColor, donutSvg } from './population-utils.js';
 
@@ -13,6 +14,8 @@ const dialog = $('method-dialog');
 const PALETTE = ['#518a7b', '#c29b4d', '#7e85af', '#5c8eac', '#b67768', '#8d9963', '#947cac', '#bb8c67', '#688b92', '#a18696', '#7f8990', '#b7a268', '#c2c9bd'];
 const state = {
   features: [], byCode: new Map(), metadata: {}, counts: {}, data: null, basemap: null,
+  operatingTransit: null, greenTransit: null, geographicContext: null,
+  roads: true, labels: true, transit: true, landmarks: true,
   groups: [], groupById: new Map(), selectedGroups: [], colors: {}, selected: null,
   mode: 'composition', income: true, contexts: [], comparisonContexts: [], composition: null,
   view: null, wholeCity: true, compareStart: 0, searchMatches: [], activeSearch: -1,
@@ -25,7 +28,7 @@ let lastComparisonPageSize = null;
 function selectedGroups() { return state.groups.filter(g => state.selectedGroups.includes(g.id)); }
 function populationRecord(code) { return state.data?.communities[code] || null; }
 function activeContexts() { return state.mode === 'composition' ? [state.composition].filter(Boolean) : state.comparisonContexts; }
-function closeTooltips() { state.contexts.forEach(context => context.tooltip.close()); }
+function closeTooltips(closePopups = true) { state.contexts.forEach(context => { context.tooltip.close(); if (closePopups) context.map.closePopup(); }); }
 function setCollapsed(collapsed) {
   sidebar.classList.toggle('collapsed', collapsed);
   $('mobile-detail-handle').setAttribute('aria-expanded', String(!collapsed));
@@ -34,7 +37,21 @@ function setCollapsed(collapsed) {
 function toggleGroups(open) {
   $('groups-panel').hidden = !open;
   $('groups-button').setAttribute('aria-expanded', String(open));
-  if (open) $('group-search').focus();
+  if (open) { toggleLayers(false); $('group-search').focus(); }
+}
+
+function toggleLayers(open) {
+  $('layers-panel').hidden = !open;
+  $('layers-button').setAttribute('aria-expanded', String(open));
+  if (open) { toggleGroups(false); closeTooltips(); }
+}
+function updateLayerVisibility() {
+  closeTooltips();
+  for (const context of state.contexts) {
+    context.contextLayers?.setVisible({ roads: state.roads, transit: state.transit, landmarks: state.landmarks, communityLabels: state.labels });
+    updateLabels(context);
+  }
+  $('transit-legend').hidden = !state.transit;
 }
 
 function renderMetadata() {
@@ -161,11 +178,12 @@ function refreshStyles() {
 function tooltipContent(feature, context) {
   const p = feature.properties;
   const record = populationRecord(p.code);
+  const reference = p.note ? `<span class="tip-reference"><b>选区参考</b>${esc(p.note)}</span>` : '';
   if (context.groupId) {
     const group = state.groupById.get(context.groupId);
-    return `<strong>${esc(p.name)}</strong>${esc(group.label)} ${percent(populationShare(record, group.id))}<br>${number(record?.counts[group.id])} 人 · 全市 ${percent(populationShare(state.data.city, group.id))}<span class="tip-note">点击固定社区，查看完整构成</span>`;
+    return `<strong>${esc(p.name)}</strong>${esc(group.label)} ${percent(populationShare(record, group.id))}<br>${number(record?.counts[group.id])} 人 · 全市 ${percent(populationShare(state.data.city, group.id))}${reference}<span class="tip-note">点击固定社区，查看完整构成</span>`;
   }
-  return `<strong>${esc(p.name)}</strong>家庭收入 ${money(p.income)}<br>人口 ${number(record?.population ?? p.population)}${record ? selectedGroups().slice(0, 5).map(g => `<br>${esc(g.label)} ${percent(populationShare(record, g.id))}`).join('') : '<br>人口分类暂无数据'}<span class="tip-note">点击查看社区详情</span>`;
+  return `<strong>${esc(p.name)}</strong>家庭收入 ${money(p.income)}<br>人口 ${number(record?.population ?? p.population)}${record ? selectedGroups().slice(0, 5).map(g => `<br>${esc(g.label)} ${percent(populationShare(record, g.id))}`).join('') : '<br>人口分类暂无数据'}${reference}<span class="tip-note">点击查看社区详情</span>`;
 }
 
 function createMap(element, groupId = null) {
@@ -191,11 +209,11 @@ function createMap(element, groupId = null) {
       context.tooltip.bind(layer, { content: () => tooltipContent(feature, context), anchor: event => event?.latlng || layer.getBounds().getCenter() });
     },
   }).addTo(map);
-  renderBasemap(context);
+  context.contextLayers = createContextLayers({ context, basemap: state.basemap, geography: state.geographicContext, operatingTransit: state.operatingTransit, greenTransit: state.greenTransit, communityNames: state.features.map(f => f.properties.name), visible: { roads: state.roads, transit: state.transit, landmarks: state.landmarks, communityLabels: state.labels }, onStationOpen: () => { closeTooltips(); toggleGroups(false); toggleLayers(false); if (mobile()) setCollapsed(true); } });
   state.contexts.push(context);
   map.on('movestart zoomstart', () => {
     context.tooltip.close();
-    if (!syncing) closeTooltips();
+    if (!syncing) closeTooltips(false);
   });
   map.on('dragstart', () => { state.wholeCity = false; });
   map.on('zoomstart', () => { if (!syncing) state.wholeCity = false; });
@@ -213,11 +231,6 @@ function createMap(element, groupId = null) {
   return context;
 }
 
-function renderBasemap(context) {
-  if (!state.basemap?.features) return;
-  L.geoJSON(state.basemap, { filter: f => f.properties.kind === 'water', pane: 'water', interactive: false, style: { color: '#79aebb', weight: 0.65, fillColor: '#a7ccd3', fillOpacity: 0.85 } }).addTo(context.map);
-  L.geoJSON(state.basemap, { filter: f => f.properties.kind === 'road', pane: 'roads', interactive: false, style: { color: '#fffff4', weight: 1.2, opacity: 0.8 } }).addTo(context.map);
-}
 
 function syncMaps(source) {
   if (!state.contexts.includes(source) || !activeContexts().includes(source) || !source.map._loaded || syncing) return;
@@ -308,20 +321,26 @@ function updateDonuts() {
 function updateLabels(context) {
   const map = context.map;
   if (!map._loaded) return;
+  context.contextLayers?.update();
   context.labels.clearLayers();
-  const occupied = [];
-  const candidates = state.features.filter(f => map.getBounds().contains([f.properties.centroid[1], f.properties.centroid[0]]) && (isNumber(f.properties.population) || f.properties.code === state.selected))
-    .sort((a, b) => (a.properties.code === state.selected ? -1 : b.properties.code === state.selected ? 1 : (b.properties.population || 0) - (a.properties.population || 0)));
+  if (!state.labels) return;
+  const zoom = map.getZoom();
+  const fontSize = zoom < 10.25 ? 6.5 : zoom < 11 ? 7.1 : zoom < 12 ? 8 : zoom < 13 ? 9 : 10;
+  const candidates = state.features.filter(f => {
+    const p = f.properties;
+    return map.getBounds().contains([p.centroid[1], p.centroid[0]]) && (!/^\d/.test(p.name) || p.code === state.selected);
+  });
   for (const feature of candidates) {
     const p = feature.properties;
     const prominent = p.code === state.selected;
-    if (map.getZoom() < 11.5 && !prominent && p.population < 20000) continue;
-    const point = map.latLngToContainerPoint([p.centroid[1], p.centroid[0]]);
-    const width = Math.min(180, p.name.length * (prominent ? 6 : 5));
-    const box = { x: point.x - width / 2, y: point.y + (context.groupId ? 4 : 20), w: width, h: 16 };
-    if (occupied.some(other => box.x < other.x + other.w + 8 && box.x + box.w + 8 > other.x && box.y < other.y + other.h + 8 && box.y + box.h + 8 > other.y) && !prominent) continue;
-    occupied.push(box);
-    L.marker([p.centroid[1], p.centroid[0]], { icon: L.divIcon({ className: `community-label${prominent ? ' focus-label' : ''}`, html: esc(p.name), iconSize: [width, 20], iconAnchor: [width / 2, context.groupId ? -4 : -20] }), interactive: false, keyboard: false, pane: 'labels' }).addTo(context.labels);
+    const label = `${p.code === 'CIA' ? 'YYC · ' : ''}${p.name.toUpperCase()}`;
+    const size = prominent ? Math.max(9, fontSize + 1) : fontSize;
+    const width = Math.min(zoom < 11 ? 95 : 170, Math.max(44, label.length * size * .57));
+    const offset = context.groupId ? -2 : 10;
+    L.marker([p.centroid[1], p.centroid[0]], {
+      icon: L.divIcon({ className: `community-label all-community-label${prominent ? ' focus-label' : ''}`, html: `<span style="font-size:${size}px">${esc(label)}</span>`, iconSize: [width, 28], iconAnchor: [width / 2, -offset] }),
+      interactive: false, keyboard: false, pane: 'labels', zIndexOffset: prominent ? 1000 : 0,
+    }).addTo(context.labels);
   }
 }
 
@@ -424,7 +443,7 @@ function chooseSearchResult(code) {
 }
 
 function setReady(ready) {
-  document.querySelectorAll('.view-tabs button,#groups-button,#group-search,#default-groups,#all-groups,#clear-groups,#income-toggle,#search,#fit-city,#zoom-in,#zoom-out,#focus-community').forEach(control => { control.disabled = !ready; });
+  document.querySelectorAll('.view-tabs button,#groups-button,#group-search,#default-groups,#all-groups,#clear-groups,#income-toggle,#layers-button,#roads-toggle,#labels-toggle,#transit-toggle,#landmarks-toggle,#search,#fit-city,#zoom-in,#zoom-out,#focus-community').forEach(control => { control.disabled = !ready; });
 }
 
 function initializeControls() {
@@ -437,6 +456,9 @@ function initializeControls() {
     const mode = event.key === 'Home' ? 'composition' : event.key === 'End' ? 'distribution' : state.mode === 'composition' ? 'distribution' : 'composition';
     selectView(mode); $(`${mode}-tab`).focus();
   });
+  $('layers-button').addEventListener('click', () => toggleLayers($('layers-panel').hidden));
+  $('close-layers').addEventListener('click', () => { toggleLayers(false); $('layers-button').focus(); });
+  for (const layer of ['roads', 'labels', 'transit', 'landmarks']) $(`${layer}-toggle`).addEventListener('change', event => { state[layer] = event.target.checked; updateLayerVisibility(); });
   $('groups-button').addEventListener('click', () => toggleGroups($('groups-panel').hidden));
   $('close-groups').addEventListener('click', () => { toggleGroups(false); $('groups-button').focus(); });
   $('empty-choose-groups').addEventListener('click', () => toggleGroups(true));
@@ -458,7 +480,7 @@ function initializeControls() {
   $('zoom-out').addEventListener('click', () => activeContexts()[0]?.map.zoomOut(0.5));
   $('focus-community').addEventListener('click', () => fitCommunity(state.selected));
   $('mobile-detail-handle').addEventListener('click', () => setCollapsed(!sidebar.classList.contains('collapsed')));
-  $('method-button').addEventListener('click', () => { toggleGroups(false); closeTooltips(); dialog.showModal(); });
+  $('method-button').addEventListener('click', () => { toggleGroups(false); toggleLayers(false); closeTooltips(); dialog.showModal(); });
   $('close-method').addEventListener('click', () => dialog.close());
   dialog.addEventListener('click', event => {
     if (event.target !== dialog) return;
@@ -480,10 +502,11 @@ function initializeControls() {
   });
   document.addEventListener('click', event => {
     if (!event.target.closest('.search-wrap')) closeSearch();
+    if (!event.target.closest('#layers-panel') && !event.target.closest('#layers-button')) toggleLayers(false);
     if (!event.target.closest('#groups-panel') && !event.target.closest('#groups-button') && !event.target.closest('#empty-choose-groups')) toggleGroups(false);
   });
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape') { closeTooltips(); if (!$('groups-panel').hidden) { toggleGroups(false); $('groups-button').focus(); } }
+    if (event.key === 'Escape') { closeTooltips(); if (!$('layers-panel').hidden) { toggleLayers(false); $('layers-button').focus(); } if (!$('groups-panel').hidden) { toggleGroups(false); $('groups-button').focus(); } }
     if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) && !dialog.open) { event.preventDefault(); $('search').focus(); }
   });
   window.addEventListener('hashchange', () => { const code = hashCode(location.hash, state.features); if (code && code !== state.selected) selectCommunity(code); });
@@ -509,6 +532,7 @@ async function init() {
   try {
     const data = await loadData();
     state.metadata = data.metadata; state.features = data.features; state.data = data.populationData; state.basemap = data.basemap;
+    state.operatingTransit = data.operatingTransit; state.greenTransit = data.greenTransit; state.geographicContext = data.geographicContext;
     state.byCode = new Map(data.features.map(f => [f.properties.code, f])); state.counts = summarize(data.features);
     state.groups = data.populationData.groups; state.groupById = new Map(state.groups.map(g => [g.id, g]));
     state.colors = Object.fromEntries(state.groups.map((g, i) => [g.id, PALETTE[i % PALETTE.length]]));
@@ -518,7 +542,8 @@ async function init() {
     renderMetadata(); renderGroupList(); renderDonutKey(); renderDetail();
     $('group-count').textContent = state.selectedGroups.length;
     state.composition = createMap('composition-map');
-    if (!data.basemap) { $('map-warning').textContent = '道路与河流参考图暂未载入，社区统计仍可使用。'; $('map-warning').hidden = false; }
+    const unavailable = [[data.basemap, '道路与河流'], [data.operatingTransit, '运营 CTrain'], [data.greenTransit, 'Green Line'], [data.geographicContext, '铁路与地理地标']].filter(([loaded]) => !loaded).map(([, label]) => label);
+    if (unavailable.length) { $('map-warning').textContent = `${unavailable.join('、')}暂未载入，社区统计仍可使用。`; $('map-warning').hidden = false; }
     $('loading-overlay').hidden = true;
     fitCity(); selectCommunity(state.selected, false, false);
     if (linkedCode) fitCommunity(linkedCode);
