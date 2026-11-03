@@ -68,7 +68,7 @@ html[data-theme=dark] .icon-button{background:#2b444b;color:#d9e7e4}
 html[data-theme=dark] .group-option{border-color:#2a4146}
 html[data-theme=dark] .group-option:hover{background:#203a3b}
 html[data-theme=dark] .mode-description,html[data-theme=dark] .filter-note,html[data-theme=dark] .group-name small,html[data-theme=dark] .group-city{color:#acbeb6}
-html[data-theme=dark] .sidebar{scrollbar-color:#506c70 transparent}
+html[data-theme=dark] .sidebar{background:var(--paper);border-color:var(--line);scrollbar-color:#506c70 transparent}
 html[data-theme=dark] .eyebrow,html[data-theme=dark] .metric-label,html[data-theme=dark] .population-summary-note,html[data-theme=dark] .metric-basis,html[data-theme=dark] .detail-empty,html[data-theme=dark] .metric-context,html[data-theme=dark] .bar-heading small,html[data-theme=dark] .sidebar-footer{color:#a7b9b5}
 html[data-theme=dark] .bar-track{background:#2c4247}
 html[data-theme=dark] .city-reference,html[data-theme=dark] .city-reference-symbol{background:#ecf3df;box-shadow:0 0 0 1px #19303599}
