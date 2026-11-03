@@ -57,7 +57,6 @@ export function createContextLayers({ context, basemap, geography, operatingTran
   const roadFeatures = features(basemap).filter(f => f.properties.kind === 'road');
   const areaFeatures = features(geography).filter(f => ['airport', 'park', 'reserve'].includes(f.properties.kind));
   const normalizeName = name => String(name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-  const knownCommunities = new Set(communityNames.map(normalizeName));
   const parkLabelsByName = new Map();
   const iconicParks = new Set(['nosehillpark', 'fishcreekpark', 'northglenmorepark', 'southglenmorepark', 'bownesspark', 'princesislandpark']);
   for (const feature of areaFeatures.filter(f => f.properties.kind === 'park' && f.properties.named !== false)) {
@@ -73,16 +72,18 @@ export function createContextLayers({ context, basemap, geography, operatingTran
   const roads = [];
   const railways = [];
   const routeLayers = [];
+  const routeCasings = [];
   const stationLayers = [];
+  const labelBoxes = [];
   const collection = items => ({ type: 'FeatureCollection', features: items });
 
   L.geoJSON(collection(areaFeatures), {
     pane: 'geography', interactive: false,
     style: feature => {
       const kind = feature.properties.kind;
-      return kind === 'airport' ? { color: '#9585ad', weight: 1, opacity: .85, fillColor: '#c3b9da', fillOpacity: .64 }
-        : kind === 'reserve' ? { color: '#af926b', weight: 1.4, dashArray: '5 4', opacity: .9, fillColor: '#ded0b7', fillOpacity: .6 }
-          : { color: '#80a777', weight: .65, opacity: .75, fillColor: '#a5c898', fillOpacity: .58 };
+      return kind === 'airport' ? { color: '#9585ad', weight: .8, opacity: .55, fillColor: '#c3b9da', fillOpacity: .42 }
+        : kind === 'reserve' ? { color: '#af926b', weight: 1, dashArray: '5 4', opacity: .6, fillColor: '#ded0b7', fillOpacity: .35 }
+          : { color: '#80a777', weight: .4, opacity: .4, fillColor: '#a5c898', fillOpacity: .42 };
     },
   }).addTo(map);
   L.geoJSON(basemap || collection([]), { filter: f => f.properties.kind === 'water', pane: 'water', interactive: false, style: { color: '#75a7b5', weight: .85, fillColor: '#a5cad4', fillOpacity: .9 } }).addTo(map);
@@ -95,7 +96,10 @@ export function createContextLayers({ context, basemap, geography, operatingTran
     railways.push({ layer, casing });
   }
   // All casings are painted first so shared Red / Blue track retains both colours.
-  for (const feature of routes) L.geoJSON(feature, { pane: 'transit', interactive: false, style: { color: '#fffef7', weight: feature.properties.funding === 'unfunded' ? 4.5 : feature.properties.lineId === 'red' ? 7.2 : 6.5, opacity: .92 } }).addTo(map);
+  for (const feature of routes) {
+    const layer = L.geoJSON(feature, { pane: 'transit', interactive: false, style: { color: '#fffef7', weight: 4, opacity: .8 } }).addTo(map);
+    routeCasings.push({ layer, lineId: feature.properties.lineId, future: feature.properties.funding === 'unfunded' });
+  }
   for (const lineId of ['red', 'blue', 'green']) {
     for (const feature of routes.filter(f => f.properties.lineId === lineId)) {
       const future = feature.properties.funding === 'unfunded';
@@ -133,7 +137,7 @@ export function createContextLayers({ context, basemap, geography, operatingTran
     marker.on('remove', detachElement);
     attachElement();
     context.tooltip.bind(marker, { content: () => stationContent(p), anchor: () => marker.getLatLng(), offset: [0, -8] });
-    stationLayers.push({ marker, shared });
+    stationLayers.push({ marker, shared, properties: p });
   }
 
   function setVisible(next) {
@@ -149,66 +153,85 @@ export function createContextLayers({ context, basemap, geography, operatingTran
     if (!map._loaded) return;
     const zoom = map.getZoom();
     const bounds = map.getBounds();
-    const styleBucket = zoom >= 12;
+    const size = map.getSize();
+    const styleBucket = zoom < 11.5 ? 0 : zoom < 13 ? 1 : 2;
     if (styleBucket !== lastStyleBucket) {
       lastStyleBucket = styleBucket;
-    roads.forEach(({ layer, casing }) => layer.setStyle({ weight: casing ? (zoom >= 12 ? 3.8 : 2.9) : (zoom >= 12 ? 2 : 1.35) }));
-    railways.forEach(({ layer, casing }) => layer.setStyle({ weight: casing ? (zoom >= 12 ? 2.5 : 1.8) : (zoom >= 12 ? 1.5 : 1) }));
-    routeLayers.forEach(({ layer, lineId, future }) => layer.setStyle({ weight: future ? (zoom >= 12 ? 2.7 : 2) : lineId === 'red' ? (zoom >= 12 ? 5.8 : 4.7) : (zoom >= 12 ? 3.7 : 2.8) }));
-    stationLayers.forEach(({ marker, shared }) => marker.setRadius(zoom >= 12 ? (shared ? 5.2 : 4.5) : (shared ? 3.8 : 3)));
+      const detail = styleBucket === 2;
+      roads.forEach(({ layer, casing }) => layer.setStyle({ weight: casing ? (detail ? 3.4 : 2.2) : (detail ? 1.8 : 1.1) }));
+      railways.forEach(({ layer, casing }) => layer.setStyle({ weight: casing ? (detail ? 2 : 1.2) : (detail ? 1.1 : .7), opacity: detail ? .75 : .42 }));
+      const routeWeight = (lineId, future) => future ? (detail ? 2.3 : 1.6) : lineId === 'red' ? (detail ? 5 : 3.4) : (detail ? 3 : 2.1);
+      routeCasings.forEach(({ layer, lineId, future }) => layer.setStyle({ weight: routeWeight(lineId, future) + (detail ? 1.8 : 1.2) }));
+      routeLayers.forEach(({ layer, lineId, future }) => layer.setStyle({ weight: routeWeight(lineId, future) }));
+      stationLayers.forEach(({ marker, shared }) => marker.setRadius(detail ? (shared ? 4.7 : 3.8) : (shared ? 3.1 : 2.4)));
+    }
+    // At overview scales, neighbouring downtown dots merge visually. Reveal them
+    // progressively instead of drawing a dense string of overlapping targets.
+    const stationPoints = [];
+    for (const { marker } of stationLayers) {
+      const point = map.latLngToContainerPoint(marker.getLatLng());
+      const minGap = zoom < 11.5 ? 13 : zoom < 13 ? 8 : 0;
+      const shown = bounds.contains(marker.getLatLng()) && !stationPoints.some(p => Math.hypot(p.x - point.x, p.y - point.y) < minGap);
+      if (shown) stationPoints.push(point);
+      const element = marker.getElement();
+      if (element) {
+        element.style.display = shown ? '' : 'none';
+        element.setAttribute('tabindex', shown ? '0' : '-1');
+      }
     }
     roadLabels.clearLayers();
     stationLabels.clearLayers();
     landmarkLabels.clearLayers();
-    if (zoom >= 12) for (const feature of roadFeatures) {
-      const point = midpoint(feature);
-      if (!point || !bounds.contains([point[1], point[0]])) continue;
-      const text = feature.properties.name;
-      L.marker([point[1], point[0]], { pane: 'roadLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: 'road-label', html: `<span>${esc(text)}</span>`, iconSize: [140, 16], iconAnchor: [70, 8] }) }).addTo(roadLabels);
+    labelBoxes.length = 0;
+    const reserveBox = box => {
+      if (box.x < 8 || box.y < 8 || box.x + box.w > size.x - 8 || box.y + box.h > size.y - 8) return false;
+      if (labelBoxes.some(a => box.x < a.x + a.w + 9 && box.x + box.w + 9 > a.x && box.y < a.y + a.h + 6 && box.y + box.h + 6 > a.y)) return false;
+      labelBoxes.push(box);
+      return true;
+    };
+    let parksShown = 0;
+    const candidates = [
+      ...areaFeatures.filter(f => f.properties.kind !== 'park').map(feature => ({ feature, name: feature.properties.name, iconic: true })),
+      ...parkLabelCandidates,
+    ];
+    if (visible.landmarks) for (const { feature, name, iconic } of candidates) {
+      const p = feature.properties;
+      if (p.kind === 'park') {
+        if (zoom < 11 || (zoom < 13 && (!iconic || parksShown >= 3))) continue;
+        if (zoom >= 13 && !iconic && !(p.areaHa >= 20)) continue;
+      }
+      const coordinates = p.labelPoint || p.centroid;
+      const point = Array.isArray(coordinates) && coordinates.length >= 2
+        ? L.latLng(coordinates[1], coordinates[0]) : L.geoJSON(feature).getBounds().getCenter();
+      if (!bounds.contains(point)) continue;
+      const pixel = map.latLngToContainerPoint(point);
+      const text = p.kind === 'airport' ? 'YYC AIRPORT' : name;
+      const width = p.kind === 'airport' ? 100 : p.kind === 'reserve' ? 150 : Math.min(140, text.length * 5.7);
+      const height = 28;
+      if (!reserveBox({ x: pixel.x - width / 2, y: pixel.y - height / 2, w: width, h: height })) continue;
+      if (p.kind === 'park') parksShown++;
+      L.marker(point, { pane: 'landmarkLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: `landmark-label ${p.kind}-label`, html: `<span>${esc(text)}</span>`, iconSize: [width, height], iconAnchor: [width / 2, height / 2] }) }).addTo(landmarkLabels);
     }
-    const occupied = [];
-    if (zoom >= 11.75) for (const feature of stations) {
+    if (visible.transit && zoom >= 13) for (const feature of stations) {
       const [lng, lat] = feature.geometry.coordinates;
       if (!bounds.contains([lat, lng])) continue;
       const p = feature.properties;
       const point = map.latLngToContainerPoint([lat, lng]);
-      const width = Math.min(165, p.name.length * 5.1);
-      // Downtown station labels are only thinned at medium zoom; every station dot stays visible.
-      const box = { x: point.x + 7, y: point.y - 8, w: width, h: 17 };
-      if (zoom < 14 && occupied.some(a => box.x < a.x + a.w && box.x + box.w > a.x && box.y < a.y + a.h && box.y + box.h > a.y)) continue;
-      occupied.push(box);
-      L.marker([lat, lng], { pane: 'stationLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: `station-label${p.status === 'operating' ? '' : ' future-station-label'}`, html: `<span>${esc(p.name)}${p.status === 'operating' ? '' : ' · 未运营'}</span>`, iconSize: [width, 20], iconAnchor: [-7, 8] }) }).addTo(stationLabels);
+      const text = `${p.name}${p.status === 'operating' ? '' : ' · 未运营'}`;
+      const width = Math.min(210, text.length * 5.8);
+      if (!reserveBox({ x: point.x + 7, y: point.y - 8, w: width, h: 19 })) continue;
+      L.marker([lat, lng], { pane: 'stationLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: `station-label${p.status === 'operating' ? '' : ' future-station-label'}`, html: `<span>${esc(text)}</span>`, iconSize: [width, 20], iconAnchor: [-7, 8] }) }).addTo(stationLabels);
     }
-    const areaLabelsOccupied = [];
-    let parksShown = 0;
-    const candidates = [
-      ...areaFeatures.filter(f => f.properties.kind !== 'park').map(feature => ({ feature, name: feature.properties.name, key: normalizeName(feature.properties.name), iconic: true })),
-      ...parkLabelCandidates,
-    ];
-    for (const candidate of candidates) {
-      const { feature, name, key, iconic } = candidate;
-      const p = feature.properties;
-      if (visible.communityLabels && (knownCommunities.has(key) || p.kind === 'airport')) continue;
-      if (p.kind === 'park') {
-        if (zoom < 13 && (!iconic || parksShown >= 6)) continue;
-        if (zoom >= 13 && !iconic && !(p.areaHa >= 20)) continue;
-      }
-      const coordinates = p.labelPoint || p.centroid;
-      let point;
-      if (Array.isArray(coordinates) && coordinates.length >= 2) point = L.latLng(coordinates[1], coordinates[0]);
-      else point = L.geoJSON(feature).getBounds().getCenter();
-      if (!bounds.contains(point)) continue;
-      const pixel = map.latLngToContainerPoint(point);
-      const width = p.kind === 'airport' ? 185 : p.kind === 'reserve' ? 175 : 132;
-      const height = 28;
-      const box = { x: pixel.x - width / 2, y: pixel.y - height / 2, w: width, h: height };
-      if (areaLabelsOccupied.some(a => box.x < a.x + a.w + 8 && box.x + box.w + 8 > a.x && box.y < a.y + a.h + 5 && box.y + box.h + 5 > a.y)) continue;
-      areaLabelsOccupied.push(box);
-      if (p.kind === 'park') parksShown++;
-      const text = p.kind === 'airport' ? 'YYC · CALGARY INTERNATIONAL AIRPORT' : name;
-      L.marker(point, { pane: 'landmarkLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: `landmark-label ${p.kind}-label`, html: `<span>${esc(text)}</span>`, iconSize: [width, height], iconAnchor: [width / 2, height / 2] }) }).addTo(landmarkLabels);
+    if (visible.roads && zoom >= 12) for (const feature of roadFeatures) {
+      const point = midpoint(feature);
+      if (!point || !bounds.contains([point[1], point[0]])) continue;
+      const text = feature.properties.name;
+      const pixel = map.latLngToContainerPoint([point[1], point[0]]);
+      const width = Math.min(150, text.length * 5.4);
+      if (!reserveBox({ x: pixel.x - width / 2, y: pixel.y - 8, w: width, h: 16 })) continue;
+      L.marker([point[1], point[0]], { pane: 'roadLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: 'road-label', html: `<span>${esc(text)}</span>`, iconSize: [width, 16], iconAnchor: [width / 2, 8] }) }).addTo(roadLabels);
     }
   }
   setVisible(visible);
-  return { setVisible, update, stationCount: stations.length };
+  return { setVisible, update, labelBoxes, stationCount: stations.length };
 }

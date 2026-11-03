@@ -51,7 +51,7 @@ function updateLayerVisibility() {
     context.contextLayers?.setVisible({ roads: state.roads, transit: state.transit, landmarks: state.landmarks, communityLabels: state.labels });
     updateLabels(context);
   }
-  $('transit-legend').hidden = !state.transit;
+  $('transit-legend').hidden = state.mode !== 'composition' || !state.transit;
 }
 
 function renderMetadata() {
@@ -209,7 +209,11 @@ function createMap(element, groupId = null) {
       context.tooltip.bind(layer, { content: () => tooltipContent(feature, context), anchor: event => event?.latlng || layer.getBounds().getCenter() });
     },
   }).addTo(map);
-  context.contextLayers = createContextLayers({ context, basemap: state.basemap, geography: state.geographicContext, operatingTransit: state.operatingTransit, greenTransit: state.greenTransit, communityNames: state.features.map(f => f.properties.name), visible: { roads: state.roads, transit: state.transit, landmarks: state.landmarks, communityLabels: state.labels }, onStationOpen: () => { closeTooltips(); toggleGroups(false); toggleLayers(false); if (mobile()) setCollapsed(true); } });
+  if (!groupId) {
+    context.contextLayers = createContextLayers({ context, basemap: state.basemap, geography: state.geographicContext, operatingTransit: state.operatingTransit, greenTransit: state.greenTransit, communityNames: state.features.map(f => f.properties.name), visible: { roads: state.roads, transit: state.transit, landmarks: state.landmarks, communityLabels: state.labels }, onStationOpen: () => { closeTooltips(); toggleGroups(false); toggleLayers(false); if (mobile()) setCollapsed(true); } });
+  } else {
+    renderComparisonBasemap(context);
+  }
   state.contexts.push(context);
   map.on('movestart zoomstart', () => {
     context.tooltip.close();
@@ -231,6 +235,12 @@ function createMap(element, groupId = null) {
   return context;
 }
 
+
+function renderComparisonBasemap(context) {
+  if (!state.basemap?.features) return;
+  L.geoJSON(state.basemap, { filter: f => f.properties.kind === 'water', pane: 'water', interactive: false, style: { color: '#8bb8c1', weight: .55, fillColor: '#b5d3d8', fillOpacity: .75 } }).addTo(context.map);
+  L.geoJSON(state.basemap, { filter: f => f.properties.kind === 'road', pane: 'roads', interactive: false, style: { color: '#fffff4', weight: 1.1, opacity: .72 } }).addTo(context.map);
+}
 
 function syncMaps(source) {
   if (!state.contexts.includes(source) || !activeContexts().includes(source) || !source.map._loaded || syncing) return;
@@ -323,24 +333,55 @@ function updateLabels(context) {
   if (!map._loaded) return;
   context.contextLayers?.update();
   context.labels.clearLayers();
-  if (!state.labels) return;
+  const comparison = Boolean(context.groupId);
+  if (!comparison && !state.labels) return;
   const zoom = map.getZoom();
-  const fontSize = zoom < 10.25 ? 6.5 : zoom < 11 ? 7.1 : zoom < 12 ? 8 : zoom < 13 ? 9 : 10;
-  const candidates = state.features.filter(f => {
-    const p = f.properties;
-    return map.getBounds().contains([p.centroid[1], p.centroid[0]]) && (!/^\d/.test(p.name) || p.code === state.selected);
-  });
-  for (const feature of candidates) {
+  const viewport = map.getSize();
+  const tier = zoom < 11.5 ? { cap: 32, pixels: 28000, minPopulation: 9000 }
+    : zoom < 12.5 ? { cap: 45, pixels: 22000, minPopulation: 3500 }
+      : zoom < 13.5 ? { cap: 70, pixels: 16000, minPopulation: 0 }
+        : { cap: 100, pixels: 12000, minPopulation: 0 };
+  const density = comparison ? 1.7 : 1;
+  const cap = Math.max(3, Math.min(Math.round(tier.cap / density), Math.floor(viewport.x * viewport.y / (tier.pixels * density))));
+  const fontSize = zoom < 12 ? (mobile() ? 9 : 9.5) : zoom < 13.5 ? 10 : 10.5;
+  const candidates = state.features.filter(feature => {
+    const p = feature.properties;
+    if (!map.getBounds().contains([p.centroid[1], p.centroid[0]])) return false;
+    if (!comparison && state.landmarks && (p.code === 'CIA' || p.type === 'Major Park')) return false;
+    if (p.code === state.selected) return true;
+    if (/^\d/.test(p.name)) return false;
+    if (zoom < 12.5 && (!isNumber(p.population) || p.population < tier.minPopulation)) return false;
+    return zoom >= 13.5 || p.type === 'Residential';
+  }).map(feature => {
+    const p = feature.properties;
+    const bounds = context.layers.get(p.code)?.getBounds();
+    const area = bounds ? Math.abs((bounds.getEast() - bounds.getWest()) * (bounds.getNorth() - bounds.getSouth())) : 0;
+    return { feature, priority: (p.population || 0) + area * 400000 };
+  }).sort((a, b) => Number(b.feature.properties.code === state.selected) - Number(a.feature.properties.code === state.selected)
+    || b.priority - a.priority || a.feature.properties.code.localeCompare(b.feature.properties.code));
+  const occupied = [...(context.contextLayers?.labelBoxes || [])];
+  let shown = 0;
+  for (const { feature } of candidates) {
+    if (shown >= cap) break;
     const p = feature.properties;
     const prominent = p.code === state.selected;
-    const label = `${p.code === 'CIA' ? 'YYC · ' : ''}${p.name.toUpperCase()}`;
-    const size = prominent ? Math.max(9, fontSize + 1) : fontSize;
-    const width = Math.min(zoom < 11 ? 95 : 170, Math.max(44, label.length * size * .57));
-    const offset = context.groupId ? -2 : 10;
+    const label = p.name.toUpperCase();
+    const size = prominent ? fontSize + 1 : fontSize;
+    const width = Math.min(145, Math.max(54, label.length * size * .57));
+    const height = label.length * size * .57 > 145 ? 28 : 15;
+    const point = map.latLngToContainerPoint([p.centroid[1], p.centroid[0]]);
+    const offset = comparison ? -height / 2 : 14;
+    const box = { x: point.x - width / 2, y: point.y + offset, w: width, h: height };
+    if (!prominent && (box.x < 6 || box.y < 8 || box.x + width > viewport.x - 6 || box.y + height > viewport.y - 18)) continue;
+    const gapX = zoom < 12 ? 16 : 10;
+    const gapY = zoom < 12 ? 12 : 7;
+    if (!prominent && occupied.some(a => box.x < a.x + a.w + gapX && box.x + box.w + gapX > a.x && box.y < a.y + a.h + gapY && box.y + box.h + gapY > a.y)) continue;
+    occupied.push(box);
     L.marker([p.centroid[1], p.centroid[0]], {
-      icon: L.divIcon({ className: `community-label all-community-label${prominent ? ' focus-label' : ''}`, html: `<span style="font-size:${size}px">${esc(label)}</span>`, iconSize: [width, 28], iconAnchor: [width / 2, -offset] }),
+      icon: L.divIcon({ className: `community-label hierarchy-community-label${prominent ? ' focus-label' : ''}`, html: `<span style="font-size:${size}px">${esc(label)}</span>`, iconSize: [width, height], iconAnchor: [width / 2, -offset] }),
       interactive: false, keyboard: false, pane: 'labels', zIndexOffset: prominent ? 1000 : 0,
     }).addTo(context.labels);
+    shown++;
   }
 }
 
@@ -409,6 +450,9 @@ function selectView(mode) {
     $(`${candidate}-view`).hidden = !active;
   }
   $('income-control').hidden = mode !== 'composition';
+  $('layers-button').hidden = mode !== 'composition';
+  $('transit-legend').hidden = mode !== 'composition' || !state.transit;
+  toggleLayers(false);
   $('mode-description').textContent = mode === 'composition' ? '一个社区，一张构成图' : '同一色阶，查看聚居分布';
   document.querySelector('.map-workspace').classList.toggle('comparing', mode === 'distribution');
   if (mode === 'distribution') rebuildComparison();

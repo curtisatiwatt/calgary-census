@@ -33,9 +33,9 @@
       <span id="mode-description" class="mode-description">一个社区，一张构成图</span>
     </div>
     <section id="layers-panel" class="layers-panel" aria-label="选择地图图层" hidden>
-      <div class="filter-heading"><div><h2>地图图层</h2><p>两个视图同步显示</p></div><button id="close-layers" class="icon-button" aria-label="关闭地图图层">×</button></div>
+      <div class="filter-heading"><div><h2>地图图层</h2><p>社区构成的地理参照</p></div><button id="close-layers" class="icon-button" aria-label="关闭地图图层">×</button></div>
       <label class="layer-option"><input type="checkbox" id="roads-toggle" checked><span>道路与铁路底图<small>主要道路、道路名称及铁路轨道</small></span></label>
-      <label class="layer-option"><input type="checkbox" id="labels-toggle" checked><span>社区标注<small>缩小时保留社区名称；地图上使用大写</small></span></label>
+      <label class="layer-option"><input type="checkbox" id="labels-toggle" checked><span>社区标注<small>随缩放逐步显示；自动避开重叠</small></span></label>
       <label class="layer-option"><input type="checkbox" id="transit-toggle" checked><span>CTrain 线路与车站<small>Red / Blue 运营线路 · Green 未运营线路</small></span></label>
       <label class="layer-option"><input type="checkbox" id="landmarks-toggle" checked><span>地理地标<small>机场、公园绿地及原住民保留区</small></span></label>
       <div class="context-legend"><span><i class="landmark-swatch airport-swatch"></i>机场</span><span><i class="landmark-swatch park-swatch"></i>公园</span><span><i class="landmark-swatch reserve-swatch"></i>保留区</span><span><i class="railway-swatch"></i>铁路</span></div>
@@ -102,7 +102,7 @@
     <h2>这张地图怎样读？</h2>
     <div class="method-grid">
       <section><h3>社区构成 / 分布对比</h3><p>“社区构成”用一个等大的圆展示一个社区，彩色扇区对应勾选类别，灰色是其余类别。圆的大小不代表人口多少；全市视角会避开重叠，放大可看到更多社区，未显示圆的社区仍可点击。“分布对比”用底色表示各类别在社区人口中的占比，所有地图共用固定色阶和地图位置。</p><p>地图中的圆心只是社区内的显示位置，不是居民地址。</p></section>
-      <section><h3>道路、轨道与地理地标</h3><p>“地图图层”可分别切换道路与铁路、社区名称、CTrain 和地理地标。社区名称在地图上使用大写，详情保留原名称。机场使用紫色、公园使用绿色、原住民保留区使用浅棕色，这些地理底色不表示人口或收入。</p><p>Red / Blue 为运营线路；Green Line 采用绿色虚线，标注未运营及各段建设状态。点击车站查看名称与线路，放大可显示更多车站名。规划线路及站位可能调整，示意位置会特别注明。地理图层覆盖范围可超出社区统计范围；不会为市外区域推算人口资料。</p></section>
+      <section><h3>道路、轨道与地理地标</h3><p>“社区构成”的“地图图层”可分别切换道路与铁路、社区名称、CTrain 和地理地标；“分布对比”保留简洁的人口热度图。社区名称在地图上使用大写，详情保留原名称。文字随缩放逐步显示并自动避让，放大后可查看更多社区和站点。机场使用紫色、公园使用绿色、原住民保留区使用浅棕色，这些地理底色不表示人口或收入。</p><p>Red / Blue 为运营线路；Green Line 采用绿色虚线，标注未运营及各段建设状态。点击车站查看名称与线路，放大可显示更多车站名。规划线路及站位可能调整，示意位置会特别注明。地理图层覆盖范围可超出社区统计范围；不会为市外区域推算人口资料。</p></section>
       <section><h3>人口类别不等于国籍</h3><p id="population-groups-definition">采用 2021 年普查 Visible minority（Racialized population）分类。Chinese 不等于中国国籍、中国出生或普通话使用者；“非可见少数族裔”包括原住民等，不能改称白人或欧洲裔。默认勾选五个人数最多的可见少数族裔类别，也可选择其余类别。</p></section>
       <section><h3>人数、占比与取整</h3><p>详情与热度图的占比由公布人数除以同表的私人住户人口计算，保留一位小数；这与原 PDF 中已取整的整数百分比可能略有不同。官方人数通常按 5 人取整，各类别人数之和可能略偏离总人口。分类合计少于人口总数时，差额在圆环中单独留白；超过人口总数时，圆环按分类合计缩放。详情数值仍使用表中人口基数。</p><p>“其余类别”只包含未勾选的人口类别，不包含缺失数据。带点线的留白表示原表统计差额，不是一个人口类别。公布的 0 不代表可以确认绝对没有居民；灰色虚线边界和“暂无数据”表示资料缺失，不当作 0。</p></section>
       <section><h3>年份与收入</h3><p id="year-definition"></p><p id="income-definition"></p><p>收入底色蓝色较低、黄色居中、红色较高，使用固定区间；收入不是财富、房价或个人工资。“住户”也包括单人和合住者。</p><p id="latest-census-note"></p></section>
