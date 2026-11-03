@@ -2,6 +2,8 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './styles.css';
 import { loadData } from './data.js';
+import { t, currentLanguage, setLanguage, applyStaticTranslations, localizeHtml } from './i18n.js';
+import { initTheme, refreshThemeControl, isDarkTheme } from './theme.js';
 import { createMapTooltip } from './map-tooltip.js';
 import { createContextLayers } from './context-layers.js';
 import { INCOME_BINS, isNumber, colorFor, money, number, percent, searchFeatures, summarize, escapeHtml as esc, safeUrl, hashCode } from './map-utils.js';
@@ -24,6 +26,8 @@ let syncing = false;
 let syncFrame = null;
 let lastMobile = mobile();
 let lastComparisonPageSize = null;
+
+function localize(...roots) { roots.filter(Boolean).forEach(root => applyStaticTranslations(root)); }
 
 function selectedGroups() { return state.groups.filter(g => state.selectedGroups.includes(g.id)); }
 function populationRecord(code) { return state.data?.communities[code] || null; }
@@ -73,25 +77,27 @@ function renderMetadata() {
     const url = safeUrl(source.url);
     if (!url) continue;
     const link = document.createElement('a');
-    Object.assign(link, { href: url, textContent: `${source.label} ↗`, target: '_blank', rel: 'noopener noreferrer' });
+    Object.assign(link, { href: url, textContent: `${t(source.label)} ↗`, target: '_blank', rel: 'noopener noreferrer' });
     $('source-list').append(link);
   }
   $('income-ramp').innerHTML = INCOME_BINS.map(bin => `<span style="background:${bin.color}" title="${esc(bin.label)}"></span>`).join('');
   $('population-ramp').innerHTML = POPULATION_BINS.map(bin => `<span style="background:${bin.color}" title="${esc(bin.label)}"></span>`).join('');
+  localize(document.querySelector('.app-header'), dialog, $('income-legend'), $('population-legend'), document.querySelector('.map-status'));
 }
 
 function renderGroupList() {
   const query = $('group-search').value.trim().toLowerCase();
   const groups = state.groups.filter(g => `${g.label} ${g.name}`.toLowerCase().includes(query));
-  $('group-list').innerHTML = groups.length ? groups.map(g => `<label class="group-option" for="group-${g.id}"><input type="checkbox" id="group-${g.id}" data-group="${g.id}" ${state.selectedGroups.includes(g.id) ? 'checked' : ''}><span class="group-name">${esc(g.label)}<small>${esc(g.name)}</small></span><span class="group-city">${percent(populationShare(state.data.city, g.id))}</span></label>`).join('') : '<p class="no-results">没有找到这个类别。</p>';
-  $('filter-count').textContent = `已选 ${state.selectedGroups.length} / ${state.groups.length}`;
+  $('group-list').innerHTML = groups.length ? groups.map(g => `<label class="group-option" for="group-${g.id}"><input type="checkbox" id="group-${g.id}" data-group="${g.id}" ${state.selectedGroups.includes(g.id) ? 'checked' : ''}><span class="group-name">${esc(g.label)}<small>${esc(currentLanguage() === 'zh' ? g.name : '')}</small></span><span class="group-city">${percent(populationShare(state.data.city, g.id))}</span></label>`).join('') : '<p class="no-results">没有找到这个类别。</p>';
+  $('filter-count').textContent = t(`已选 ${state.selectedGroups.length} / ${state.groups.length}`);
+  localize($('group-list'));
 }
 
 function updateGroupSelection(ids, rerender = true) {
   state.selectedGroups = [...new Set(ids)].filter(id => state.groupById.has(id));
   state.compareStart = Math.min(state.compareStart, Math.max(0, state.selectedGroups.length - 1));
   $('group-count').textContent = state.selectedGroups.length;
-  $('filter-count').textContent = `已选 ${state.selectedGroups.length} / ${state.groups.length}`;
+  $('filter-count').textContent = t(`已选 ${state.selectedGroups.length} / ${state.groups.length}`);
   if (rerender) renderGroupList();
   renderDonutKey();
   renderDetail();
@@ -102,6 +108,7 @@ function updateGroupSelection(ids, rerender = true) {
 function renderDonutKey() {
   const groups = selectedGroups();
   $('donut-key').innerHTML = groups.map(g => `<span><i style="background:${state.colors[g.id]}"></i>${esc(g.label)}</span>`).join('') + (groups.length ? '<span><i style="background:#d5dbd5"></i>其余类别</span><span><i style="background:#fff;border:1px dotted #819080"></i>原表统计差额</span>' : '<span>未选择人口群体 · 可从上方添加</span>');
+  localize($('donut-key'));
 }
 
 function renderDetail() {
@@ -131,11 +138,13 @@ function renderDetail() {
   if (!record) {
     $('composition-bars').innerHTML = '<p class="detail-empty">这个区域暂无可用的人口分类资料，不能当作 0 人。</p>';
     $('composition-basis').textContent = '';
+    localize(sidebar);
     return;
   }
   if (!groups.length) {
     $('composition-bars').innerHTML = '<p class="detail-empty">从上方“人口群体”选择想了解的类别。</p>';
     $('composition-basis').textContent = '';
+    localize(sidebar);
     return;
   }
   const rows = groups.map(g => ({ ...g, count: record.counts[g.id], share: populationShare(record, g.id), city: populationShare(state.data.city, g.id), color: state.colors[g.id] }));
@@ -150,7 +159,8 @@ function renderDetail() {
   $('composition-bars').innerHTML = rows.map(row => `<div class="composition-row" data-detail-group="${row.id}"><div class="bar-heading"><span>${esc(row.label)}</span><span><small>${number(row.count)} 人</small><strong>${percent(row.share)}</strong></span></div><div class="bar-track"><span class="bar-fill" style="width:${Math.min(100, Math.max(0, (row.share || 0) * 100))}%;background:${row.color}"></span><i class="city-reference" style="left:${Math.min(100, Math.max(0, (row.city || 0) * 100))}%" title="全市 ${percent(row.city)}"></i></div><span class="sr-only">全市占比 ${percent(row.city)}</span></div>`).join('');
   const sum = Object.values(record.counts).reduce((a, b) => a + b, 0);
   const difference = Math.abs(sum - record.population);
-  $('composition-basis').textContent = '占比按人数 ÷ 同表私人住户人口计算。灰色为未勾选类别，留白为原表统计差额。' + (difference > 35 || difference / record.population > 0.01 ? ` 分类合计 ${number(sum)}，表内人口 ${number(record.population)}；原表存在差异，保留原数值。` : '原始人数经过统计取整。');
+  $('composition-basis').textContent = t('占比按人数 ÷ 同表私人住户人口计算。灰色为未勾选类别，留白为原表统计差额。') + (difference > 35 || difference / record.population > 0.01 ? t(` 分类合计 ${number(sum)}，表内人口 ${number(record.population)}；原表存在差异，保留原数值。`) : t('原始人数经过统计取整。'));
+  localize(sidebar);
 }
 
 function styleFor(context, feature) {
@@ -158,11 +168,12 @@ function styleFor(context, feature) {
   const value = context.groupId ? populationShare(populationRecord(p.code), context.groupId) : p.income;
   const missing = context.groupId ? value === null : state.income && !isNumber(value);
   const selected = p.code === state.selected;
+  const dark = isDarkTheme();
   return {
-    color: selected ? '#243f42' : missing ? '#a7b3ac' : '#fafbf5',
+    color: selected ? (dark ? '#d9efdc' : '#243f42') : missing ? (dark ? '#5a7075' : '#a7b3ac') : (dark ? '#5a7075' : '#fafbf5'),
     weight: selected ? 2.5 : 0.75, opacity: 1,
-    fillColor: context.groupId ? populationColor(value) : state.income ? colorFor(value) : '#e0e8dc',
-    fillOpacity: missing ? 0.35 : context.groupId ? 0.86 : state.income ? 0.67 : 0.72,
+    fillColor: missing ? (dark ? '#263b42' : '#d6dcd9') : context.groupId ? populationColor(value) : state.income ? colorFor(value) : (dark ? '#263b42' : '#e0e8dc'),
+    fillOpacity: missing ? 0.35 : context.groupId ? (dark ? 0.72 : 0.86) : state.income ? (dark ? 0.62 : 0.67) : 0.72,
     dashArray: missing ? '3 3' : null,
   };
 }
@@ -178,12 +189,12 @@ function refreshStyles() {
 function tooltipContent(feature, context) {
   const p = feature.properties;
   const record = populationRecord(p.code);
-  const reference = p.note ? `<span class="tip-reference"><b>选区参考</b>${esc(p.note)}</span>` : '';
+  const reference = p.note ? `<span class="tip-reference"><b>选区参考</b>${esc(t(p.note))}</span>` : '';
   if (context.groupId) {
     const group = state.groupById.get(context.groupId);
-    return `<strong>${esc(p.name)}</strong>${esc(group.label)} ${percent(populationShare(record, group.id))}<br>${number(record?.counts[group.id])} 人 · 全市 ${percent(populationShare(state.data.city, group.id))}${reference}<span class="tip-note">点击固定社区，查看完整构成</span>`;
+    return localizeHtml(`<strong>${esc(p.name)}</strong>${esc(group.label)} ${percent(populationShare(record, group.id))}<br>${number(record?.counts[group.id])} 人 · 全市 ${percent(populationShare(state.data.city, group.id))}${reference}<span class="tip-note">点击固定社区，查看完整构成</span>`);
   }
-  return `<strong>${esc(p.name)}</strong>家庭收入 ${money(p.income)}<br>人口 ${number(record?.population ?? p.population)}${record ? selectedGroups().slice(0, 5).map(g => `<br>${esc(g.label)} ${percent(populationShare(record, g.id))}`).join('') : '<br>人口分类暂无数据'}${reference}<span class="tip-note">点击查看社区详情</span>`;
+  return localizeHtml(`<strong>${esc(p.name)}</strong>家庭收入 ${money(p.income)}<br>人口 ${number(record?.population ?? p.population)}${record ? selectedGroups().slice(0, 5).map(g => `<br>${esc(g.label)} ${percent(populationShare(record, g.id))}`).join('') : '<br>人口分类暂无数据'}${reference}<span class="tip-note">点击查看社区详情</span>`);
 }
 
 function createMap(element, groupId = null) {
@@ -238,8 +249,14 @@ function createMap(element, groupId = null) {
 
 function renderComparisonBasemap(context) {
   if (!state.basemap?.features) return;
-  L.geoJSON(state.basemap, { filter: f => f.properties.kind === 'water', pane: 'water', interactive: false, style: { color: '#8bb8c1', weight: .55, fillColor: '#b5d3d8', fillOpacity: .75 } }).addTo(context.map);
-  L.geoJSON(state.basemap, { filter: f => f.properties.kind === 'road', pane: 'roads', interactive: false, style: { color: '#fffff4', weight: 1.1, opacity: .72 } }).addTo(context.map);
+  const water = L.geoJSON(state.basemap, { filter: f => f.properties.kind === 'water', pane: 'water', interactive: false }).addTo(context.map);
+  const roads = L.geoJSON(state.basemap, { filter: f => f.properties.kind === 'road', pane: 'roads', interactive: false }).addTo(context.map);
+  context.refreshBasemap = () => {
+    const dark = isDarkTheme();
+    water.setStyle({ color: dark ? '#3e6976' : '#8bb8c1', weight: .55, fillColor: dark ? '#234958' : '#b5d3d8', fillOpacity: .75 });
+    roads.setStyle({ color: dark ? '#637278' : '#fffff4', weight: 1.1, opacity: .72 });
+  };
+  context.refreshBasemap();
 }
 
 function syncMaps(source) {
@@ -289,7 +306,7 @@ function selectCommunity(code, zoom = true, expand = true) {
   updateDonuts();
   renderComparisonHeadings();
   if (zoom) fitCommunity(code);
-  $('announcer').textContent = `已选择 ${state.byCode.get(code).properties.name}。人口构成已更新。`;
+  $('announcer').textContent = t(`已选择 ${state.byCode.get(code).properties.name}。人口构成已更新。`);
   try { history.replaceState(null, '', `#${encodeURIComponent(code)}`); } catch { /* embedded preview */ }
 }
 
@@ -299,7 +316,7 @@ function updateDonuts() {
   context.tooltip.close();
   context.donuts.clearLayers();
   const groups = selectedGroups();
-  if (!groups.length) { $('donut-status').textContent = '未选人口群体，暂不显示构成圆'; return; }
+  if (!groups.length) { $('donut-status').textContent = t('未选人口群体，暂不显示构成圆'); return; }
   const map = context.map;
   const size = mobile() ? 28 : 32;
   const occupied = [];
@@ -316,16 +333,16 @@ function updateDonuts() {
     occupied.push(point);
     const marker = L.marker([p.centroid[1], p.centroid[0]], {
       icon: L.divIcon({ className: `population-donut${p.code === state.selected ? ' selected-donut' : ''}`, html, iconSize: [size, size], iconAnchor: [size / 2, size / 2] }),
-      pane: 'donuts', keyboard: true, title: `${p.name} 人口构成`, alt: `${p.name} 人口构成`, riseOnHover: false,
+      pane: 'donuts', keyboard: true, title: t(`${p.name} 人口构成`), alt: t(`${p.name} 人口构成`), riseOnHover: false,
     }).addTo(context.donuts);
     marker.getElement()?.setAttribute('data-population-code', p.code);
-    marker.getElement()?.setAttribute('aria-label', `${p.name}，点击查看人口构成`);
+    marker.getElement()?.setAttribute('aria-label', t(`${p.name}，点击查看人口构成`));
     marker.on('click', () => { selectCommunity(p.code, false); toggleGroups(false); });
     context.tooltip.bind(marker, { content: () => tooltipContent(feature, context), anchor: () => marker.getLatLng(), offset: [0, -size / 2] });
     shown++;
   }
   context.donutCount = shown;
-  $('donut-status').textContent = `当前显示 ${shown} 个构成圈 · 放大可查看更多`;
+  $('donut-status').textContent = t(`当前显示 ${shown} 个构成圈 · 放大可查看更多`);
 }
 
 function updateLabels(context) {
@@ -401,6 +418,7 @@ function renderComparisonHeadings() {
     const node = document.querySelector(`[data-map-heading="${group.id}"]`);
     if (node) node.innerHTML = `<div><h2>${esc(group.label)}</h2><span>全市 ${percent(populationShare(state.data.city, group.id))}</span></div><p title="${esc(name)}">${esc(name)} <strong>${percent(value)}</strong></p>`;
   }
+  localize($('comparison-maps'), $('comparison-select'));
 }
 
 function rebuildComparison() {
@@ -456,7 +474,7 @@ function selectView(mode) {
   $('layers-button').hidden = mode !== 'composition';
   $('transit-legend').hidden = mode !== 'composition' || !state.transit;
   toggleLayers(false);
-  $('mode-description').textContent = mode === 'composition' ? '一个社区，一张构成图' : '同一色阶，查看聚居分布';
+  $('mode-description').textContent = t(mode === 'composition' ? '一个社区，一张构成图' : '同一色阶，查看聚居分布');
   document.querySelector('.map-workspace').classList.toggle('comparing', mode === 'distribution');
   if (mode === 'distribution') rebuildComparison();
   else requestAnimationFrame(() => {
@@ -484,6 +502,7 @@ function renderSearch() {
     const p = feature.properties;
     return `<button class="search-result" id="search-option-${i}" role="option" aria-selected="false" data-code="${esc(p.code)}"><span><strong>${esc(p.name)}</strong><small>${esc([p.sectorLabel, p.typeLabel].filter(Boolean).join(' · '))}</small></span><span>${money(p.income)}</span></button>`;
   }).join('') : '<p class="no-results">没有找到社区，可输入英文名或社区代码。</p>';
+  localize($('search-results'));
 }
 function chooseSearchResult(code) {
   selectCommunity(code); $('search').value = ''; closeSearch(); $('search').blur(); toggleGroups(false);
@@ -495,6 +514,18 @@ function setReady(ready) {
 
 function initializeControls() {
   setReady(false);
+  $('language-toggle').addEventListener('click', () => {
+    closeTooltips();
+    setLanguage(currentLanguage() === 'zh' ? 'en' : 'zh');
+    applyStaticTranslations(); refreshThemeControl();
+    if (state.data) {
+      renderMetadata(); renderGroupList(); renderDonutKey(); renderDetail(); renderComparisonHeadings();
+      $('mode-description').textContent = t(state.mode === 'composition' ? '一个社区，一张构成图' : '同一色阶，查看聚居分布');
+      updateDonuts(); state.contexts.forEach(updateLabels);
+      if ($('search').value) renderSearch();
+    }
+  });
+  window.addEventListener('atlas-themechange', () => { closeTooltips(); refreshStyles(); state.contexts.forEach(context => context.refreshBasemap?.()); });
   if (mobile()) setCollapsed(true);
   for (const mode of ['composition', 'distribution']) $(`${mode}-tab`).addEventListener('click', () => selectView(mode));
   document.querySelector('.view-tabs').addEventListener('keydown', event => {
@@ -575,6 +606,8 @@ function initializeControls() {
 }
 
 async function init() {
+  applyStaticTranslations();
+  initTheme();
   initializeControls();
   try {
     const data = await loadData();
@@ -590,7 +623,7 @@ async function init() {
     $('group-count').textContent = state.selectedGroups.length;
     state.composition = createMap('composition-map');
     const unavailable = [[data.basemap, '道路与河流'], [data.operatingTransit, '运营 CTrain'], [data.greenTransit, 'Green Line'], [data.geographicContext, '铁路与地理地标']].filter(([loaded]) => !loaded).map(([, label]) => label);
-    if (unavailable.length) { $('map-warning').textContent = `${unavailable.join('、')}暂未载入，社区统计仍可使用。`; $('map-warning').hidden = false; }
+    if (unavailable.length) { $('map-warning').textContent = `${unavailable.join('、')}暂未载入，社区统计仍可使用。`; $('map-warning').hidden = false; localize($('map-warning')); }
     $('loading-overlay').hidden = true;
     fitCity(); selectCommunity(state.selected, false, false);
     if (linkedCode) fitCommunity(linkedCode);
@@ -600,6 +633,7 @@ async function init() {
     $('loading-overlay').innerHTML = `<strong>地图暂时无法载入</strong><span>${esc(error.message)}</span><button class="map-button" id="retry">重新载入</button>`;
     $('retry').addEventListener('click', () => location.reload());
     $('coverage-text').textContent = '数据载入失败';
+    localize($('loading-overlay'), $('coverage-text'));
   }
 }
 

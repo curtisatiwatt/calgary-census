@@ -1,4 +1,6 @@
 import L from 'leaflet';
+import { t, currentLanguage, localizeHtml } from './i18n.js';
+import { isDarkTheme } from './theme.js';
 import { escapeHtml as esc, safeUrl } from './map-utils.js';
 
 export const LINE_COLORS = Object.freeze({ red: '#ca3544', blue: '#2879bd', green: '#22834b' });
@@ -35,7 +37,7 @@ export function stationContent(properties) {
   const names = (properties.lineIds || []).map(lineName).join(' / ');
   const approximate = properties.geometryQuality === 'approximate' || properties.geometryQuality === 'schematic';
   const source = safeUrl(properties.sourceUrl);
-  return `<strong>${esc(properties.name)}</strong><span class="station-lines">${esc(names)}</span><span class="station-status${properties.status === 'operating' ? '' : ' future-status'}">${esc(statusName(properties.status))}</span>${properties.phaseLabel ? `<span class="station-phase">${esc(properties.phaseLabel)}${properties.funding === 'unfunded' ? ' · 远期规划 / 未获建设资金' : ''}</span>` : ''}${approximate ? '<span class="station-position-note">规划示意位置，非最终站位</span>' : ''}${properties.locationNote ? `<span class="station-position-note">${esc(properties.locationNote)}</span>` : ''}${properties.note ? `<span class="station-position-note">${esc(properties.note)}</span>` : ''}${source ? `<a class="station-source" href="${source}" target="_blank" rel="noopener noreferrer">官方线路资料 ↗</a>` : ''}`;
+  return localizeHtml(`<strong>${esc(properties.name)}</strong><span class="station-lines">${esc(names)}</span><span class="station-status${properties.status === 'operating' ? '' : ' future-status'}">${esc(statusName(properties.status))}</span>${properties.phaseLabel ? `<span class="station-phase">${esc(properties.phaseLabel)}${properties.funding === 'unfunded' ? ' · 远期规划 / 未获建设资金' : ''}</span>` : ''}${approximate ? '<span class="station-position-note">规划示意位置，非最终站位</span>' : ''}${properties.locationNote ? `<span class="station-position-note">${esc(properties.locationNote)}</span>` : ''}${properties.note ? `<span class="station-position-note">${esc(properties.note)}</span>` : ''}${source ? `<a class="station-source" href="${source}" target="_blank" rel="noopener noreferrer">官方线路资料 ↗</a>` : ''}`);
 }
 
 /** Context geometry never changes census statistics or the heat-map scale. */
@@ -77,7 +79,7 @@ export function createContextLayers({ context, basemap, geography, operatingTran
   const labelBoxes = [];
   const collection = items => ({ type: 'FeatureCollection', features: items });
 
-  L.geoJSON(collection(areaFeatures), {
+  const areasLayer = L.geoJSON(collection(areaFeatures), {
     pane: 'geography', interactive: false,
     style: feature => {
       const kind = feature.properties.kind;
@@ -86,7 +88,7 @@ export function createContextLayers({ context, basemap, geography, operatingTran
           : { color: '#80a777', weight: .4, opacity: .4, fillColor: '#a5c898', fillOpacity: .42 };
     },
   }).addTo(map);
-  L.geoJSON(basemap || collection([]), { filter: f => f.properties.kind === 'water', pane: 'water', interactive: false, style: { color: '#75a7b5', weight: .85, fillColor: '#a5cad4', fillOpacity: .9 } }).addTo(map);
+  const waterLayer = L.geoJSON(basemap || collection([]), { filter: f => f.properties.kind === 'water', pane: 'water', interactive: false, style: { color: '#75a7b5', weight: .85, fillColor: '#a5cad4', fillOpacity: .9 } }).addTo(map);
   for (const casing of [true, false]) {
     const layer = L.geoJSON(collection(roadFeatures), { pane: 'roads', interactive: false, style: { color: casing ? '#6d8275' : '#fffff7', weight: casing ? 3.1 : 1.6, opacity: casing ? .55 : .96 } }).addTo(map);
     roads.push({ layer, casing });
@@ -154,21 +156,34 @@ export function createContextLayers({ context, basemap, geography, operatingTran
     const zoom = map.getZoom();
     const bounds = map.getBounds();
     const size = map.getSize();
-    const styleBucket = zoom < 11.5 ? 0 : zoom < 13 ? 1 : 2;
+    const dark = isDarkTheme();
+    const zoomBucket = zoom < 11.5 ? 0 : zoom < 13 ? 1 : 2;
+    const styleBucket = `${zoomBucket}:${dark}`;
     if (styleBucket !== lastStyleBucket) {
       lastStyleBucket = styleBucket;
-      const detail = styleBucket === 2;
-      roads.forEach(({ layer, casing }) => layer.setStyle({ weight: casing ? (detail ? 3.4 : 2.2) : (detail ? 1.8 : 1.1) }));
-      railways.forEach(({ layer, casing }) => layer.setStyle({ weight: casing ? (detail ? 2 : 1.2) : (detail ? 1.1 : .7), opacity: detail ? .75 : .42 }));
+      const detail = zoomBucket === 2;
+      areasLayer.setStyle(feature => {
+        const kind = feature.properties.kind;
+        return kind === 'airport' ? { color: dark ? '#77718c' : '#9585ad', fillColor: dark ? '#3d3c57' : '#c3b9da' }
+          : kind === 'reserve' ? { color: dark ? '#81765d' : '#af926b', fillColor: dark ? '#484333' : '#ded0b7' }
+          : { color: dark ? '#416850' : '#80a777', fillColor: dark ? '#27483a' : '#a5c898' };
+      });
+      waterLayer.setStyle({ color: dark ? '#3e6976' : '#75a7b5', fillColor: dark ? '#234958' : '#a5cad4' });
+      roads.forEach(({ layer, casing }) => layer.setStyle({ color: casing ? (dark ? '#20343a' : '#6d8275') : (dark ? '#637278' : '#fffff7'), weight: casing ? (detail ? 3.4 : 2.2) : (detail ? 1.8 : 1.1) }));
+      railways.forEach(({ layer, casing }) => layer.setStyle({ color: casing ? (dark ? '#83918d' : '#65716e') : (dark ? '#20343a' : '#f5f6ed'), weight: casing ? (detail ? 2 : 1.2) : (detail ? 1.1 : .7), opacity: detail ? .75 : .42 }));
       const routeWeight = (lineId, future) => future ? (detail ? 2.3 : 1.6) : lineId === 'red' ? (detail ? 5 : 3.4) : (detail ? 3 : 2.1);
-      routeCasings.forEach(({ layer, lineId, future }) => layer.setStyle({ weight: routeWeight(lineId, future) + (detail ? 1.8 : 1.2) }));
-      routeLayers.forEach(({ layer, lineId, future }) => layer.setStyle({ weight: routeWeight(lineId, future) }));
-      stationLayers.forEach(({ marker, shared }) => marker.setRadius(detail ? (shared ? 4.7 : 3.8) : (shared ? 3.1 : 2.4)));
+      routeCasings.forEach(({ layer, lineId, future }) => layer.setStyle({ color: dark ? '#14272e' : '#fffef7', weight: routeWeight(lineId, future) + (detail ? 1.8 : 1.2) }));
+      routeLayers.forEach(({ layer, lineId, future }) => layer.setStyle({ color: future ? (dark ? '#668e70' : '#65a17b') : dark ? ({red:'#ee7d87',blue:'#74b9e9',green:'#7bbf8c'}[lineId]) : LINE_COLORS[lineId], weight: routeWeight(lineId, future) }));
+      stationLayers.forEach(({ marker, shared, properties }) => {
+        marker.setRadius(detail ? (shared ? 4.7 : 3.8) : (shared ? 3.1 : 2.4));
+        const id = shared ? 'blue' : properties.lineIds?.[0] || 'green';
+        marker.setStyle({color: dark ? ({red:'#ee7d87',blue:'#74b9e9',green:'#7bbf8c'}[id]) : LINE_COLORS[id], fillColor: shared ? (dark ? '#a25c67' : '#efb3b6') : (dark ? '#20343a' : '#fffef8')});
+      });
     }
     // At overview scales, neighbouring downtown dots merge visually. Reveal them
     // progressively instead of drawing a dense string of overlapping targets.
     const stationPoints = [];
-    for (const { marker } of stationLayers) {
+    for (const { marker, properties } of stationLayers) {
       const point = map.latLngToContainerPoint(marker.getLatLng());
       const minGap = zoom < 11.5 ? 13 : zoom < 13 ? 8 : 0;
       const shown = bounds.contains(marker.getLatLng()) && !stationPoints.some(p => Math.hypot(p.x - point.x, p.y - point.y) < minGap);
@@ -177,6 +192,7 @@ export function createContextLayers({ context, basemap, geography, operatingTran
       if (element) {
         element.style.display = shown ? '' : 'none';
         element.setAttribute('tabindex', shown ? '0' : '-1');
+        element.setAttribute('aria-label', `${properties.name} · ${(properties.lineIds || []).map(lineName).join(' / ')} · ${t(statusName(properties.status))}`);
       }
     }
     roadLabels.clearLayers();
@@ -217,7 +233,7 @@ export function createContextLayers({ context, basemap, geography, operatingTran
       if (!bounds.contains([lat, lng])) continue;
       const p = feature.properties;
       const point = map.latLngToContainerPoint([lat, lng]);
-      const text = `${p.name}${p.status === 'operating' ? '' : ' · 未运营'}`;
+      const text = `${p.name}${p.status === 'operating' ? '' : currentLanguage() === 'en' ? ' · not in service' : ' · 未运营'}`;
       const width = Math.min(210, text.length * 5.8);
       if (!reserveBox({ x: point.x + 7, y: point.y - 8, w: width, h: 19 })) continue;
       L.marker([lat, lng], { pane: 'stationLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: `station-label${p.status === 'operating' ? '' : ' future-station-label'}`, html: `<span>${esc(text)}</span>`, iconSize: [width, 20], iconAnchor: [-7, 8] }) }).addTo(stationLabels);

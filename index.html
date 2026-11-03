@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="referrer" content="strict-origin-when-cross-origin">
+  <script>try{const saved=localStorage.getItem('census-atlas-theme');document.documentElement.dataset.theme=saved==='light'||saved==='dark'?saved:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}catch{document.documentElement.dataset.theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}</script>
   <meta name="theme-color" content="#f7f8f3">
   <meta name="description" content="探索 Calgary 社区的人口构成、不同人口群体的分布和家庭收入。基于官方 2021 年人口普查社区资料。">
   <title>Calgary 社区观察 · 人口构成与分布</title>
@@ -18,7 +19,7 @@
       <input id="search" type="search" placeholder="搜索社区，例如 Panorama Hills" autocomplete="off" role="combobox" aria-label="搜索卡尔加里社区" aria-autocomplete="list" aria-expanded="false" aria-controls="search-results">
       <kbd aria-hidden="true">/</kbd><div id="search-results" class="search-results" role="listbox" hidden></div>
     </div>
-    <div class="header-actions"><span class="data-edition" id="data-edition">2021 年人口普查</span><button id="method-button" class="text-button">数据说明 ↗</button></div>
+    <div class="header-actions"><span class="data-edition" id="data-edition">2021 年人口普查</span><button id="method-button" class="text-button">数据说明 ↗</button><button id="language-toggle" class="preference-button language-button" type="button" aria-label="Switch to English">EN</button><button id="theme-toggle" class="preference-button theme-button" type="button" aria-label="切换至夜间模式"></button></div>
   </header>
 
   <nav class="viewbar" aria-label="地图视图与人口群体">
