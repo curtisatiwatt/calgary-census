@@ -29,26 +29,30 @@
       <button id="distribution-tab" role="tab" aria-selected="false" aria-controls="distribution-view" tabindex="-1"><span aria-hidden="true">▥</span> 分布对比</button>
     </div>
     <div class="view-controls">
-      <button id="groups-button" class="filter-button" aria-expanded="false" aria-controls="groups-panel"><span id="group-selection-label">人群：华人</span><span id="group-count" hidden>1</span><span aria-hidden="true">⌄</span></button>
+      <button id="groups-button" class="filter-button" aria-expanded="false" aria-controls="groups-panel"><span id="group-selection-label">人群</span><span id="group-count" hidden>0</span><span aria-hidden="true">⌄</span></button>
       <label id="income-control" class="plain-toggle"><input id="income-toggle" type="checkbox"><span>收入底色</span></label>
-      <button id="layers-button" class="filter-button" aria-expanded="false" aria-controls="layers-panel">地图图层 <span aria-hidden="true">⌄</span></button>
+      <button id="layers-button" class="filter-button settings-link" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="layers-panel"><span class="settings-row-icon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5 9-5Zm-9 9 9 5 9-5M3 16l9 5 9-5"/></svg></span><span class="settings-row-copy"><span data-mobile-text="地图图层">地图图层</span><small class="settings-row-subtitle" data-mobile-text="道路、轻轨与地标">道路、轻轨与地标</small></span><span class="settings-row-chevron"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></span><span class="toolbar-chevron" aria-hidden="true">⌄</span></button>
       <span id="mode-description" class="mode-description">一个社区，一张构成图</span>
     </div>
     <section id="layers-panel" class="layers-panel" aria-label="选择地图图层" hidden>
-      <div class="filter-heading"><div><h2>地图图层</h2><p>社区构成的地理参照</p></div><button id="close-layers" class="icon-button" aria-label="关闭地图图层">×</button></div>
+      <div class="filter-heading dialog-nav"><button id="back-layers" class="dialog-back" type="button" aria-label="返回地图设置"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button><div class="dialog-nav-title"><h2 id="layers-heading">地图图层</h2><p>社区构成的地理参照</p></div><button id="close-layers" class="icon-button dialog-close" type="button" aria-label="关闭地图图层">×</button></div>
+      <div class="dialog-scroll">
       <label class="layer-option"><input type="checkbox" id="roads-toggle" checked><span>道路与铁路底图<small>主要道路、道路名称及铁路轨道</small></span></label>
       <label class="layer-option"><input type="checkbox" id="labels-toggle" checked><span>社区标注<small>随缩放逐步显示；自动避开重叠</small></span></label>
       <label class="layer-option"><input type="checkbox" id="transit-toggle"><span>CTrain 线路与车站<small>Red / Blue 运营线路 · Green 未运营线路</small></span></label>
       <label class="layer-option"><input type="checkbox" id="landmarks-toggle"><span>地理地标<small>机场、公园绿地及原住民保留区</small></span></label>
       <div class="context-legend"><span><i class="landmark-swatch airport-swatch"></i>机场</span><span><i class="landmark-swatch park-swatch"></i>公园</span><span><i class="landmark-swatch reserve-swatch"></i>保留区</span><span><i class="railway-swatch"></i>铁路</span></div>
       <p class="filter-note">地理底色不代表收入或人口占比。点击车站可查看线路与建设状态。</p>
+      </div>
     </section>
     <section id="groups-panel" class="groups-panel" aria-label="选择人口群体" hidden>
-      <div class="filter-heading"><div><h2>选择人口群体</h2><p>两个视图共用这份选择</p></div><button id="close-groups" class="icon-button" aria-label="关闭人口群体选择">×</button></div>
+      <div class="filter-heading dialog-nav"><div class="dialog-nav-title"><h2 id="groups-heading">选择人口群体</h2><p>两个视图共用这份选择</p></div><button id="close-groups" class="icon-button dialog-close" type="button" aria-label="关闭人口群体选择">×</button></div>
+      <div class="dialog-scroll">
       <input type="search" id="group-search" placeholder="搜索名称 / Search groups" aria-label="搜索人口群体">
       <div class="filter-actions"><button id="default-groups" class="text-button">常用五类</button><button id="all-groups" class="text-button">全选</button><button id="clear-groups" class="text-button">清空</button><span id="filter-count"></span></div>
       <div id="group-list" class="group-list"></div>
       <p class="filter-note">按普查原始分类展示；这些类别不等于国籍。“非可见少数族裔”包括原住民等，不能等同于白人。</p>
+      </div>
     </section>
   </nav>
 
@@ -102,24 +106,37 @@
 
 
   <dialog id="mobile-more-dialog" class="mobile-sheet" aria-labelledby="mobile-more-heading">
-    <div class="mobile-sheet-heading"><h2 id="mobile-more-heading" data-mobile-text="地图设置">地图设置</h2><button id="close-mobile-more" type="button" aria-label="关闭设置">×</button></div>
-    <div id="mobile-settings-content">
-      <div id="mobile-layers-slot" class="mobile-only"></div>
-      <label id="mobile-language-slot" class="mobile-settings-row" for="language-preference"><span data-mobile-text="语言">语言</span><select id="language-preference"><option value="system">跟随系统</option><option value="zh" lang="zh-CN">中文</option><option value="en" lang="en">English</option></select></label>
-      <label id="mobile-theme-slot" class="mobile-settings-row" for="theme-preference"><span data-mobile-text="外观">外观</span><select id="theme-preference"><option value="system">跟随系统</option><option value="light">白天</option><option value="dark">夜间</option></select></label>
-      <button id="method-button" class="text-button">数据说明 ↗</button>
-      <button id="mobile-full-map" type="button" data-mobile-text="全屏查看地图">全屏查看地图</button>
+    <div class="mobile-sheet-heading dialog-nav"><h2 id="mobile-more-heading" data-mobile-text="地图设置">地图设置</h2><button id="close-mobile-more" class="dialog-close" type="button" aria-label="关闭设置">×</button></div>
+    <div id="mobile-settings-content" class="dialog-scroll">
+      <section class="settings-section" aria-labelledby="map-settings-heading">
+        <h3 id="map-settings-heading" data-mobile-text="地图与资料">地图与资料</h3>
+        <div class="settings-group">
+          <div id="mobile-layers-slot" class="mobile-only"></div>
+          <button id="method-button" class="text-button settings-link" type="button" aria-haspopup="dialog"><span class="settings-row-icon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></span><span class="settings-row-copy"><span data-mobile-text="数据说明">数据说明</span><small data-mobile-text="统计口径与官方来源">统计口径与官方来源</small></span><span class="settings-row-chevron"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></span></button>
+          <button id="mobile-full-map" class="settings-link" type="button"><span class="settings-row-icon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg></span><span class="settings-row-copy" data-mobile-text="全屏查看地图">全屏查看地图</span><span class="settings-row-chevron"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></span></button>
+        </div>
+      </section>
+      <section class="settings-section" aria-labelledby="display-settings-heading">
+        <h3 id="display-settings-heading" data-mobile-text="显示偏好">显示偏好</h3>
+        <div class="settings-group">
+          <label id="mobile-language-slot" class="mobile-settings-row" for="language-preference"><span class="settings-row-icon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a17 17 0 0 1 0 18 17 17 0 0 1 0-18Z"/></svg></span><span class="settings-row-copy" data-mobile-text="语言">语言</span><select id="language-preference"><option value="system">跟随系统</option><option value="zh" lang="zh-CN">中文</option><option value="en" lang="en">English</option></select></label>
+          <label id="mobile-theme-slot" class="mobile-settings-row" for="theme-preference"><span class="settings-row-icon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"/></svg></span><span class="settings-row-copy" data-mobile-text="外观">外观</span><select id="theme-preference"><option value="system">跟随系统</option><option value="light">白天</option><option value="dark">夜间</option></select></label>
+        </div>
+      </section>
     </div>
   </dialog>
   <dialog id="mobile-legend-dialog" class="mobile-sheet" aria-labelledby="mobile-legend-heading">
-    <div class="mobile-sheet-heading"><h2 id="mobile-legend-heading" data-mobile-text="图例">图例</h2><button id="close-mobile-legend" type="button" aria-label="关闭图例">×</button></div>
-    <div id="mobile-composition-legend" class="mobile-legend-stack"></div>
-    <div id="mobile-distribution-legend" class="mobile-legend-stack" hidden></div>
+    <div class="mobile-sheet-heading dialog-nav"><h2 id="mobile-legend-heading" data-mobile-text="图例">图例</h2><button id="close-mobile-legend" class="dialog-close" type="button" aria-label="关闭图例">×</button></div>
+    <div class="dialog-scroll">
+      <div id="mobile-composition-legend" class="mobile-legend-stack"></div>
+      <div id="mobile-distribution-legend" class="mobile-legend-stack" hidden></div>
+    </div>
   </dialog>
   <dialog id="mobile-filter-dialog" class="mobile-sheet"></dialog>
 
-  <dialog id="method-dialog">
-    <div class="dialog-heading"><span class="eyebrow">ABOUT THE DATA</span><button id="close-method" class="icon-button" aria-label="关闭数据说明">×</button></div>
+  <dialog id="method-dialog" aria-labelledby="method-heading">
+    <div class="dialog-heading dialog-nav"><button id="back-method" class="dialog-back" type="button" aria-label="返回地图设置"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button><h2 id="method-heading" data-mobile-text="数据说明">数据说明</h2><button id="close-method" class="icon-button dialog-close" type="button" aria-label="关闭数据说明">×</button></div>
+    <div class="dialog-scroll">
     <h2>这张地图怎样读？</h2>
     <div class="method-grid">
       <section><h3>社区构成 / 分布对比</h3><p>“社区构成”用一个等大的圆展示一个社区，彩色扇区对应勾选类别，灰色是其余类别。圆的大小不代表人口多少；全市视角会避开重叠，放大可看到更多社区，未显示圆的社区仍可点击。“分布对比”用底色表示各类别在社区人口中的占比，所有地图共用固定色阶和地图位置。</p><p>地图中的圆心只是社区内的显示位置，不是居民地址。</p></section>
@@ -130,6 +147,7 @@
       <section><h3>覆盖与选区参考</h3><p id="coverage-definition"></p><p id="boundary-note"></p><p>学校分配需按具体地址核验。收入或人口构成不能等同于学校质量、治安或个人特征。地图仅覆盖 Calgary 市内社区，不含 Springbank、Bearspaw 等市外地区。</p></section>
     </div>
     <div class="method-sources"><h3>原始来源</h3><div id="source-list"></div><p id="prepared-note"></p><p id="license-note"></p></div>
+    </div>
   </dialog>
   <noscript>请启用 JavaScript 以查看互动地图。官方数据可从 https://www.calgary.ca/communities/profiles.html 查阅。</noscript>
 </body>

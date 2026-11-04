@@ -1,6 +1,10 @@
 import { addTranslations, currentLanguage, t } from './i18n.js';
 
 addTranslations({
+  '返回地图设置': 'Back to map settings', '数据说明': 'About the data',
+  '道路、轻轨与地标': 'Roads, transit and landmarks',
+  '统计口径与官方来源': 'Definitions and official sources',
+  '显示偏好': 'Display preferences', '地图与资料': 'Map and data',
   '更多': 'More', '地图设置': 'Map settings', '关闭设置': 'Close settings',
   '图例': 'Legend', '关闭图例': 'Close legend', '查看详情': 'Details', '收起': 'Collapse',
   '全屏查看地图': 'Show full map', '语言': 'Language', '外观': 'Appearance',
@@ -74,7 +78,7 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
     if (!media.matches) return { top: 0, right: 0, bottom: 0, left: 0 };
     const focused = document.body.classList.contains('map-focus');
     const top = focused ? 12 : Math.ceil(header.getBoundingClientRect().bottom + 8 + viewbar.getBoundingClientRect().height) + 10;
-    const bottom = focused ? 0 : Math.ceil(sidebar.getBoundingClientRect().height);
+    const bottom = focused || sidebar.dataset.sheetSnap === 'closed' ? 0 : Math.ceil(sidebar.getBoundingClientRect().height);
     return { top, bottom: bottom + 14, left: 12, right: 12 };
   }
   function measure() {
@@ -131,13 +135,13 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
     $('mobile-more').setAttribute('aria-label', t('地图设置'));
     $('mobile-more').setAttribute('aria-expanded', String(more.open));
     $('mobile-legend-button').setAttribute('aria-expanded', String(legend.open));
-    $('mobile-detail-label').textContent = t(sidebar.classList.contains('collapsed') ? '查看详情' : '收起');
-    $('mobile-detail-handle').setAttribute('aria-label', `${t(sidebar.classList.contains('collapsed') ? '查看详情' : '收起')} · ${$('community-name').textContent}`);
     syncFilterDialog();
     scheduleMeasure();
   }
 
   $('mobile-more').addEventListener('click', () => openDialog(more));
+  $('back-layers')?.addEventListener('click', () => { closeFilters(); openDialog(more); });
+  $('back-method')?.addEventListener('click', () => { $('method-dialog').close(); openDialog(more); });
   // The layer picker becomes its own sheet, rather than nesting native dialogs.
   $('layers-button').addEventListener('click', () => closeDialog(more), true);
   $('mobile-legend-button').addEventListener('click', () => openDialog(legend));

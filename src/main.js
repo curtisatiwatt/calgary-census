@@ -2,8 +2,11 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './styles.css';
 import './mobile-ui.css';
+import './mobile-dialogs.css';
+import './community-sheet.css';
 import './map-legibility.css';
 import { initMobileUI, getMobileMapInsets } from './mobile-ui.js';
+import { initCommunitySheet } from './community-sheet.js';
 import { loadData } from './data.js';
 import { t, currentLanguage, initLanguagePreference, applyStaticTranslations, localizeHtml } from './i18n.js';
 import { initTheme, refreshThemeControl, isDarkTheme } from './theme.js';
@@ -30,6 +33,7 @@ let syncFrame = null;
 let lastMobile = mobile();
 let lastComparisonPageSize = null;
 let mobileUI;
+let communitySheet;
 let observedTextSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
 const labelMeasure = document.createElement('canvas').getContext('2d');
 
@@ -40,9 +44,8 @@ function populationRecord(code) { return state.data?.communities[code] || null; 
 function activeContexts() { return state.mode === 'composition' ? [state.composition].filter(Boolean) : state.comparisonContexts; }
 function closeTooltips(closePopups = true) { state.contexts.forEach(context => { context.tooltip.close(); if (closePopups) context.map.closePopup(); }); }
 function setCollapsed(collapsed) {
-  sidebar.classList.toggle('collapsed', collapsed);
-  $('mobile-detail-handle').setAttribute('aria-expanded', String(!collapsed));
-  $('mobile-chevron').textContent = collapsed ? '⌃' : '⌄';
+  if (mobile() && communitySheet) communitySheet.setSnap(collapsed ? 'peek' : 'half');
+  else sidebar.classList.toggle('collapsed', collapsed);
   mobileUI?.refresh();
 }
 function toggleGroups(open) {
@@ -122,7 +125,7 @@ function renderMetadata() {
   $('year-definition').textContent = `人口资料来自 ${m.populationYear} 年人口普查，收入参考期为 ${m.incomeYear} 年，不是今天的收入与人口。`;
   $('income-definition').textContent = m.incomeDefinition || '';
   $('latest-census-note').textContent = m.latestCensusNote || '';
-  if (m.populationGroupsDefinition) $('population-groups-definition').textContent = m.populationGroupsDefinition.replace('默认勾选全市人数最多的五个可见少数族裔类别', '初始只显示华人，可自行选择其他或多个人口群体');
+  if (m.populationGroupsDefinition) $('population-groups-definition').textContent = m.populationGroupsDefinition.replace('默认勾选全市人数最多的五个可见少数族裔类别', '初始不选人口群体，可自行选择一个或多个人口群体');
   $('coverage-definition').textContent = `覆盖 ${state.counts.total} 个官方区域，${Object.keys(state.data.communities).length} 个有可用人口分类，${state.counts.income} 个有收入数据；保留缺失区域的边界。`;
   $('boundary-note').textContent = m.boundaryNote || '';
   $('prepared-note').textContent = m.preparedDate ? `原始数据整理于 ${m.preparedDate}；本图为官方资料快照。` : '';
@@ -264,7 +267,7 @@ function tooltipContent(feature, context) {
 }
 
 function createMap(element, groupId = null) {
-  const map = L.map(element, { zoomControl: false, zoomSnap: 0.25, zoomDelta: 0.5, minZoom: 8, maxZoom: 17, attributionControl: true });
+  const map = L.map(element, { zoomControl: false, zoomSnap: 0.25, zoomDelta: 0.5, minZoom: 8, maxZoom: 17, attributionControl: false });
   const context = { map, groupId, layers: new Map(), donuts: L.layerGroup(), labels: L.layerGroup(), donutCount: 0 };
   context.tooltip = createMapTooltip({ map, tooltip: L.tooltip({ className: 'community-tooltip', direction: 'top', opacity: 0.98 }), enabled: () => !mobile(), hoverEnabled: () => window.matchMedia('(any-hover: hover)').matches });
   for (const [name, zIndex] of [['water', 410], ['roads', 420], ['donuts', 450], ['labels', 470]]) {
@@ -274,8 +277,6 @@ function createMap(element, groupId = null) {
   }
   context.donuts.addTo(map);
   context.labels.addTo(map);
-  map.attributionControl.setPrefix(false);
-  map.attributionControl.addAttribution('<a href="https://www.calgary.ca/communities/profiles.html" target="_blank" rel="noopener">City of Calgary</a> · 2021');
   context.boundaries = L.geoJSON({ type: 'FeatureCollection', features: state.features }, {
     style: feature => styleFor(context, feature),
     onEachFeature(feature, layer) {
@@ -351,7 +352,9 @@ function mobileLabelObstacles(map) {
 
 function fitPadding(map, community = false) {
   if (!mobile()) return { paddingTopLeft: [community ? 35 : 24, 65], paddingBottomRight: [community ? 35 : 24, 100] };
-  const { top, bottom, left, right } = getMobileMapInsets();
+  const { top, left, right } = getMobileMapInsets();
+  // Fit to the destination stop, rather than the old height during its animation.
+  const bottom = (communitySheet?.getTargetInset() || 0) + 14;
   const size = map.getSize();
   const available = Math.max(0, size.y - 120);
   const total = top + bottom + 32;
@@ -373,11 +376,11 @@ function fitCity() {
   updateDonuts();
 }
 
-function fitCommunity(code) {
+function fitCommunity(code, collapse = true) {
   const contexts = activeContexts();
   const layer = contexts[0]?.layers.get(code);
   if (!layer) return;
-  if (mobile()) setCollapsed(true);
+  if (mobile() && collapse) setCollapsed(true);
   syncing = true;
   contexts[0].map.fitBounds(layer.getBounds(), { ...fitPadding(contexts[0].map, true), maxZoom: 14, animate: false });
   syncing = false;
@@ -391,12 +394,13 @@ function selectCommunity(code, zoom = true, expand = true) {
   if (!state.byCode.has(code)) return;
   closeTooltips();
   state.selected = code;
-  if (mobile() && expand && !state.focusMode) setCollapsed(true);
   renderDetail();
+  if (mobile() && expand && !state.focusMode) communitySheet.open('half');
+  else communitySheet?.refresh();
   refreshStyles();
   updateDonuts();
   renderComparisonHeadings();
-  if (zoom) fitCommunity(code);
+  if (zoom) fitCommunity(code, false);
   $('announcer').textContent = t(`已选择 ${state.byCode.get(code).properties.name}。人口构成已更新。`);
   try { history.replaceState(null, '', `#${encodeURIComponent(code)}`); } catch { /* embedded preview */ }
 }
@@ -638,7 +642,7 @@ function initializeControls() {
     closeTooltips();
     applyStaticTranslations(); refreshThemeControl(); refreshFocusControl(); mobileUI?.refresh();
     if (state.data) {
-      renderMetadata(); renderGroupList(); renderDonutKey(); renderDetail(); renderComparisonHeadings();
+      renderMetadata(); renderGroupList(); renderDonutKey(); renderDetail(); renderComparisonHeadings(); communitySheet?.refresh();
       $('mode-description').textContent = t(state.mode === 'composition' ? '一个社区，一张构成图' : '同一色阶，查看聚居分布');
       updateDonuts(); state.contexts.forEach(updateLabels);
       if ($('search').value) renderSearch();
@@ -677,9 +681,8 @@ function initializeControls() {
   $('zoom-in').addEventListener('click', () => activeContexts()[0]?.map.zoomIn(0.5));
   $('zoom-out').addEventListener('click', () => activeContexts()[0]?.map.zoomOut(0.5));
   $('focus-community').addEventListener('click', () => fitCommunity(state.selected));
-  $('mobile-detail-handle').addEventListener('click', () => setCollapsed(!sidebar.classList.contains('collapsed')));
   $('method-button').addEventListener('click', () => { toggleGroups(false); toggleLayers(false); closeTooltips(); dialog.showModal(); });
-  $('close-method').addEventListener('click', () => dialog.close());
+  $('close-method').addEventListener('click', () => { dialog.close(); $('mobile-more').focus({ preventScroll: true }); });
   dialog.addEventListener('click', event => {
     if (event.target !== dialog) return;
     const rect = dialog.getBoundingClientRect();
@@ -732,6 +735,7 @@ function initializeControls() {
 async function init() {
   applyStaticTranslations();
   initTheme();
+  communitySheet = initCommunitySheet({ onChange: () => mobileUI?.refresh(), onClose: closeTooltips });
   initializeControls();
   initLanguagePreference();
   mobileUI = initMobileUI({ onLayoutChange: () => {
@@ -749,7 +753,7 @@ async function init() {
     state.byCode = new Map(data.features.map(f => [f.properties.code, f])); state.counts = summarize(data.features);
     state.groups = data.populationData.groups; state.groupById = new Map(state.groups.map(g => [g.id, g]));
     state.colors = Object.fromEntries(state.groups.map((g, i) => [g.id, PALETTE[i % PALETTE.length]]));
-    state.selectedGroups = ['chinese'].filter(id => state.groupById.has(id));
+    state.selectedGroups = [];
     const linkedCode = hashCode(location.hash, state.features);
     state.selected = linkedCode || (state.byCode.has('PAN') ? 'PAN' : data.features[0].properties.code);
     renderMetadata(); renderGroupList(); renderDonutKey(); renderDetail();
