@@ -19,6 +19,7 @@
       <input id="search" type="search" placeholder="搜索社区，例如 Panorama Hills" autocomplete="off" role="combobox" aria-label="搜索卡尔加里社区" aria-autocomplete="list" aria-expanded="false" aria-controls="search-results">
       <kbd aria-hidden="true">/</kbd><div id="search-results" class="search-results" role="listbox" hidden></div>
     </div>
+    <button id="mobile-more" class="mobile-only" type="button" aria-label="地图设置" aria-haspopup="dialog" aria-controls="mobile-more-dialog" aria-expanded="false"><span data-mobile-text="更多">更多</span></button>
     <div class="header-actions"><span class="data-edition" id="data-edition">2021 年人口普查</span><button id="method-button" class="text-button">数据说明 ↗</button><button id="language-toggle" class="preference-button language-button" type="button" aria-label="Switch to English">EN</button><button id="theme-toggle" class="preference-button theme-button" type="button" aria-label="切换至夜间模式"></button></div>
   </header>
 
@@ -35,6 +36,7 @@
     </div>
     <section id="layers-panel" class="layers-panel" aria-label="选择地图图层" hidden>
       <div class="filter-heading"><div><h2>地图图层</h2><p>社区构成的地理参照</p></div><button id="close-layers" class="icon-button" aria-label="关闭地图图层">×</button></div>
+      <div id="mobile-income-slot" class="mobile-only"></div>
       <label class="layer-option"><input type="checkbox" id="roads-toggle" checked><span>道路与铁路底图<small>主要道路、道路名称及铁路轨道</small></span></label>
       <label class="layer-option"><input type="checkbox" id="labels-toggle" checked><span>社区标注<small>随缩放逐步显示；自动避开重叠</small></span></label>
       <label class="layer-option"><input type="checkbox" id="transit-toggle" checked><span>CTrain 线路与车站<small>Red / Blue 运营线路 · Green 未运营线路</small></span></label>
@@ -54,7 +56,7 @@
   <main class="workspace">
     <aside class="sidebar" aria-label="社区详情">
       <section class="detail-panel" id="detail-panel">
-        <button id="mobile-detail-handle" class="mobile-detail-handle" aria-label="展开或收起社区详情" aria-expanded="false" aria-controls="detail-body"><span class="handle-bar"></span><span>社区详情</span><span id="mobile-chevron">⌃</span></button>
+        <button id="mobile-detail-handle" class="mobile-detail-handle" aria-label="展开或收起社区详情" aria-expanded="false" aria-controls="detail-body"><span class="handle-bar"></span><span id="mobile-detail-label">查看详情</span><span id="mobile-chevron">⌃</span></button>
         <div class="detail-topline"><span class="eyebrow">SELECTED COMMUNITY</span><button id="focus-community" class="text-button">定位 ↗</button></div>
         <h1 id="community-name">正在载入社区</h1>
         <div class="community-meta" id="community-meta">正在加载官方社区数据…</div>
@@ -91,12 +93,29 @@
         <div class="population-legend map-legend" id="population-legend"><div class="legend-title"><strong>占社区人口比例</strong><span>所有地图使用相同色阶</span></div><div class="population-ramp" id="population-ramp"></div><div class="population-bin-labels"><span>&lt;5%</span><span>5–10%</span><span>10–20%</span><span>20–30%</span><span>30–40%</span><span>40%+</span></div><p><span class="missing-swatch"></span> 暂无数据，不是 0%</p></div>
       </section>
       <div id="transit-legend" class="transit-legend" aria-label="CTrain 线路图例"><span><i class="transit-line red-line"></i>Red</span><span><i class="transit-line blue-line"></i>Blue</span><span><i class="transit-line green-line"></i>Green · 未运营</span><span><i class="transit-line future-line"></i>远期规划</span></div>
+      <button id="mobile-legend-button" class="mobile-only" type="button" aria-haspopup="dialog" aria-controls="mobile-legend-dialog" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h5v5H4zM4 14h5v5H4zM13 7h7M13 16h7"/></svg><span data-mobile-text="图例">图例</span></button>
       <div class="map-tools"><button id="focus-map" class="map-button focus-map-button" type="button" aria-label="专注地图" title="专注地图" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="focus-expand" d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/><path class="focus-restore" d="M3 8h5V3m13 5h-5V3M8 21v-5H3m13 5v-5h5"/></svg><span id="focus-map-label">专注地图</span></button><button id="fit-city" class="map-button" aria-label="查看整个卡尔加里">全市 ⤢</button><button id="zoom-in" class="map-button square" aria-label="放大地图">+</button><button id="zoom-out" class="map-button square" aria-label="缩小地图">−</button></div>
       <div id="map-warning" class="map-warning" hidden role="status"></div>
       <div id="loading-overlay" class="loading-overlay"><div class="loader"></div><strong>正在展开 Calgary</strong><span>读取官方社区边界与人口资料</span></div>
     </section>
   </main>
   <div id="announcer" class="sr-only" aria-live="polite"></div>
+
+
+  <dialog id="mobile-more-dialog" class="mobile-sheet" aria-labelledby="mobile-more-heading">
+    <div class="mobile-sheet-heading"><h2 id="mobile-more-heading" data-mobile-text="地图设置">地图设置</h2><button id="close-mobile-more" type="button" aria-label="关闭设置">×</button></div>
+    <div id="mobile-settings-content">
+      <div id="mobile-language-slot" class="mobile-settings-row"><span data-mobile-text="语言">语言</span></div>
+      <div id="mobile-theme-slot" class="mobile-settings-row"><span data-mobile-text="外观">外观</span></div>
+      <button id="mobile-full-map" type="button" data-mobile-text="全屏查看地图">全屏查看地图</button>
+    </div>
+  </dialog>
+  <dialog id="mobile-legend-dialog" class="mobile-sheet" aria-labelledby="mobile-legend-heading">
+    <div class="mobile-sheet-heading"><h2 id="mobile-legend-heading" data-mobile-text="图例">图例</h2><button id="close-mobile-legend" type="button" aria-label="关闭图例">×</button></div>
+    <div id="mobile-composition-legend" class="mobile-legend-stack"></div>
+    <div id="mobile-distribution-legend" class="mobile-legend-stack" hidden></div>
+  </dialog>
+  <dialog id="mobile-filter-dialog" class="mobile-sheet"></dialog>
 
   <dialog id="method-dialog">
     <div class="dialog-heading"><span class="eyebrow">ABOUT THE DATA</span><button id="close-method" class="icon-button" aria-label="关闭数据说明">×</button></div>

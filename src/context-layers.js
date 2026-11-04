@@ -2,7 +2,7 @@ import L from 'leaflet';
 import { t, currentLanguage, localizeHtml } from './i18n.js';
 import { isDarkTheme } from './theme.js';
 import { escapeHtml as esc, safeUrl } from './map-utils.js';
-import { displayMapName, groupRoadLabels, visibleLineAnchors, visibleWaterAnchors } from './label-placement.js';
+import { displayMapName, groupRoadLabels, roadPriority, visibleLineAnchors, visibleWaterAnchors } from './label-placement.js';
 
 export const LINE_COLORS = Object.freeze({ red: '#ca3544', blue: '#2879bd', green: '#22834b' });
 const lineName = id => ({ red: 'Red Line', blue: 'Blue Line', green: 'Green Line' }[id] || id);
@@ -17,7 +17,7 @@ export function stationContent(properties) {
 }
 
 /** Context geometry never changes census statistics or the heat-map scale. */
-export function createContextLayers({ context, basemap, geography, operatingTransit, greenTransit, orientationLandmarks, communityNames = [], visible, onStationOpen }) {
+export function createContextLayers({ context, basemap, geography, operatingTransit, greenTransit, orientationLandmarks, communityNames = [], visible, onStationOpen, getLabelObstacles }) {
   const map = context.map;
   const definitions = [['geography', 405], ['water', 410], ['roads', 420], ['roadLabels', 425], ['waterLabels', 430], ['transit', 440], ['stations', 480], ['stationLabels', 485], ['landmarkLabels', 490]];
   for (const [name, zIndex] of definitions) {
@@ -62,6 +62,21 @@ export function createContextLayers({ context, basemap, geography, operatingTran
   const stationLayers = [];
   const labelBoxes = [];
   const collection = items => ({ type: 'FeatureCollection', features: items });
+  const textMeasure = document.createElement('canvas').getContext('2d');
+
+  function roadStyle(feature, casing, zoomBucket, dark) {
+    const priority = roadPriority(feature.properties);
+    const primary = priority >= 3;
+    const inner = zoomBucket === 2 ? (primary ? 3.4 : 2.2)
+      : zoomBucket === 1 ? (primary ? 2.2 : 1.5) : (primary ? 1.6 : .9);
+    return {
+      color: casing ? (dark ? '#15212c' : primary ? '#818b94' : '#9da5aa')
+        : (dark ? primary ? '#a2b2bf' : '#7f929f' : '#ffffff'),
+      weight: inner + (casing ? (zoomBucket === 2 ? 1.6 : 1.1) : 0),
+      opacity: casing ? .9 : 1,
+      lineCap: 'round', lineJoin: 'round',
+    };
+  }
 
   const areasLayer = L.geoJSON(collection(areaFeatures), {
     pane: 'geography', interactive: false,
@@ -74,7 +89,7 @@ export function createContextLayers({ context, basemap, geography, operatingTran
   }).addTo(map);
   const waterLayer = L.geoJSON(basemap || collection([]), { filter: f => f.properties.kind === 'water', pane: 'water', interactive: false, style: { color: '#75a7b5', weight: .85, fillColor: '#a5cad4', fillOpacity: .9 } }).addTo(map);
   for (const casing of [true, false]) {
-    const layer = L.geoJSON(collection(roadFeatures), { pane: 'roads', interactive: false, style: { color: casing ? '#6d8275' : '#fffff7', weight: casing ? 3.1 : 1.6, opacity: casing ? .55 : .96 } }).addTo(map);
+    const layer = L.geoJSON(collection(roadFeatures), { pane: 'roads', interactive: false, style: feature => roadStyle(feature, casing, 0, isDarkTheme()) }).addTo(map);
     roads.push({ layer, casing });
   }
   for (const casing of [true, false]) {
@@ -141,6 +156,16 @@ export function createContextLayers({ context, basemap, geography, operatingTran
     const bounds = map.getBounds();
     const size = map.getSize();
     const dark = isDarkTheme();
+    // Match rem-based map fonts, including an enlarged browser/system text size.
+    // Collision boxes use measured glyph widths instead of the old 9px estimate.
+    const rootStyle = getComputedStyle(document.documentElement);
+    const textScale = (parseFloat(rootStyle.fontSize) || 16) / 16;
+    const family = getComputedStyle(map.getContainer()).fontFamily;
+    const measureLabel = (text, size = 12, extra = 0) => {
+      const fontSize = size * textScale;
+      if (textMeasure) textMeasure.font = `500 ${fontSize}px ${family}`;
+      return { width: Math.ceil((textMeasure?.measureText(text).width ?? text.length * fontSize * .62) + 4 + extra), height: Math.ceil(fontSize * 1.4) };
+    };
     const zoomBucket = zoom < 11.5 ? 0 : zoom < 13 ? 1 : 2;
     const styleBucket = `${zoomBucket}:${dark}`;
     if (styleBucket !== lastStyleBucket) {
@@ -152,9 +177,9 @@ export function createContextLayers({ context, basemap, geography, operatingTran
           : kind === 'reserve' ? { color: dark ? '#81765d' : '#af926b', fillColor: dark ? '#484333' : '#ded0b7' }
           : { color: dark ? '#416850' : '#80a777', fillColor: dark ? '#27483a' : '#a5c898' };
       });
-      waterLayer.setStyle({ color: dark ? '#3e6976' : '#75a7b5', fillColor: dark ? '#234958' : '#a5cad4' });
-      roads.forEach(({ layer, casing }) => layer.setStyle({ color: casing ? (dark ? '#20343a' : '#6d8275') : (dark ? '#637278' : '#fffff7'), weight: casing ? (detail ? 3.4 : 2.2) : (detail ? 1.8 : 1.1) }));
-      railways.forEach(({ layer, casing }) => layer.setStyle({ color: casing ? (dark ? '#83918d' : '#65716e') : (dark ? '#20343a' : '#f5f6ed'), weight: casing ? (detail ? 2 : 1.2) : (detail ? 1.1 : .7), opacity: detail ? .75 : .42 }));
+      waterLayer.setStyle({ color: dark ? '#648caa' : '#648fa9', weight: .9, fillColor: dark ? '#294d68' : '#acd2e3' });
+      roads.forEach(({ layer, casing }) => layer.setStyle(feature => roadStyle(feature, casing, zoomBucket, dark)));
+      railways.forEach(({ layer, casing }) => layer.setStyle({ color: casing ? (dark ? '#83918d' : '#65716e') : (dark ? '#20343a' : '#f5f6ed'), weight: casing ? (detail ? 1.6 : 1) : (detail ? .9 : .6), opacity: detail ? .6 : .32 }));
       const routeWeight = (lineId, future) => future ? (detail ? 2.3 : 1.6) : lineId === 'red' ? (detail ? 5 : 3.4) : (detail ? 3 : 2.1);
       routeCasings.forEach(({ layer, lineId, future }) => layer.setStyle({ color: dark ? '#14272e' : '#fffef7', weight: routeWeight(lineId, future) + (detail ? 1.8 : 1.2) }));
       routeLayers.forEach(({ layer, lineId, future }) => layer.setStyle({ color: future ? (dark ? '#668e70' : '#65a17b') : dark ? ({red:'#ee7d87',blue:'#74b9e9',green:'#7bbf8c'}[lineId]) : LINE_COLORS[lineId], weight: routeWeight(lineId, future) }));
@@ -184,6 +209,7 @@ export function createContextLayers({ context, basemap, geography, operatingTran
     stationLabels.clearLayers();
     landmarkLabels.clearLayers();
     labelBoxes.length = 0;
+    labelBoxes.push(...(getLabelObstacles?.() || []));
     const reserveBox = box => {
       if (box.x < 8 || box.y < 8 || box.x + box.w > size.x - 8 || box.y + box.h > size.y - 8) return false;
       if (labelBoxes.some(a => box.x < a.x + a.w + 9 && box.x + box.w + 9 > a.x && box.y < a.y + a.h + 6 && box.y + box.h + 6 > a.y)) return false;
@@ -201,13 +227,13 @@ export function createContextLayers({ context, basemap, geography, operatingTran
       const priority = waterPriority(feature.properties.name);
       if (zoom < (priority === 4 ? 11 : priority === 3 ? 11.5 : 13) || watersShown >= waterLimit) continue;
       const text = displayMapName(feature.properties.name);
-      const width = Math.min(220, text.length * 6 + 8);
+      const { width, height } = measureLabel(text);
       const pixel = visibleWaterAnchors(feature.geometry, project, size, width)
-        .find(point => reserveBox({ x: point.x - width / 2, y: point.y - 9, w: width, h: 18 }));
+        .find(point => reserveBox({ x: point.x - width / 2, y: point.y - height / 2, w: width, h: height }));
       if (!pixel) continue;
       watersShown++;
       placedWaterNames.add(waterNameKey);
-      L.marker(map.containerPointToLatLng([pixel.x, pixel.y]), { pane: 'waterLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: 'water-label', html: `<span>${esc(text)}</span>`, iconSize: [width, 18], iconAnchor: [width / 2, 9] }) }).addTo(waterLabels);
+      L.marker(map.containerPointToLatLng([pixel.x, pixel.y]), { pane: 'waterLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: 'water-label', html: `<span>${esc(text)}</span>`, iconSize: [width, height], iconAnchor: [width / 2, height / 2] }) }).addTo(waterLabels);
     }
     let placesShown = 0;
     const placedPlaceNames = [];
@@ -218,11 +244,11 @@ export function createContextLayers({ context, basemap, geography, operatingTran
       const [lng, lat] = feature.geometry.coordinates;
       if (!bounds.contains([lat, lng])) continue;
       const pixel = project([lng, lat]);
-      const width = Math.min(215, p.name.length * 5.9 + 15);
-      if (!reserveBox({ x: pixel.x - 3, y: pixel.y - 9, w: width, h: 18 })) continue;
+      const { width, height } = measureLabel(p.name, 12, 10);
+      if (!reserveBox({ x: pixel.x - 3, y: pixel.y - height / 2, w: width, h: height })) continue;
       placesShown++;
       placedPlaceNames.push(normalizeName(p.name));
-      L.marker([lat, lng], { pane: 'landmarkLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: 'orientation-label', html: `<span>${esc(p.name)}</span>`, iconSize: [width, 18], iconAnchor: [3, 9] }) }).addTo(landmarkLabels);
+      L.marker([lat, lng], { pane: 'landmarkLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: 'orientation-label', html: `<span>${esc(p.name)}</span>`, iconSize: [width, height], iconAnchor: [3, height / 2] }) }).addTo(landmarkLabels);
     }
     let parksShown = 0;
     const candidates = [
@@ -243,23 +269,22 @@ export function createContextLayers({ context, basemap, geography, operatingTran
       if (!bounds.contains(point)) continue;
       const pixel = map.latLngToContainerPoint(point);
       const text = p.kind === 'airport' ? 'YYC AIRPORT' : name;
-      const width = p.kind === 'airport' ? 100 : p.kind === 'reserve' ? 150 : Math.min(140, text.length * 5.7);
-      const height = 28;
+      const { width, height } = measureLabel(text, 11);
       if (!reserveBox({ x: pixel.x - width / 2, y: pixel.y - height / 2, w: width, h: height })) continue;
       if (p.kind === 'park') parksShown++;
       L.marker(point, { pane: 'landmarkLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: `landmark-label ${p.kind}-label`, html: `<span>${esc(text)}</span>`, iconSize: [width, height], iconAnchor: [width / 2, height / 2] }) }).addTo(landmarkLabels);
     }
     let roadsShown = 0;
-    const roadLimit = Math.min(zoom < 13 ? 12 : zoom < 14 ? 22 : 30, Math.max(4, Math.floor(size.x * size.y / (zoom < 13 ? 70000 : 47000))));
+    const roadLimit = Math.min(zoom < 13 ? 10 : zoom < 14 ? 18 : 25, Math.max(3, Math.floor(size.x * size.y / ((zoom < 13 ? 85000 : 60000) * textScale))));
     if (visible.roads && zoom >= 12) for (const group of roadLabelGroups) {
       if (roadsShown >= roadLimit) break;
       if (zoom < 13 && group.priority < 2) continue;
-      const width = Math.min(190, group.name.length * 5.6 + 8);
+      const { width, height } = measureLabel(group.name);
       const pixel = visibleLineAnchors(group.lines, project, size, width)
-        .find(point => reserveBox({ x: point.x - width / 2, y: point.y - 9, w: width, h: 18 }));
+        .find(point => reserveBox({ x: point.x - width / 2, y: point.y - height / 2, w: width, h: height }));
       if (!pixel) continue;
       roadsShown++;
-      L.marker(map.containerPointToLatLng([pixel.x, pixel.y]), { pane: 'roadLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: 'road-label', html: `<span>${esc(group.name)}</span>`, iconSize: [width, 18], iconAnchor: [width / 2, 9] }) }).addTo(roadLabels);
+      L.marker(map.containerPointToLatLng([pixel.x, pixel.y]), { pane: 'roadLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: 'road-label', html: `<span>${esc(group.name)}</span>`, iconSize: [width, height], iconAnchor: [width / 2, height / 2] }) }).addTo(roadLabels);
     }
     if (visible.transit && zoom >= 13) for (const feature of stations) {
       const [lng, lat] = feature.geometry.coordinates;
@@ -267,9 +292,9 @@ export function createContextLayers({ context, basemap, geography, operatingTran
       const p = feature.properties;
       const point = map.latLngToContainerPoint([lat, lng]);
       const text = `${p.name}${p.status === 'operating' ? '' : currentLanguage() === 'en' ? ' · not in service' : ' · 未运营'}`;
-      const width = Math.min(210, text.length * 5.8);
-      if (!reserveBox({ x: point.x + 7, y: point.y - 8, w: width, h: 19 })) continue;
-      L.marker([lat, lng], { pane: 'stationLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: `station-label${p.status === 'operating' ? '' : ' future-station-label'}`, html: `<span>${esc(text)}</span>`, iconSize: [width, 20], iconAnchor: [-7, 8] }) }).addTo(stationLabels);
+      const { width, height } = measureLabel(text, 11);
+      if (!reserveBox({ x: point.x + 7, y: point.y - height / 2, w: width, h: height })) continue;
+      L.marker([lat, lng], { pane: 'stationLabels', interactive: false, keyboard: false, icon: L.divIcon({ className: `station-label${p.status === 'operating' ? '' : ' future-station-label'}`, html: `<span>${esc(text)}</span>`, iconSize: [width, height], iconAnchor: [-7, height / 2] }) }).addTo(stationLabels);
     }
 
   }

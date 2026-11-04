@@ -1,6 +1,9 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './styles.css';
+import './mobile-ui.css';
+import './map-legibility.css';
+import { initMobileUI, getMobileMapInsets } from './mobile-ui.js';
 import { loadData } from './data.js';
 import { t, currentLanguage, setLanguage, applyStaticTranslations, localizeHtml } from './i18n.js';
 import { initTheme, refreshThemeControl, isDarkTheme } from './theme.js';
@@ -26,6 +29,9 @@ let syncing = false;
 let syncFrame = null;
 let lastMobile = mobile();
 let lastComparisonPageSize = null;
+let mobileUI;
+let observedTextSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+const labelMeasure = document.createElement('canvas').getContext('2d');
 
 function localize(...roots) { roots.filter(Boolean).forEach(root => applyStaticTranslations(root)); }
 
@@ -37,17 +43,20 @@ function setCollapsed(collapsed) {
   sidebar.classList.toggle('collapsed', collapsed);
   $('mobile-detail-handle').setAttribute('aria-expanded', String(!collapsed));
   $('mobile-chevron').textContent = collapsed ? '⌃' : '⌄';
+  mobileUI?.refresh();
 }
 function toggleGroups(open) {
   $('groups-panel').hidden = !open;
   $('groups-button').setAttribute('aria-expanded', String(open));
-  if (open) { toggleLayers(false); $('group-search').focus(); }
+  if (open) { toggleLayers(false); if (!mobile()) $('group-search').focus(); }
+  mobileUI?.refresh();
 }
 
 function toggleLayers(open) {
   $('layers-panel').hidden = !open;
   $('layers-button').setAttribute('aria-expanded', String(open));
   if (open) { toggleGroups(false); closeTooltips(); }
+  mobileUI?.refresh();
 }
 function refreshFocusControl() {
   const label = t(state.focusMode ? '退出专注' : '专注地图');
@@ -78,13 +87,14 @@ function resizeMapsKeepingView() {
 
 function setFocusMode(focused) {
   if (state.focusMode === focused) return;
-  closeTooltips(); toggleGroups(false); toggleLayers(false); closeSearch();
+  closeTooltips(); toggleGroups(false); toggleLayers(false); closeSearch(); mobileUI?.closeTransient();
   const current = activeContexts()[0];
   if (current?.map._loaded) syncMaps(current);
   // The visible comparison panels and paging controls must share the same size.
   state.focusComparisonPageSize = focused ? (lastComparisonPageSize ?? comparisonPageSize()) : null;
   state.focusMode = focused;
   document.body.classList.toggle('map-focus', focused);
+  mobileUI?.refresh();
   refreshFocusControl();
   // Keep focus on an available control when the surrounding navigation disappears.
   $('focus-map').focus({ preventScroll: true });
@@ -218,7 +228,7 @@ function styleFor(context, feature) {
     color: selected ? (dark ? '#d9efdc' : '#243f42') : missing ? (dark ? '#5a7075' : '#a7b3ac') : (dark ? '#5a7075' : '#fafbf5'),
     weight: selected ? 2.5 : 0.75, opacity: 1,
     fillColor: missing ? (dark ? '#263b42' : '#d6dcd9') : context.groupId ? populationColor(value) : state.income ? colorFor(value) : (dark ? '#263b42' : '#e0e8dc'),
-    fillOpacity: missing ? 0.35 : context.groupId ? (dark ? 0.72 : 0.86) : state.income ? (dark ? 0.62 : 0.67) : 0.72,
+    fillOpacity: missing ? 0.35 : context.groupId ? (dark ? 0.72 : 0.64) : state.income ? (dark ? 0.62 : 0.67) : 0.72,
     dashArray: missing ? '3 3' : null,
   };
 }
@@ -266,7 +276,7 @@ function createMap(element, groupId = null) {
     },
   }).addTo(map);
   if (!groupId) {
-    context.contextLayers = createContextLayers({ context, basemap: state.basemap, geography: state.geographicContext, orientationLandmarks: state.orientationLandmarks, operatingTransit: state.operatingTransit, greenTransit: state.greenTransit, communityNames: state.features.map(f => f.properties.name), visible: { roads: state.roads, transit: state.transit, landmarks: state.landmarks, communityLabels: state.labels }, onStationOpen: () => { closeTooltips(); toggleGroups(false); toggleLayers(false); if (mobile()) setCollapsed(true); } });
+    context.contextLayers = createContextLayers({ context, basemap: state.basemap, geography: state.geographicContext, orientationLandmarks: state.orientationLandmarks, operatingTransit: state.operatingTransit, greenTransit: state.greenTransit, communityNames: state.features.map(f => f.properties.name), visible: { roads: state.roads, transit: state.transit, landmarks: state.landmarks, communityLabels: state.labels }, getLabelObstacles: () => mobileLabelObstacles(map), onStationOpen: () => { closeTooltips(); toggleGroups(false); toggleLayers(false); if (mobile()) setCollapsed(true); } });
   } else {
     renderComparisonBasemap(context);
   }
@@ -295,11 +305,13 @@ function createMap(element, groupId = null) {
 function renderComparisonBasemap(context) {
   if (!state.basemap?.features) return;
   const water = L.geoJSON(state.basemap, { filter: f => f.properties.kind === 'water', pane: 'water', interactive: false }).addTo(context.map);
+  const roadEdges = L.geoJSON(state.basemap, { filter: f => f.properties.kind === 'road', pane: 'roads', interactive: false }).addTo(context.map);
   const roads = L.geoJSON(state.basemap, { filter: f => f.properties.kind === 'road', pane: 'roads', interactive: false }).addTo(context.map);
   context.refreshBasemap = () => {
     const dark = isDarkTheme();
     water.setStyle({ color: dark ? '#3e6976' : '#8bb8c1', weight: .55, fillColor: dark ? '#234958' : '#b5d3d8', fillOpacity: .75 });
-    roads.setStyle({ color: dark ? '#637278' : '#fffff4', weight: 1.1, opacity: .72 });
+    roadEdges.setStyle({ color: dark ? '#223239' : '#737b80', weight: 3, opacity: .8 });
+    roads.setStyle({ color: dark ? '#a6b0b5' : '#ffffff', weight: 1.6, opacity: .95 });
   };
   context.refreshBasemap();
 }
@@ -314,13 +326,35 @@ function syncMaps(source) {
   syncing = false;
 }
 
+function mobileLabelObstacles(map) {
+  if (!mobile()) return [];
+  const { top, bottom } = getMobileMapInsets();
+  const size = map.getSize();
+  const mapRect = map.getContainer().getBoundingClientRect();
+  const controls = [...document.querySelectorAll('.map-tools, #mobile-legend-button')].filter(node => node.offsetWidth && node.offsetHeight).map(node => {
+    const r = node.getBoundingClientRect();
+    return { x: r.left - mapRect.left - 5, y: r.top - mapRect.top - 5, w: r.width + 10, h: r.height + 10 };
+  });
+  return [{ x: 0, y: 0, w: size.x, h: top }, { x: 0, y: size.y - bottom, w: size.x, h: bottom }, ...controls];
+}
+
+function fitPadding(map, community = false) {
+  if (!mobile()) return { paddingTopLeft: [community ? 35 : 24, 65], paddingBottomRight: [community ? 35 : 24, 100] };
+  const { top, bottom, left, right } = getMobileMapInsets();
+  const size = map.getSize();
+  const available = Math.max(0, size.y - 120);
+  const total = top + bottom + 32;
+  const scale = total > available ? available / total : 1;
+  return { paddingTopLeft: [Math.max(16, left || 0), (top + 16) * scale], paddingBottomRight: [Math.max(16, right || 0), (bottom + 16) * scale] };
+}
+
 function fitCity() {
   const contexts = activeContexts();
   if (!contexts.length) return;
   closeTooltips();
   syncing = true;
   const first = contexts[0];
-  first.map.fitBounds(first.boundaries.getBounds(), { paddingTopLeft: [24, 65], paddingBottomRight: [24, mobile() ? 140 : 100], animate: false });
+  first.map.fitBounds(first.boundaries.getBounds(), { ...fitPadding(first.map), animate: false });
   syncing = false;
   syncMaps(first);
   state.wholeCity = true;
@@ -332,8 +366,9 @@ function fitCommunity(code) {
   const contexts = activeContexts();
   const layer = contexts[0]?.layers.get(code);
   if (!layer) return;
+  if (mobile()) setCollapsed(true);
   syncing = true;
-  contexts[0].map.fitBounds(layer.getBounds(), { paddingTopLeft: [35, 60], paddingBottomRight: [35, mobile() ? Math.min(sidebar.getBoundingClientRect().height + 25, contexts[0].map.getSize().y * .55) : 100], maxZoom: 14, animate: false });
+  contexts[0].map.fitBounds(layer.getBounds(), { ...fitPadding(contexts[0].map, true), maxZoom: 14, animate: false });
   syncing = false;
   state.wholeCity = false;
   syncMaps(contexts[0]);
@@ -345,7 +380,7 @@ function selectCommunity(code, zoom = true, expand = true) {
   if (!state.byCode.has(code)) return;
   closeTooltips();
   state.selected = code;
-  if (mobile() && expand && !state.focusMode) setCollapsed(false);
+  if (mobile() && expand && !state.focusMode) setCollapsed(true);
   renderDetail();
   refreshStyles();
   updateDonuts();
@@ -364,6 +399,8 @@ function updateDonuts() {
   if (!groups.length) { $('donut-status').textContent = t('未选人口群体，暂不显示构成圆'); return; }
   const map = context.map;
   const size = mobile() ? 28 : 32;
+  const hitSize = mobile() ? 44 : size;
+  const obstacles = mobileLabelObstacles(map);
   const occupied = [];
   const candidates = state.features.filter(f => populationRecord(f.properties.code) && map.getBounds().contains([f.properties.centroid[1], f.properties.centroid[0]]))
     .sort((a, b) => (a.properties.code === state.selected ? -1 : b.properties.code === state.selected ? 1 : (populationRecord(b.properties.code)?.population || 0) - (populationRecord(a.properties.code)?.population || 0)));
@@ -371,13 +408,14 @@ function updateDonuts() {
   for (const feature of candidates) {
     const p = feature.properties;
     const point = map.latLngToContainerPoint([p.centroid[1], p.centroid[0]]);
-    if (point.x < size / 2 || point.y < size / 2 || point.x > map.getSize().x - size / 2 || point.y > map.getSize().y - size / 2) continue;
-    if (occupied.some(other => point.distanceTo(other) < size + 10) && p.code !== state.selected) continue;
+    if (point.x < hitSize / 2 || point.y < hitSize / 2 || point.x > map.getSize().x - hitSize / 2 || point.y > map.getSize().y - hitSize / 2) continue;
+    if (obstacles.some(b => point.x + hitSize / 2 > b.x && point.x - hitSize / 2 < b.x + b.w && point.y + hitSize / 2 > b.y && point.y - hitSize / 2 < b.y + b.h)) continue;
+    if (occupied.some(other => point.distanceTo(other) < hitSize + 14) && p.code !== state.selected) continue;
     const html = donutSvg(populationRecord(p.code), state.selectedGroups, state.colors, size);
     if (!html) continue;
     occupied.push(point);
     const marker = L.marker([p.centroid[1], p.centroid[0]], {
-      icon: L.divIcon({ className: `population-donut${p.code === state.selected ? ' selected-donut' : ''}`, html, iconSize: [size, size], iconAnchor: [size / 2, size / 2] }),
+      icon: L.divIcon({ className: `population-donut${p.code === state.selected ? ' selected-donut' : ''}`, html, iconSize: [hitSize, hitSize], iconAnchor: [hitSize / 2, hitSize / 2] }),
       pane: 'donuts', keyboard: true, title: t(`${p.name} 人口构成`), alt: t(`${p.name} 人口构成`), riseOnHover: false,
     }).addTo(context.donuts);
     marker.getElement()?.setAttribute('data-population-code', p.code);
@@ -403,9 +441,10 @@ function updateLabels(context) {
     : zoom < 12.5 ? { cap: 45, pixels: 22000, minPopulation: 3500 }
       : zoom < 13.5 ? { cap: 70, pixels: 16000, minPopulation: 0 }
         : { cap: 100, pixels: 12000, minPopulation: 0 };
-  const density = comparison ? 1.7 : 1;
+  const textScale = parseFloat(getComputedStyle(document.documentElement).fontSize) / 16 || 1;
+  const density = (comparison ? 1.7 : 1.2) * textScale * textScale;
   const cap = Math.max(3, Math.min(Math.round(tier.cap / density), Math.floor(viewport.x * viewport.y / (tier.pixels * density))));
-  const fontSize = zoom < 12 ? (mobile() ? 9 : 9.5) : zoom < 13.5 ? 10 : 10.5;
+  const fontSize = (zoom < 12 ? 12 : 13) * textScale;
   const candidates = state.features.filter(feature => {
     const p = feature.properties;
     if (!map.getBounds().contains([p.centroid[1], p.centroid[0]])) return false;
@@ -421,29 +460,37 @@ function updateLabels(context) {
     return { feature, priority: (p.population || 0) + area * 400000 };
   }).sort((a, b) => Number(b.feature.properties.code === state.selected) - Number(a.feature.properties.code === state.selected)
     || b.priority - a.priority || a.feature.properties.code.localeCompare(b.feature.properties.code));
-  const occupied = [...(context.contextLayers?.labelBoxes || [])];
+  const occupied = [...(context.contextLayers?.labelBoxes || mobileLabelObstacles(map))];
   let shown = 0;
   for (const { feature } of candidates) {
     if (shown >= cap) break;
     const p = feature.properties;
     const prominent = p.code === state.selected;
     const label = p.name.toUpperCase();
-    const size = prominent ? fontSize + 1 : fontSize;
-    const estimatedWidth = label.length * size * .66 + 6;
-    const width = Math.min(145, Math.max(54, estimatedWidth));
-    const height = estimatedWidth > 145 ? 28 : 16;
+    const size = fontSize;
+    const maxWidth = Math.min(210 * textScale, viewport.x * .65);
+    labelMeasure.font = `600 ${size}px ${getComputedStyle(document.documentElement).fontFamily}`;
+    const lines = [''];
+    for (const word of label.split(' ')) {
+      const current = lines.length - 1;
+      const next = lines[current] ? `${lines[current]} ${word}` : word;
+      if (lines[current] && labelMeasure.measureText(next).width > maxWidth) lines.push(word);
+      else lines[current] = next;
+    }
+    const width = Math.ceil(Math.max(54, ...lines.map(line => labelMeasure.measureText(line).width)) + 6);
+    const height = Math.ceil(lines.length * size * 1.22);
     const point = map.latLngToContainerPoint([p.centroid[1], p.centroid[0]]);
-    let offset = comparison ? -height / 2 : 14;
+    let offset = comparison ? -height / 2 : 20;
     const overlaps = box => occupied.some(a => box.x < a.x + a.w + 8 && box.x + box.w + 8 > a.x && box.y < a.y + a.h + 6 && box.y + box.h + 6 > a.y);
     if (prominent) offset = [offset, -height - 18, 32].find(candidate => !overlaps({ x: point.x - width / 2, y: point.y + candidate, w: width, h: height })) ?? offset;
     const box = { x: point.x - width / 2, y: point.y + offset, w: width, h: height };
-    if (!prominent && (box.x < 6 || box.y < 8 || box.x + width > viewport.x - 6 || box.y + height > viewport.y - 18)) continue;
+    if ((box.x < 6 || box.y < 8 || box.x + width > viewport.x - 6 || box.y + height > viewport.y - 18)) continue;
     const gapX = zoom < 12 ? 16 : 10;
     const gapY = zoom < 12 ? 12 : 7;
-    if (!prominent && occupied.some(a => box.x < a.x + a.w + gapX && box.x + box.w + gapX > a.x && box.y < a.y + a.h + gapY && box.y + box.h + gapY > a.y)) continue;
+    if (occupied.some(a => box.x < a.x + a.w + gapX && box.x + box.w + gapX > a.x && box.y < a.y + a.h + gapY && box.y + box.h + gapY > a.y)) continue;
     occupied.push(box);
     L.marker([p.centroid[1], p.centroid[0]], {
-      icon: L.divIcon({ className: `community-label hierarchy-community-label${prominent ? ' focus-label' : ''}`, html: `<span style="font-size:${size}px">${esc(label)}</span>`, iconSize: [width, height], iconAnchor: [width / 2, -offset] }),
+      icon: L.divIcon({ className: `community-label hierarchy-community-label${prominent ? ' focus-label' : ''}`, html: `<span style="font-size:${size}px;line-height:1.22;font-weight:600">${lines.map(esc).join('<br>')}</span>`, iconSize: [width, height], iconAnchor: [width / 2, -offset] }),
       interactive: false, keyboard: false, pane: 'labels', zIndexOffset: prominent ? 1000 : 0,
     }).addTo(context.labels);
     shown++;
@@ -456,6 +503,16 @@ function comparisonPageSize() {
   const width = document.querySelector('.map-workspace').clientWidth;
   return width >= 780 ? 3 : width >= 500 ? 2 : 1;
 }
+function renderMobileSummary() {
+  const p = state.byCode.get(state.selected)?.properties;
+  if (!p) return;
+  if (state.mode === 'distribution') {
+    const group = selectedGroups()[state.compareStart];
+    $('collapsed-summary').textContent = group ? `${t(group.label)} ${percent(populationShare(populationRecord(p.code), group.id))} · ${t('全市占比')} ${percent(populationShare(state.data.city, group.id))}` : t('选择人口群体');
+  }
+  mobileUI?.refresh();
+}
+
 function renderComparisonHeadings() {
   for (const context of state.comparisonContexts) {
     const group = state.groupById.get(context.groupId);
@@ -465,6 +522,7 @@ function renderComparisonHeadings() {
     if (node) node.innerHTML = `<div><h2>${esc(group.label)}</h2><span>全市 ${percent(populationShare(state.data.city, group.id))}</span></div><p title="${esc(name)}">${esc(name)} <strong>${percent(value)}</strong></p>`;
   }
   localize($('comparison-maps'), $('comparison-select'));
+  renderMobileSummary();
 }
 
 function rebuildComparison({ preserveView = state.focusMode } = {}) {
@@ -489,7 +547,7 @@ function rebuildComparison({ preserveView = state.focusMode } = {}) {
   $('next-groups').disabled = state.compareStart + size >= groups.length;
   $('comparison-maps').style.setProperty('--map-columns', String(Math.max(1, shown.length)));
   $('comparison-maps').innerHTML = shown.map(g => `<section class="comparison-card"><header class="comparison-card-heading" data-map-heading="${g.id}"></header><div id="compare-${g.id}" class="comparison-map" role="region" aria-label="${esc(g.label)}在 Calgary 各社区的占比地图"></div></section>`).join('');
-  if (!groups.length) return;
+  if (!groups.length) { renderMobileSummary(); return; }
   syncing = true;
   state.comparisonContexts = shown.map(g => createMap(`compare-${g.id}`, g.id));
   for (const context of state.comparisonContexts) if (state.view) context.map.setView(state.view.center, state.view.zoom, { animate: false });
@@ -510,6 +568,7 @@ function selectView(mode) {
   if (current?.map._loaded) syncMaps(current);
   closeTooltips();
   state.mode = mode;
+  renderDetail(); renderMobileSummary();
   for (const candidate of ['composition', 'distribution']) {
     const active = candidate === mode;
     $(`${candidate}-tab`).classList.toggle('active', active);
@@ -523,6 +582,7 @@ function selectView(mode) {
   toggleLayers(false);
   $('mode-description').textContent = t(mode === 'composition' ? '一个社区，一张构成图' : '同一色阶，查看聚居分布');
   document.querySelector('.map-workspace').classList.toggle('comparing', mode === 'distribution');
+  mobileUI?.refresh();
   if (mode === 'distribution') rebuildComparison();
   else requestAnimationFrame(() => {
     syncing = true;
@@ -552,6 +612,7 @@ function renderSearch() {
   localize($('search-results'));
 }
 function chooseSearchResult(code) {
+  if (mobile()) $('search').blur();
   selectCommunity(code); $('search').value = ''; closeSearch(); $('search').blur(); toggleGroups(false);
 }
 
@@ -565,7 +626,7 @@ function initializeControls() {
   $('language-toggle').addEventListener('click', () => {
     closeTooltips();
     setLanguage(currentLanguage() === 'zh' ? 'en' : 'zh');
-    applyStaticTranslations(); refreshThemeControl(); refreshFocusControl();
+    applyStaticTranslations(); refreshThemeControl(); refreshFocusControl(); mobileUI?.refresh();
     if (state.data) {
       renderMetadata(); renderGroupList(); renderDonutKey(); renderDetail(); renderComparisonHeadings();
       $('mode-description').textContent = t(state.mode === 'composition' ? '一个社区，一张构成图' : '同一色阶，查看聚居分布');
@@ -633,13 +694,13 @@ function initializeControls() {
     if (!event.target.closest('#groups-panel') && !event.target.closest('#groups-button') && !event.target.closest('#empty-choose-groups')) toggleGroups(false);
   });
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && !dialog.open) {
+    if (event.key === 'Escape' && !document.querySelector('dialog[open]')) {
       closeTooltips();
       if (!$('layers-panel').hidden) { toggleLayers(false); $('layers-button').focus(); }
       else if (!$('groups-panel').hidden) { toggleGroups(false); $('groups-button').focus(); }
       else if (state.focusMode) { event.preventDefault(); setFocusMode(false); }
     }
-    if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) && !dialog.open) {
+    if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) && !document.querySelector('dialog[open]')) {
       event.preventDefault(); setFocusMode(false); $('search').focus();
     }
   });
@@ -650,13 +711,10 @@ function initializeControls() {
     resizeTimer = setTimeout(() => {
       const changed = lastMobile !== mobile(); lastMobile = mobile();
       if (changed && mobile()) setCollapsed(true);
-      if (state.mode === 'distribution' && (changed || lastComparisonPageSize !== comparisonPageSize())) rebuildComparison();
-      else {
-        syncing = true;
-        for (const context of activeContexts()) context.map.invalidateSize({ pan: false });
-        syncing = false;
-        if (state.wholeCity) fitCity(); else { activeContexts().forEach(updateLabels); updateDonuts(); }
-      }
+      // Keyboard and browser chrome resize the viewport. Preserve the user's camera.
+      mobileUI?.refresh();
+      if (state.mode === 'distribution' && (changed || lastComparisonPageSize !== comparisonPageSize())) rebuildComparison({ preserveView: true });
+      else resizeMapsKeepingView();
     }, 150);
   });
 }
@@ -665,6 +723,14 @@ async function init() {
   applyStaticTranslations();
   initTheme();
   initializeControls();
+  mobileUI = initMobileUI({ onLayoutChange: () => {
+    const nextTextSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const changedText = nextTextSize !== observedTextSize;
+    observedTextSize = nextTextSize;
+    if (changedText && state.wholeCity && activeContexts().length) fitCity();
+    activeContexts().forEach(updateLabels);
+    updateDonuts();
+  } });
   try {
     const data = await loadData();
     state.metadata = data.metadata; state.features = data.features; state.data = data.populationData; state.basemap = data.basemap;
@@ -681,6 +747,7 @@ async function init() {
     const unavailable = [[data.basemap, '道路与河流'], [data.operatingTransit, '运营 CTrain'], [data.greenTransit, 'Green Line'], [data.geographicContext, '铁路与地理地标']].filter(([loaded]) => !loaded).map(([, label]) => label);
     if (unavailable.length) { $('map-warning').textContent = `${unavailable.join('、')}暂未载入，社区统计仍可使用。`; $('map-warning').hidden = false; localize($('map-warning')); }
     $('loading-overlay').hidden = true;
+    mobileUI.refresh();
     fitCity(); selectCommunity(state.selected, false, false);
     if (linkedCode) fitCommunity(linkedCode);
     setReady(true);
