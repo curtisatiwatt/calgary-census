@@ -5,7 +5,7 @@ import './mobile-ui.css';
 import './map-legibility.css';
 import { initMobileUI, getMobileMapInsets } from './mobile-ui.js';
 import { loadData } from './data.js';
-import { t, currentLanguage, setLanguage, applyStaticTranslations, localizeHtml } from './i18n.js';
+import { t, currentLanguage, initLanguagePreference, applyStaticTranslations, localizeHtml } from './i18n.js';
 import { initTheme, refreshThemeControl, isDarkTheme } from './theme.js';
 import { createMapTooltip } from './map-tooltip.js';
 import { createContextLayers } from './context-layers.js';
@@ -20,9 +20,9 @@ const PALETTE = ['#518a7b', '#c29b4d', '#7e85af', '#5c8eac', '#b67768', '#8d9963
 const state = {
   features: [], byCode: new Map(), metadata: {}, counts: {}, data: null, basemap: null,
   operatingTransit: null, greenTransit: null, geographicContext: null, orientationLandmarks: null,
-  roads: true, labels: true, transit: true, landmarks: true,
+  roads: true, labels: true, transit: false, landmarks: false,
   groups: [], groupById: new Map(), selectedGroups: [], colors: {}, selected: null,
-  mode: 'composition', focusMode: false, focusComparisonPageSize: null, income: true, contexts: [], comparisonContexts: [], composition: null,
+  mode: 'composition', focusMode: false, focusComparisonPageSize: null, income: false, contexts: [], comparisonContexts: [], composition: null,
   view: null, wholeCity: true, compareStart: 0, searchMatches: [], activeSearch: -1,
 };
 let syncing = false;
@@ -122,7 +122,7 @@ function renderMetadata() {
   $('year-definition').textContent = `人口资料来自 ${m.populationYear} 年人口普查，收入参考期为 ${m.incomeYear} 年，不是今天的收入与人口。`;
   $('income-definition').textContent = m.incomeDefinition || '';
   $('latest-census-note').textContent = m.latestCensusNote || '';
-  if (m.populationGroupsDefinition) $('population-groups-definition').textContent = m.populationGroupsDefinition;
+  if (m.populationGroupsDefinition) $('population-groups-definition').textContent = m.populationGroupsDefinition.replace('默认勾选全市人数最多的五个可见少数族裔类别', '初始只显示华人，可自行选择其他或多个人口群体');
   $('coverage-definition').textContent = `覆盖 ${state.counts.total} 个官方区域，${Object.keys(state.data.communities).length} 个有可用人口分类，${state.counts.income} 个有收入数据；保留缺失区域的边界。`;
   $('boundary-note').textContent = m.boundaryNote || '';
   $('prepared-note').textContent = m.preparedDate ? `原始数据整理于 ${m.preparedDate}；本图为官方资料快照。` : '';
@@ -140,12 +140,22 @@ function renderMetadata() {
   localize(document.querySelector('.app-header'), dialog, $('income-legend'), $('population-legend'), document.querySelector('.map-status'));
 }
 
+function refreshGroupControl() {
+  const groups = selectedGroups();
+  const english = currentLanguage() === 'en';
+  const selection = groups.length === 1 ? t(groups[0].label) : english ? `${groups.length}` : `${groups.length} 类`;
+  const label = $('group-selection-label');
+  if (label) label.textContent = groups.length ? `${english ? 'Groups: ' : '人群：'}${selection}` : (english ? 'Choose groups' : '选择人群');
+  $('groups-button').setAttribute('aria-label', `${english ? 'Choose population groups' : '选择人口群体'}${groups.length ? ` · ${selection}` : ''}`);
+}
+
 function renderGroupList() {
   const query = $('group-search').value.trim().toLowerCase();
   const groups = state.groups.filter(g => `${g.label} ${g.name}`.toLowerCase().includes(query));
   $('group-list').innerHTML = groups.length ? groups.map(g => `<label class="group-option" for="group-${g.id}"><input type="checkbox" id="group-${g.id}" data-group="${g.id}" ${state.selectedGroups.includes(g.id) ? 'checked' : ''}><span class="group-name">${esc(g.label)}<small>${esc(currentLanguage() === 'zh' ? g.name : '')}</small></span><span class="group-city">${percent(populationShare(state.data.city, g.id))}</span></label>`).join('') : '<p class="no-results">没有找到这个类别。</p>';
   $('filter-count').textContent = t(`已选 ${state.selectedGroups.length} / ${state.groups.length}`);
   localize($('group-list'));
+  refreshGroupControl();
 }
 
 function updateGroupSelection(ids, rerender = true) {
@@ -154,6 +164,7 @@ function updateGroupSelection(ids, rerender = true) {
   $('group-count').textContent = state.selectedGroups.length;
   $('filter-count').textContent = t(`已选 ${state.selectedGroups.length} / ${state.groups.length}`);
   if (rerender) renderGroupList();
+  refreshGroupControl();
   renderDonutKey();
   renderDetail();
   updateDonuts();
@@ -623,9 +634,8 @@ function setReady(ready) {
 function initializeControls() {
   setReady(false);
   refreshFocusControl();
-  $('language-toggle').addEventListener('click', () => {
+  window.addEventListener('atlas-languagechange', () => {
     closeTooltips();
-    setLanguage(currentLanguage() === 'zh' ? 'en' : 'zh');
     applyStaticTranslations(); refreshThemeControl(); refreshFocusControl(); mobileUI?.refresh();
     if (state.data) {
       renderMetadata(); renderGroupList(); renderDonutKey(); renderDetail(); renderComparisonHeadings();
@@ -644,7 +654,7 @@ function initializeControls() {
     selectView(mode); $(`${mode}-tab`).focus();
   });
   $('layers-button').addEventListener('click', () => toggleLayers($('layers-panel').hidden));
-  $('close-layers').addEventListener('click', () => { toggleLayers(false); $('layers-button').focus(); });
+  $('close-layers').addEventListener('click', () => { toggleLayers(false); (mobile() ? $('mobile-more') : $('layers-button')).focus(); });
   for (const layer of ['roads', 'labels', 'transit', 'landmarks']) $(`${layer}-toggle`).addEventListener('change', event => { state[layer] = event.target.checked; updateLayerVisibility(); });
   $('groups-button').addEventListener('click', () => toggleGroups($('groups-panel').hidden));
   $('close-groups').addEventListener('click', () => { toggleGroups(false); $('groups-button').focus(); });
@@ -696,7 +706,7 @@ function initializeControls() {
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && !document.querySelector('dialog[open]')) {
       closeTooltips();
-      if (!$('layers-panel').hidden) { toggleLayers(false); $('layers-button').focus(); }
+      if (!$('layers-panel').hidden) { toggleLayers(false); (mobile() ? $('mobile-more') : $('layers-button')).focus(); }
       else if (!$('groups-panel').hidden) { toggleGroups(false); $('groups-button').focus(); }
       else if (state.focusMode) { event.preventDefault(); setFocusMode(false); }
     }
@@ -723,6 +733,7 @@ async function init() {
   applyStaticTranslations();
   initTheme();
   initializeControls();
+  initLanguagePreference();
   mobileUI = initMobileUI({ onLayoutChange: () => {
     const nextTextSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
     const changedText = nextTextSize !== observedTextSize;
@@ -738,7 +749,7 @@ async function init() {
     state.byCode = new Map(data.features.map(f => [f.properties.code, f])); state.counts = summarize(data.features);
     state.groups = data.populationData.groups; state.groupById = new Map(state.groups.map(g => [g.id, g]));
     state.colors = Object.fromEntries(state.groups.map((g, i) => [g.id, PALETTE[i % PALETTE.length]]));
-    state.selectedGroups = data.populationData.defaultGroupIds.filter(id => state.groupById.has(id));
+    state.selectedGroups = ['chinese'].filter(id => state.groupById.has(id));
     const linkedCode = hashCode(location.hash, state.features);
     state.selected = linkedCode || (state.byCode.has('PAN') ? 'PAN' : data.features[0].properties.code);
     renderMetadata(); renderGroupList(); renderDonutKey(); renderDetail();

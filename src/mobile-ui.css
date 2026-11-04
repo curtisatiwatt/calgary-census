@@ -1,5 +1,27 @@
 /* Mobile controls float over a full-height map instead of consuming map rows. */
 .mobile-only,.mobile-sheet{display:none}
+/* Frequent actions stay in the toolbar; occasional preferences share one menu. */
+.settings-trigger{display:flex;align-items:center;justify-content:center;min-width:54px;min-height:44px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--paper);font-size:.875rem;font-weight:600}
+#group-count{display:none}
+#group-selection-label{min-width:0;overflow-wrap:normal;word-break:normal}
+.view-controls #income-control{display:flex;align-items:center;min-height:44px;gap:8px;padding:9px 12px;margin:0;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);font-size:.875rem;cursor:pointer}
+#income-control input{width:20px;height:20px;flex:none;accent-color:var(--accent)}
+#income-control:has(input:checked){background:#e5f1ec;border-color:#75a08e;color:#163f34}
+html[data-theme=dark] #income-control:has(input:checked){background:#34554d;border-color:#8bbcad;color:#fff}
+#mobile-more-dialog .mobile-settings-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;min-height:68px;padding:10px 0;font-size:1rem}
+#mobile-more-dialog select{flex:1;width:auto;min-width:min(100%,10rem);max-width:100%;min-height:44px;padding:8px;border:1px solid var(--line);border-radius:8px;font:inherit;color:inherit;background:var(--paper)}
+#mobile-settings-content{display:flex;flex-direction:column;gap:4px}
+#mobile-layers-slot #layers-button{width:100%;min-height:48px;justify-content:space-between;padding:10px 0;border:0;box-shadow:none;background:none;font-size:1rem;white-space:normal;text-align:left}
+#mobile-settings-content>.text-button,#mobile-full-map{min-height:48px;font-size:1rem;text-align:left;white-space:normal;background:none}
+@media(min-width:761px){
+  .app-header>.settings-trigger{order:4}
+  #mobile-more-dialog[open]{display:block;inset:0;width:min(440px,calc(100vw - 40px));max-height:85dvh;margin:auto;padding:24px;border:1px solid var(--line);border-radius:18px;background:var(--paper);color:var(--ink)}
+  #mobile-more-dialog::backdrop{background:#102b2959}
+  #mobile-more-dialog .mobile-sheet-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px}
+  #mobile-more-dialog .mobile-sheet-heading h2{font-size:1.25rem;margin:0}
+  #close-mobile-more{width:44px;height:44px;flex:none;border-radius:50%;font-size:1.5rem;background:var(--line)}
+  #mobile-settings-content>.text-button,#mobile-full-map{padding:12px 0}
+}
 @media(max-width:760px){
   :root{--mobile-header-bottom:68px;--mobile-ui-top:180px;--mobile-sheet-height:100px;--mobile-surface:#fff;--mobile-ink:#172321;--mobile-muted:#52605b}
   html[data-theme=dark]{--mobile-surface:#17282e;--mobile-ink:#f0f5f3;--mobile-muted:#c1cfca}
@@ -23,7 +45,7 @@
   .viewbar{position:fixed;top:calc(var(--mobile-header-bottom) + 8px);left:10px;right:10px;height:auto;padding:0;gap:8px;display:flex;align-items:stretch;background:none;border:0;pointer-events:none;z-index:2000}
   .viewbar>*{pointer-events:auto}
   .view-tabs{width:100%;display:flex;gap:3px;padding:3px;border:1px solid var(--line);border-radius:13px;background:var(--mobile-surface);box-shadow:0 2px 7px #142b2414}
-  .view-tabs button{min-width:0;min-height:44px;flex:1;padding:.5rem .6rem;font-size:.9375rem;line-height:1.3;white-space:normal;color:var(--mobile-muted);border-radius:10px}
+  .view-tabs button{min-width:0;min-height:44px;flex:1;padding:.5rem .15rem;font-size:.875rem;line-height:1.3;white-space:normal;color:var(--mobile-muted);border-radius:10px}
   .view-tabs button>span{display:none}
   .view-tabs button.active{background:#e5f1ec;color:#163f34;box-shadow:none;font-weight:650}
   html[data-theme=dark] .view-tabs{background:var(--mobile-surface)}
@@ -34,7 +56,13 @@
   #group-count{font-size:.75rem;min-width:20px;padding:1px 4px;color:var(--mobile-ink);background:#eef1ee}
   html[data-theme=dark] #group-count{background:#30483f}
   .mode-description{display:none}
-  .view-controls>.plain-toggle{display:none}
+  body.mobile-map-ui .view-controls #income-control{display:flex;flex:1 1 0;width:0;min-width:0;max-width:none;padding:.55rem .35rem;border-radius:22px;font-size:.875rem;line-height:1.25;background:var(--mobile-surface);color:var(--mobile-ink);box-shadow:0 2px 7px #142b2414;white-space:normal}
+  body.mobile-map-ui #income-control input{width:22px;height:22px}
+  body.mobile-map-ui #income-control:has(input:checked){background:#e5f1ec;color:#163f34}
+  html[data-theme=dark] body.mobile-map-ui #income-control:has(input:checked){background:#34554d;color:#fff}
+  body.mobile-map-ui .view-controls #groups-button{flex:1 1 0;width:0;min-width:0;max-width:none;padding:.55rem .35rem}
+  body.mobile-map-ui #income-control>span{min-width:0;overflow-wrap:normal;word-break:normal}
+  body.mobile-map-ui #mobile-layers-slot{display:block}
   .workspace,.map-focus .workspace{position:fixed;inset:0;height:100dvh;width:100%;display:block;min-height:0;overflow:hidden}
   .map-workspace{position:absolute;inset:0;min-height:0}
   .map-canvas,.comparison-maps,.comparison-map{inset:0}
@@ -93,7 +121,7 @@
   .mobile-sheet-heading button,.mobile-sheet .icon-button{min-width:44px;width:44px;min-height:44px;height:44px;border-radius:50%;font-size:1.5rem;background:#eef2ef;color:var(--mobile-ink)}
   html[data-theme=dark] .mobile-sheet-heading button,html[data-theme=dark] .mobile-sheet .icon-button{background:#30464b}
   .mobile-settings-row{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:62px;border-bottom:1px solid var(--line);font-size:1rem}
-  #mobile-more-dialog #language-toggle,#mobile-more-dialog #theme-toggle{min-width:48px;min-height:44px;width:48px;height:44px;font-size:.9375rem}
+  #mobile-more-dialog select{background:var(--mobile-surface);color:var(--mobile-ink)}
   #mobile-settings-content{display:flex;flex-direction:column;gap:4px}
   #mobile-settings-content>.text-button,#mobile-full-map{font-size:1rem;min-height:52px;padding:12px 0;text-align:left;justify-content:flex-start;white-space:normal;background:transparent;color:var(--mobile-ink)}
   .mobile-legend-stack{display:flex;flex-direction:column;gap:18px}

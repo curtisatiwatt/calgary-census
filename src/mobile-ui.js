@@ -4,6 +4,7 @@ addTranslations({
   '更多': 'More', '地图设置': 'Map settings', '关闭设置': 'Close settings',
   '图例': 'Legend', '关闭图例': 'Close legend', '查看详情': 'Details', '收起': 'Collapse',
   '全屏查看地图': 'Show full map', '语言': 'Language', '外观': 'Appearance',
+  '跟随系统': 'System default', '白天': 'Light', '夜间': 'Dark', '常用五类': 'Top five groups',
 });
 
 const $ = id => document.getElementById(id);
@@ -101,19 +102,15 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
   }
   function refresh() {
     const mobile = media.matches;
-    const focused = document.body.classList.contains('map-focus');
     const comparing = document.querySelector('.map-workspace').classList.contains('comparing');
     document.body.classList.toggle('mobile-map-ui', mobile);
     document.body.classList.toggle('mobile-comparing', mobile && comparing);
     if (mobile && !moved) {
       moved = true;
       move(pager, controls);
-      move($('income-control'), $('mobile-income-slot'));
+      move($('layers-button'), $('mobile-layers-slot'));
       move($('groups-panel'), filters);
       move($('layers-panel'), filters);
-      move($('language-toggle'), $('mobile-language-slot'));
-      move($('theme-toggle'), $('mobile-theme-slot'));
-      move($('method-button'), $('mobile-settings-content'));
       move($('composition-key'), $('mobile-composition-legend'));
       move($('income-legend'), $('mobile-composition-legend'));
       move($('transit-legend'), $('mobile-composition-legend'));
@@ -141,6 +138,8 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
   }
 
   $('mobile-more').addEventListener('click', () => openDialog(more));
+  // The layer picker becomes its own sheet, rather than nesting native dialogs.
+  $('layers-button').addEventListener('click', () => closeDialog(more), true);
   $('mobile-legend-button').addEventListener('click', () => openDialog(legend));
   $('close-mobile-more').addEventListener('click', () => closeDialog(more));
   $('close-mobile-legend').addEventListener('click', () => closeDialog(legend));

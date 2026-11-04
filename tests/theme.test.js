@@ -12,6 +12,8 @@ async function withBrowser(options, check) {
   const windowListeners = new Map();
   const mediaListeners = new Set();
   const buttonListeners = new Map();
+  const selectListeners = new Map();
+  const select = { value: '', addEventListener: (type, listener) => selectListeners.set(type, listener) };
   const attributes = new Map();
   const meta = new Map();
   const button = {
@@ -25,7 +27,7 @@ async function withBrowser(options, check) {
   };
   const document = {
     documentElement: { dataset: {}, style: {} },
-    getElementById: id => id === 'theme-toggle' ? button : null,
+    getElementById: id => id === 'theme-toggle' ? button : id === 'theme-preference' ? select : null,
     querySelector: selector => selector === 'meta[name="theme-color"]' ? { setAttribute: (key, value) => meta.set(key, value) } : null,
   };
   const window = {
@@ -42,6 +44,10 @@ async function withBrowser(options, check) {
   };
   const localStorage = {
     getItem(key) { if (options.blockedStorage) throw new Error('Storage is disabled'); return saved.get(key) ?? null; },
+    removeItem(key) {
+      if (options.blockedStorage) throw new Error('Storage is disabled');
+      saved.delete(key);
+    },
     setItem(key, value) {
       if (options.blockedStorage) throw new Error('Storage is disabled');
       saved.set(key, value);
@@ -54,7 +60,8 @@ async function withBrowser(options, check) {
   try {
     const theme = await import(`../src/theme.js?theme-test=${++moduleId}`);
     await check({
-      theme, document, saved, writes, events, attributes, meta,
+      theme, document, saved, writes, events, attributes, meta, select,
+      choose: value => selectListeners.get('change')({ target: { value } }),
       click: () => buttonListeners.get('click')(),
       changeSystem(dark) { media.matches = dark; mediaListeners.forEach(listener => listener({ matches: dark })); },
       receivePreference(value) {
@@ -143,5 +150,40 @@ test('other-tab changes synchronize and removing the preference resumes system f
     assert.equal(theme.getTheme(), 'light');
     changeSystem(true);
     assert.equal(theme.getTheme(), 'dark');
+  });
+});
+
+
+test('settings can return a manual theme to the device setting without duplicate repaint events', async () => {
+  await withBrowser({ preference: 'light', systemDark: false }, ({ theme, choose, changeSystem, saved, select, events }) => {
+    theme.initTheme();
+    assert.equal(select.value, 'light');
+    const previousEvents = events.length;
+    choose('system');
+    assert.equal(theme.getThemePreference(), 'system');
+    assert.equal(select.value, 'system');
+    assert.equal(saved.has(storageKey), false);
+    assert.equal(events.length, previousEvents);
+    changeSystem(true);
+    assert.equal(theme.getTheme(), 'dark');
+    choose('light');
+    assert.equal(select.value, 'light');
+    assert.equal(saved.get(storageKey), 'light');
+    changeSystem(false);
+    changeSystem(true);
+    assert.equal(theme.getTheme(), 'light');
+  });
+});
+
+test('returning to automatic theme still works when preference storage is blocked', async () => {
+  await withBrowser({ blockedStorage: true, systemDark: true }, ({ theme, choose, changeSystem, select }) => {
+    theme.initTheme();
+    choose('light');
+    assert.equal(theme.getTheme(), 'light');
+    assert.doesNotThrow(() => choose('system'));
+    assert.equal(select.value, 'system');
+    assert.equal(theme.getTheme(), 'dark');
+    changeSystem(false);
+    assert.equal(theme.getTheme(), 'light');
   });
 });

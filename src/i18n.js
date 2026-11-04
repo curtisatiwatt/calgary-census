@@ -1,18 +1,60 @@
 /** UI translations. Census values and geographic proper names are never rewritten. */
-const STORAGE_KEY = 'census-atlas-language';
-function initialLanguage() {
-  try { const saved = globalThis.localStorage?.getItem(STORAGE_KEY); if (saved === 'zh' || saved === 'en') return saved; } catch { /* restricted storage */ }
+export const LANGUAGE_STORAGE_KEY = 'census-atlas-language';
+const languages = new Set(['zh', 'en']);
+function storedLanguage() {
+  try { const saved = globalThis.localStorage?.getItem(LANGUAGE_STORAGE_KEY); return languages.has(saved) ? saved : null; } catch { return null; }
+}
+function systemLanguage() {
   return /^zh\b/i.test(globalThis.navigator?.language || 'zh') ? 'zh' : 'en';
 }
-let language = initialLanguage();
+let explicitLanguage = storedLanguage();
+let language = explicitLanguage || systemLanguage();
+let languageInitialized = false;
 export const currentLanguage = () => language;
-export function setLanguage(value) {
-  language = value === 'en' ? 'en' : 'zh';
-  try { globalThis.localStorage?.setItem(STORAGE_KEY, language); } catch { /* browser preferences remain usable */ }
+export const getLanguagePreference = () => explicitLanguage || 'system';
+export function refreshLanguagePreference() {
+  if (typeof document === 'undefined') return;
+  const select = document.getElementById('language-preference');
+  if (select) select.value = getLanguagePreference();
+}
+function applyLanguage() {
+  const previous = language;
+  language = explicitLanguage || systemLanguage();
   if (typeof document !== 'undefined') document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
+  refreshLanguagePreference();
+  if (previous !== language && typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('atlas-languagechange', { detail: { language } }));
+  }
   return language;
 }
+export function setLanguagePreference(value) {
+  if (value !== 'system' && !languages.has(value)) return language;
+  explicitLanguage = value === 'system' ? null : value;
+  try {
+    if (explicitLanguage) globalThis.localStorage?.setItem(LANGUAGE_STORAGE_KEY, explicitLanguage);
+    else globalThis.localStorage?.removeItem(LANGUAGE_STORAGE_KEY);
+  } catch { /* A manual choice remains usable within this session. */ }
+  return applyLanguage();
+}
+export function setLanguage(value) { return setLanguagePreference(value === 'en' ? 'en' : 'zh'); }
+export function initLanguagePreference() {
+  if (typeof window === 'undefined' || languageInitialized) return;
+  languageInitialized = true;
+  applyLanguage();
+  document.getElementById('language-preference')?.addEventListener('change', event => setLanguagePreference(event.target.value));
+  window.addEventListener('languagechange', () => { if (!explicitLanguage) applyLanguage(); });
+  window.addEventListener('storage', event => {
+    if (event.key !== LANGUAGE_STORAGE_KEY && event.key !== null) return;
+    explicitLanguage = languages.has(event.newValue) ? event.newValue : null;
+    applyLanguage();
+  });
+}
 const translations = {
+  '常用五类': 'Top five groups',
+  '人口视图采用市府社区档案的 13 个 Visible Minority（Racialized Population）互斥分类，初始只显示华人，可自行选择其他或多个人口群体。非可见少数族裔为普查分类，包含原住民等人口，不可视作白人或欧洲裔。': 'The population view uses the 13 mutually exclusive visible-minority (racialized-population) categories from city community profiles. Only Chinese is shown initially; choose other groups or several groups to explore. “Not a visible minority” is a census category that includes Indigenous people and cannot be treated as White or European.',
+  '人口视图采用市府 2021 年普查定制汇总的 13 个 Visible Minority（Racialized Population）互斥分类，初始只显示华人，可自行选择其他或多个人口群体。非可见少数族裔为普查分类，包含原住民等人口，不可视作白人或欧洲裔。': 'The population view uses the 13 mutually exclusive visible-minority (racialized-population) categories from the city’s custom 2021 Census tabulation. Only Chinese is shown initially; choose other groups or several groups to explore. “Not a visible minority” is a census category that includes Indigenous people and cannot be treated as White or European.',
+
+  '跟随系统': 'Use device setting', '白天': 'Light', '夜间': 'Dark', '选择语言': 'Choose language', '选择外观': 'Choose appearance',
   'theme.toDark': 'Switch to dark mode', 'theme.toLight': 'Switch to light mode',
   '社区观察': 'Community Atlas',
   'Calgary 社区观察 · 人口构成与分布': 'Calgary Community Atlas · Population & neighbourhoods',
@@ -115,7 +157,10 @@ const translatedAttributes = ['aria-label', 'placeholder', 'title', 'alt', 'cont
 /** Keep original strings on actual DOM nodes so toggling never translates a translation. */
 export function applyStaticTranslations(root = document) {
   if (typeof document === 'undefined') return;
-  if (root === document) document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
+  if (root === document) {
+    document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
+    refreshLanguagePreference();
+  }
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
   let node = walker.currentNode;
   do {
