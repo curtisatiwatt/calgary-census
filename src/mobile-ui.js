@@ -7,7 +7,7 @@ addTranslations({
   '显示偏好': 'Display preferences', '地图与资料': 'Map and data',
   '更多': 'More', '地图设置': 'Map settings', '关闭设置': 'Close settings',
   '图例': 'Legend', '关闭图例': 'Close legend', '查看详情': 'Details', '收起': 'Collapse',
-  '全屏查看地图': 'Show full map', '语言': 'Language', '外观': 'Appearance',
+  '语言': 'Language', '外观': 'Appearance',
   '跟随系统': 'System default', '白天': 'Light', '夜间': 'Dark', '常用五类': 'Top five groups',
 });
 
@@ -76,20 +76,18 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
   }
   function readInsets() {
     if (!media.matches) return { top: 0, right: 0, bottom: 0, left: 0 };
-    const focused = document.body.classList.contains('map-focus');
-    const top = focused ? 12 : Math.ceil(header.getBoundingClientRect().bottom + 8 + viewbar.getBoundingClientRect().height) + 10;
-    const bottom = focused || sidebar.dataset.sheetSnap === 'closed' ? 0 : Math.ceil(sidebar.getBoundingClientRect().height);
+    const top = Math.ceil(header.getBoundingClientRect().bottom + 8 + viewbar.getBoundingClientRect().height) + 10;
+    const bottom = sidebar.dataset.sheetSnap === 'closed' ? 0 : Math.ceil(sidebar.getBoundingClientRect().height);
     return { top, bottom: bottom + 14, left: 12, right: 12 };
   }
   function measure() {
     scheduled = 0;
-    const focused = document.body.classList.contains('map-focus');
     if (!media.matches) {
       measured = { top: 0, right: 0, bottom: 0, left: 0 };
       return;
     }
     document.body.classList.toggle('mobile-extra-large', parseFloat(getComputedStyle(document.documentElement).fontSize) >= 28);
-    const headerBottom = focused ? 0 : Math.ceil(header.getBoundingClientRect().bottom);
+    const headerBottom = Math.ceil(header.getBoundingClientRect().bottom);
     document.documentElement.style.setProperty('--mobile-header-bottom', `${headerBottom}px`);
     const next = readInsets();
     const top = next.top;
@@ -147,7 +145,6 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
   $('mobile-legend-button').addEventListener('click', () => openDialog(legend));
   $('close-mobile-more').addEventListener('click', () => closeDialog(more));
   $('close-mobile-legend').addEventListener('click', () => closeDialog(legend));
-  $('mobile-full-map').addEventListener('click', () => { closeDialog(more); $('focus-map').click(); });
   $('method-button').addEventListener('click', () => closeDialog(more), true);
   for (const dialog of [more, legend, filters]) {
     dialog.addEventListener('close', () => {

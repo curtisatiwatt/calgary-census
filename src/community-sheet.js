@@ -48,7 +48,8 @@ export function initCommunitySheet({ onChange = () => {}, onClose = () => {} } =
   closeButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m7 7 10 10M17 7 7 17"/></svg>';
   header.append(closeButton);
 
-  let snap = 'peek';
+  let snap = 'closed';
+  let mobileApplied = false;
   let drag = null;
   let scrollHandoff = null;
   let suppressClickUntil = 0;
@@ -75,16 +76,21 @@ export function initCommunitySheet({ onChange = () => {}, onClose = () => {} } =
 
   function apply() {
     sidebar.dataset.sheetSnap = snap;
-    sidebar.classList.toggle('collapsed', snap === 'peek' || snap === 'closed');
-    sidebar.classList.remove('sheet-dragging');
     if (mobile.matches) {
-      measure();
-      sidebar.style.setProperty('--community-sheet-height', `${snap === 'closed' ? heights.peek : heights[snap]}px`);
+      mobileApplied = true;
+      sidebar.classList.toggle('collapsed', snap === 'peek' || snap === 'closed');
+      sidebar.classList.remove('sheet-dragging');
+      if (snap !== 'closed') measure();
+      sidebar.style.setProperty('--community-sheet-height', `${snap === 'closed' ? 0 : heights[snap]}px`);
       sidebar.inert = snap === 'closed';
       if (snap === 'closed') sidebar.setAttribute('aria-hidden', 'true');
       else sidebar.removeAttribute('aria-hidden');
       content.inert = snap === 'peek' || snap === 'closed';
-    } else {
+    } else if (mobileApplied) {
+      // The desktop shell owns visibility there. Clean up our mobile state once,
+      // then leave its ARIA, inert state and collapsed class alone on refresh.
+      mobileApplied = false;
+      sidebar.classList.remove('collapsed', 'sheet-dragging');
       sidebar.style.removeProperty('--community-sheet-height');
       sidebar.inert = false;
       content.inert = false;
@@ -98,9 +104,16 @@ export function initCommunitySheet({ onChange = () => {}, onClose = () => {} } =
     apply();
   }
 
+  function cancelGesture() {
+    const previous = drag;
+    drag = null;
+    scrollHandoff = null;
+    if (previous?.capture && previous.target.hasPointerCapture(previous.id)) previous.target.releasePointerCapture(previous.id);
+  }
+
   function setSnap(next) {
     if (!['peek', 'half', 'full', 'closed'].includes(next)) return;
-    drag = null;
+    cancelGesture();
     snap = next;
     if (next === 'peek') content.scrollTop = 0;
     apply();
@@ -112,7 +125,10 @@ export function initCommunitySheet({ onChange = () => {}, onClose = () => {} } =
     setSnap(next === 'closed' ? 'half' : next);
   }
 
-  function close() {
+  function close(event) {
+    // Consume the activation before removing its target from hit testing.
+    event?.preventDefault();
+    event?.stopPropagation();
     const hadFocus = sidebar.contains(document.activeElement);
     setSnap('closed');
     if (hadFocus) {
@@ -241,7 +257,7 @@ export function initCommunitySheet({ onChange = () => {}, onClose = () => {} } =
   });
   closeButton.addEventListener('click', close);
   sidebar.addEventListener('keydown', event => {
-    if (mobile.matches && event.key === 'Escape') { event.preventDefault(); close(); }
+    if (mobile.matches && event.key === 'Escape') close(event);
   });
   const scheduleRefresh = () => {
     cancelAnimationFrame(refreshFrame);
@@ -252,7 +268,7 @@ export function initCommunitySheet({ onChange = () => {}, onClose = () => {} } =
   window.addEventListener('resize', scheduleRefresh);
   window.visualViewport?.addEventListener('resize', scheduleRefresh);
   window.addEventListener('atlas-languagechange', scheduleRefresh);
-  mobile.addEventListener('change', () => { drag = null; apply(); onChange(snap); });
+  mobile.addEventListener('change', () => { cancelGesture(); apply(); onChange(snap); });
   apply();
 
   return {

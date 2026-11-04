@@ -78,7 +78,6 @@
           <a id="source-link" class="source-link" target="_blank" rel="noopener">查看官方社区档案 ↗</a>
         </div>
       </section>
-      <footer class="sidebar-footer">人口构成描述社区背景，不代表学校质量或治安。</footer>
     </aside>
 
     <section class="map-workspace" aria-label="卡尔加里互动社区地图">
@@ -97,7 +96,7 @@
       </section>
       <div id="transit-legend" class="transit-legend" hidden aria-label="CTrain 线路图例"><span><i class="transit-line red-line"></i>Red</span><span><i class="transit-line blue-line"></i>Blue</span><span><i class="transit-line green-line"></i>Green · 未运营</span><span><i class="transit-line future-line"></i>远期规划</span></div>
       <button id="mobile-legend-button" class="mobile-only" type="button" aria-haspopup="dialog" aria-controls="mobile-legend-dialog" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h5v5H4zM4 14h5v5H4zM13 7h7M13 16h7"/></svg><span data-mobile-text="图例">图例</span></button>
-      <div class="map-tools"><button id="focus-map" class="map-button focus-map-button" type="button" aria-label="专注地图" title="专注地图" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="focus-expand" d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/><path class="focus-restore" d="M3 8h5V3m13 5h-5V3M8 21v-5H3m13 5v-5h5"/></svg><span id="focus-map-label">专注地图</span></button><button id="fit-city" class="map-button" aria-label="查看整个卡尔加里">全市 ⤢</button><button id="zoom-in" class="map-button square" aria-label="放大地图">+</button><button id="zoom-out" class="map-button square" aria-label="缩小地图">−</button></div>
+      <div class="map-tools"><button id="fit-city" class="map-button" aria-label="查看整个卡尔加里">全市 ⤢</button><button id="zoom-in" class="map-button square" aria-label="放大地图">+</button><button id="zoom-out" class="map-button square" aria-label="缩小地图">−</button></div>
       <div id="map-warning" class="map-warning" hidden role="status"></div>
       <div id="loading-overlay" class="loading-overlay"><div class="loader"></div><strong>正在展开 Calgary</strong><span>读取官方社区边界与人口资料</span></div>
     </section>
@@ -113,7 +112,6 @@
         <div class="settings-group">
           <div id="mobile-layers-slot" class="mobile-only"></div>
           <button id="method-button" class="text-button settings-link" type="button" aria-haspopup="dialog"><span class="settings-row-icon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></span><span class="settings-row-copy"><span data-mobile-text="数据说明">数据说明</span><small data-mobile-text="统计口径与官方来源">统计口径与官方来源</small></span><span class="settings-row-chevron"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></span></button>
-          <button id="mobile-full-map" class="settings-link" type="button"><span class="settings-row-icon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg></span><span class="settings-row-copy" data-mobile-text="全屏查看地图">全屏查看地图</span><span class="settings-row-chevron"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></span></button>
         </div>
       </section>
       <section class="settings-section" aria-labelledby="display-settings-heading">
@@ -141,7 +139,7 @@
     <div class="method-grid">
       <section><h3>社区构成 / 分布对比</h3><p>“社区构成”用一个等大的圆展示一个社区，彩色扇区对应勾选类别，灰色是其余类别。圆的大小不代表人口多少；全市视角会避开重叠，放大可看到更多社区，未显示圆的社区仍可点击。“分布对比”用底色表示各类别在社区人口中的占比，所有地图共用固定色阶和地图位置。</p><p>地图中的圆心只是社区内的显示位置，不是居民地址。</p></section>
       <section><h3>道路、轨道与地理地标</h3><p>“社区构成”的“地图图层”可分别切换道路与铁路、社区名称、CTrain 和地理地标；“分布对比”保留简洁的人口热度图。社区名称在地图上使用大写，详情保留原名称。文字随缩放逐步显示并自动避让，放大后可查看更多社区和站点。机场使用紫色、公园使用绿色、原住民保留区使用浅棕色，这些地理底色不表示人口或收入。</p><p>Red / Blue 为运营线路；Green Line 采用绿色虚线，标注未运营及各段建设状态。点击车站查看名称与线路，放大可显示更多车站名。规划线路及站位可能调整，示意位置会特别注明。地理图层覆盖范围可超出社区统计范围；不会为市外区域推算人口资料。</p></section>
-      <section><h3>人口类别不等于国籍</h3><p id="population-groups-definition">采用 2021 年普查 Visible minority（Racialized population）分类。Chinese 不等于中国国籍、中国出生或普通话使用者；“非可见少数族裔”包括原住民等，不能改称白人或欧洲裔。首次只显示华人，可在人群中选择其他类别或同时比较多类。</p></section>
+      <section><h3>人口类别不等于国籍</h3><p id="population-groups-definition">采用 2021 年普查 Visible minority（Racialized population）分类。Chinese 不等于中国国籍、中国出生或普通话使用者；“非可见少数族裔”包括原住民等，不能改称白人或欧洲裔。初始不选人口群体，可自行选择一个或多个人口群体。</p></section>
       <section><h3>人数、占比与取整</h3><p>详情与热度图的占比由公布人数除以同表的私人住户人口计算，保留一位小数；这与原 PDF 中已取整的整数百分比可能略有不同。官方人数通常按 5 人取整，各类别人数之和可能略偏离总人口。分类合计少于人口总数时，差额在圆环中单独留白；超过人口总数时，圆环按分类合计缩放。详情数值仍使用表中人口基数。</p><p>“其余类别”只包含未勾选的人口类别，不包含缺失数据。带点线的留白表示原表统计差额，不是一个人口类别。公布的 0 不代表可以确认绝对没有居民；灰色虚线边界和“暂无数据”表示资料缺失，不当作 0。</p></section>
       <section><h3>年份与收入</h3><p id="year-definition"></p><p id="income-definition"></p><p>收入底色蓝色较低、黄色居中、红色较高，使用固定区间；收入不是财富、房价或个人工资。“住户”也包括单人和合住者。</p><p id="latest-census-note"></p></section>
       <section><h3>覆盖与选区参考</h3><p id="coverage-definition"></p><p id="boundary-note"></p><p>学校分配需按具体地址核验。收入或人口构成不能等同于学校质量、治安或个人特征。地图仅覆盖 Calgary 市内社区，不含 Springbank、Bearspaw 等市外地区。</p></section>

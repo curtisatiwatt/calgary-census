@@ -5,6 +5,9 @@ import './mobile-ui.css';
 import './mobile-dialogs.css';
 import './community-sheet.css';
 import './map-legibility.css';
+import './desktop-ui.css';
+import './map-controls.css';
+import { initDesktopUI } from './desktop-ui.js';
 import { initMobileUI, getMobileMapInsets } from './mobile-ui.js';
 import { initCommunitySheet } from './community-sheet.js';
 import { loadData } from './data.js';
@@ -25,7 +28,7 @@ const state = {
   operatingTransit: null, greenTransit: null, geographicContext: null, orientationLandmarks: null,
   roads: true, labels: true, transit: false, landmarks: false,
   groups: [], groupById: new Map(), selectedGroups: [], colors: {}, selected: null,
-  mode: 'composition', focusMode: false, focusComparisonPageSize: null, income: false, contexts: [], comparisonContexts: [], composition: null,
+  mode: 'composition', income: false, contexts: [], comparisonContexts: [], composition: null,
   view: null, wholeCity: true, compareStart: 0, searchMatches: [], activeSearch: -1,
 };
 let syncing = false;
@@ -34,6 +37,7 @@ let lastMobile = mobile();
 let lastComparisonPageSize = null;
 let mobileUI;
 let communitySheet;
+let desktopUI;
 let observedTextSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
 const labelMeasure = document.createElement('canvas').getContext('2d');
 
@@ -44,8 +48,7 @@ function populationRecord(code) { return state.data?.communities[code] || null; 
 function activeContexts() { return state.mode === 'composition' ? [state.composition].filter(Boolean) : state.comparisonContexts; }
 function closeTooltips(closePopups = true) { state.contexts.forEach(context => { context.tooltip.close(); if (closePopups) context.map.closePopup(); }); }
 function setCollapsed(collapsed) {
-  if (mobile() && communitySheet) communitySheet.setSnap(collapsed ? 'peek' : 'half');
-  else sidebar.classList.toggle('collapsed', collapsed);
+  if (mobile() && communitySheet && communitySheet.getState() !== 'closed') communitySheet.setSnap(collapsed ? 'peek' : 'half');
   mobileUI?.refresh();
 }
 function toggleGroups(open) {
@@ -60,13 +63,6 @@ function toggleLayers(open) {
   $('layers-button').setAttribute('aria-expanded', String(open));
   if (open) { toggleGroups(false); closeTooltips(); }
   mobileUI?.refresh();
-}
-function refreshFocusControl() {
-  const label = t(state.focusMode ? '退出专注' : '专注地图');
-  $('focus-map-label').textContent = label;
-  $('focus-map').setAttribute('aria-pressed', String(state.focusMode));
-  $('focus-map').setAttribute('aria-label', label);
-  $('focus-map').title = label;
 }
 
 function resizeMapsKeepingView() {
@@ -88,24 +84,6 @@ function resizeMapsKeepingView() {
   updateDonuts();
 }
 
-function setFocusMode(focused) {
-  if (state.focusMode === focused) return;
-  closeTooltips(); toggleGroups(false); toggleLayers(false); closeSearch(); mobileUI?.closeTransient();
-  const current = activeContexts()[0];
-  if (current?.map._loaded) syncMaps(current);
-  // The visible comparison panels and paging controls must share the same size.
-  state.focusComparisonPageSize = focused ? (lastComparisonPageSize ?? comparisonPageSize()) : null;
-  state.focusMode = focused;
-  document.body.classList.toggle('map-focus', focused);
-  mobileUI?.refresh();
-  refreshFocusControl();
-  // Keep focus on an available control when the surrounding navigation disappears.
-  $('focus-map').focus({ preventScroll: true });
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    if (state.mode === 'distribution' && lastComparisonPageSize !== comparisonPageSize()) rebuildComparison({ preserveView: true });
-    else resizeMapsKeepingView();
-  }));
-}
 
 function updateLayerVisibility() {
   closeTooltips();
@@ -176,7 +154,8 @@ function updateGroupSelection(ids, rerender = true) {
 
 function renderDonutKey() {
   const groups = selectedGroups();
-  $('donut-key').innerHTML = groups.map(g => `<span><i style="background:${state.colors[g.id]}"></i>${esc(g.label)}</span>`).join('') + (groups.length ? '<span><i style="background:#d5dbd5"></i>其余类别</span><span><i style="background:#fff;border:1px dotted #819080"></i>原表统计差额</span>' : '<span>未选择人口群体 · 可从上方添加</span>');
+  $('composition-key').hidden = !groups.length;
+  $('donut-key').innerHTML = groups.map(g => `<span><i style="background:${state.colors[g.id]}"></i>${esc(g.label)}</span>`).join('') + (groups.length ? '<span><i style="background:#d5dbd5"></i>其余类别</span><span><i style="background:#fff;border:1px dotted #819080"></i>原表统计差额</span>' : '<span>未选择人口群体 · 点击“人群”添加</span>');
   localize($('donut-key'));
 }
 
@@ -211,7 +190,7 @@ function renderDetail() {
     return;
   }
   if (!groups.length) {
-    $('composition-bars').innerHTML = '<p class="detail-empty">从上方“人口群体”选择想了解的类别。</p>';
+    $('composition-bars').innerHTML = '<p class="detail-empty">点击“人群”选择想了解的类别。</p>';
     $('composition-basis').textContent = '';
     localize(sidebar);
     return;
@@ -288,7 +267,7 @@ function createMap(element, groupId = null) {
     },
   }).addTo(map);
   if (!groupId) {
-    context.contextLayers = createContextLayers({ context, basemap: state.basemap, geography: state.geographicContext, orientationLandmarks: state.orientationLandmarks, operatingTransit: state.operatingTransit, greenTransit: state.greenTransit, communityNames: state.features.map(f => f.properties.name), visible: { roads: state.roads, transit: state.transit, landmarks: state.landmarks, communityLabels: state.labels }, getLabelObstacles: () => mobileLabelObstacles(map), onStationOpen: () => { closeTooltips(); toggleGroups(false); toggleLayers(false); if (mobile()) setCollapsed(true); } });
+    context.contextLayers = createContextLayers({ context, basemap: state.basemap, geography: state.geographicContext, orientationLandmarks: state.orientationLandmarks, operatingTransit: state.operatingTransit, greenTransit: state.greenTransit, communityNames: state.features.map(f => f.properties.name), visible: { roads: state.roads, transit: state.transit, landmarks: state.landmarks, communityLabels: state.labels }, getLabelObstacles: () => mapLabelObstacles(map), onStationOpen: () => { closeTooltips(); toggleGroups(false); toggleLayers(false); if (mobile()) setCollapsed(true); } });
   } else {
     renderComparisonBasemap(context);
   }
@@ -338,20 +317,22 @@ function syncMaps(source) {
   syncing = false;
 }
 
-function mobileLabelObstacles(map) {
-  if (!mobile()) return [];
-  const { top, bottom } = getMobileMapInsets();
+function mapLabelObstacles(map) {
+  const { top, bottom, left, right } = mobile() ? getMobileMapInsets() : (desktopUI?.getInsets() || { top: 0, bottom: 0, left: 0, right: 0 });
   const size = map.getSize();
   const mapRect = map.getContainer().getBoundingClientRect();
   const controls = [...document.querySelectorAll('.map-tools, #mobile-legend-button')].filter(node => node.offsetWidth && node.offsetHeight).map(node => {
     const r = node.getBoundingClientRect();
     return { x: r.left - mapRect.left - 5, y: r.top - mapRect.top - 5, w: r.width + 10, h: r.height + 10 };
   });
-  return [{ x: 0, y: 0, w: size.x, h: top }, { x: 0, y: size.y - bottom, w: size.x, h: bottom }, ...controls];
+  return [{ x: 0, y: 0, w: size.x, h: top }, { x: 0, y: size.y - bottom, w: size.x, h: bottom }, { x: 0, y: 0, w: left, h: size.y }, { x: size.x - right, y: 0, w: right, h: size.y }, ...controls];
 }
 
 function fitPadding(map, community = false) {
-  if (!mobile()) return { paddingTopLeft: [community ? 35 : 24, 65], paddingBottomRight: [community ? 35 : 24, 100] };
+  if (!mobile()) {
+    const inset = desktopUI?.getInsets() || { top: 24, right: 24, bottom: 24, left: 24 };
+    return { paddingTopLeft: [inset.left + 24, inset.top + 24], paddingBottomRight: [inset.right + 24, Math.max(100, inset.bottom + 24)] };
+  }
   const { top, left, right } = getMobileMapInsets();
   // Fit to the destination stop, rather than the old height during its animation.
   const bottom = (communitySheet?.getTargetInset() || 0) + 14;
@@ -395,14 +376,22 @@ function selectCommunity(code, zoom = true, expand = true) {
   closeTooltips();
   state.selected = code;
   renderDetail();
-  if (mobile() && expand && !state.focusMode) communitySheet.open('half');
-  else communitySheet?.refresh();
+  if (expand) {
+    desktopUI?.setSelection();
+    if (mobile()) communitySheet.open('half');
+    else desktopUI?.openDetails();
+  } else communitySheet?.refresh();
   refreshStyles();
   updateDonuts();
   renderComparisonHeadings();
   if (zoom) fitCommunity(code, false);
+  else if (expand && !mobile()) {
+    const centroid = state.byCode.get(code).properties.centroid;
+    const context = activeContexts()[0];
+    if (centroid && context) context.map.panInside([centroid[1], centroid[0]], { ...fitPadding(context.map, true), animate: false });
+  }
   $('announcer').textContent = t(`已选择 ${state.byCode.get(code).properties.name}。人口构成已更新。`);
-  try { history.replaceState(null, '', `#${encodeURIComponent(code)}`); } catch { /* embedded preview */ }
+  try { if (expand) history.replaceState(null, '', `#${encodeURIComponent(code)}`); } catch { /* embedded preview */ }
 }
 
 function updateDonuts() {
@@ -415,7 +404,7 @@ function updateDonuts() {
   const map = context.map;
   const size = mobile() ? 28 : 32;
   const hitSize = mobile() ? 44 : size;
-  const obstacles = mobileLabelObstacles(map);
+  const obstacles = mapLabelObstacles(map);
   const occupied = [];
   const candidates = state.features.filter(f => populationRecord(f.properties.code) && map.getBounds().contains([f.properties.centroid[1], f.properties.centroid[0]]))
     .sort((a, b) => (a.properties.code === state.selected ? -1 : b.properties.code === state.selected ? 1 : (populationRecord(b.properties.code)?.population || 0) - (populationRecord(a.properties.code)?.population || 0)));
@@ -475,7 +464,7 @@ function updateLabels(context) {
     return { feature, priority: (p.population || 0) + area * 400000 };
   }).sort((a, b) => Number(b.feature.properties.code === state.selected) - Number(a.feature.properties.code === state.selected)
     || b.priority - a.priority || a.feature.properties.code.localeCompare(b.feature.properties.code));
-  const occupied = [...(context.contextLayers?.labelBoxes || mobileLabelObstacles(map))];
+  const occupied = [...(context.contextLayers?.labelBoxes || mapLabelObstacles(map))];
   let shown = 0;
   for (const { feature } of candidates) {
     if (shown >= cap) break;
@@ -512,12 +501,7 @@ function updateLabels(context) {
   }
 }
 
-function comparisonPageSize() {
-  if (mobile()) return 1;
-  if (state.focusMode && state.focusComparisonPageSize !== null) return state.focusComparisonPageSize;
-  const width = document.querySelector('.map-workspace').clientWidth;
-  return width >= 780 ? 3 : width >= 500 ? 2 : 1;
-}
+function comparisonPageSize() { return 1; }
 function renderMobileSummary() {
   const p = state.byCode.get(state.selected)?.properties;
   if (!p) return;
@@ -540,7 +524,7 @@ function renderComparisonHeadings() {
   renderMobileSummary();
 }
 
-function rebuildComparison({ preserveView = state.focusMode } = {}) {
+function rebuildComparison({ preserveView = true } = {}) {
   cancelAnimationFrame(syncFrame); syncFrame = null;
   closeTooltips();
   for (const context of state.comparisonContexts) {
@@ -557,7 +541,7 @@ function rebuildComparison({ preserveView = state.focusMode } = {}) {
   $('population-legend').hidden = groups.length === 0;
   $('comparison-select').innerHTML = groups.map((g, index) => `<option value="${index}" ${index === state.compareStart ? 'selected' : ''}>${esc(g.label)}</option>`).join('');
   $('comparison-select').disabled = !groups.length;
-  $('comparison-page').textContent = groups.length ? `${state.compareStart + 1}–${state.compareStart + shown.length} / ${groups.length}` : '0 / 0';
+  $('comparison-page').textContent = groups.length ? `${state.compareStart + 1} / ${groups.length}` : '0 / 0';
   $('previous-groups').disabled = state.compareStart === 0;
   $('next-groups').disabled = state.compareStart + size >= groups.length;
   $('comparison-maps').style.setProperty('--map-columns', String(Math.max(1, shown.length)));
@@ -632,15 +616,14 @@ function chooseSearchResult(code) {
 }
 
 function setReady(ready) {
-  document.querySelectorAll('.view-tabs button,#groups-button,#group-search,#default-groups,#all-groups,#clear-groups,#income-toggle,#layers-button,#roads-toggle,#labels-toggle,#transit-toggle,#landmarks-toggle,#search,#fit-city,#zoom-in,#zoom-out,#focus-map,#focus-community').forEach(control => { control.disabled = !ready; });
+  document.querySelectorAll('.view-tabs button,#groups-button,#group-search,#default-groups,#all-groups,#clear-groups,#income-toggle,#layers-button,#roads-toggle,#labels-toggle,#transit-toggle,#landmarks-toggle,#search,#fit-city,#zoom-in,#zoom-out,#focus-community').forEach(control => { control.disabled = !ready; });
 }
 
 function initializeControls() {
   setReady(false);
-  refreshFocusControl();
   window.addEventListener('atlas-languagechange', () => {
     closeTooltips();
-    applyStaticTranslations(); refreshThemeControl(); refreshFocusControl(); mobileUI?.refresh();
+    applyStaticTranslations(); refreshThemeControl(); mobileUI?.refresh();
     if (state.data) {
       renderMetadata(); renderGroupList(); renderDonutKey(); renderDetail(); renderComparisonHeadings(); communitySheet?.refresh();
       $('mode-description').textContent = t(state.mode === 'composition' ? '一个社区，一张构成图' : '同一色阶，查看聚居分布');
@@ -649,7 +632,6 @@ function initializeControls() {
     }
   });
   window.addEventListener('atlas-themechange', () => { closeTooltips(); refreshStyles(); state.contexts.forEach(context => context.refreshBasemap?.()); });
-  if (mobile()) setCollapsed(true);
   for (const mode of ['composition', 'distribution']) $(`${mode}-tab`).addEventListener('click', () => selectView(mode));
   document.querySelector('.view-tabs').addEventListener('keydown', event => {
     if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
@@ -662,7 +644,7 @@ function initializeControls() {
   for (const layer of ['roads', 'labels', 'transit', 'landmarks']) $(`${layer}-toggle`).addEventListener('change', event => { state[layer] = event.target.checked; updateLayerVisibility(); });
   $('groups-button').addEventListener('click', () => toggleGroups($('groups-panel').hidden));
   $('close-groups').addEventListener('click', () => { toggleGroups(false); $('groups-button').focus(); });
-  $('empty-choose-groups').addEventListener('click', () => { setFocusMode(false); toggleGroups(true); });
+  $('empty-choose-groups').addEventListener('click', () => { toggleGroups(true); });
   $('group-search').addEventListener('input', renderGroupList);
   $('group-list').addEventListener('change', event => {
     const id = event.target.dataset.group;
@@ -676,7 +658,6 @@ function initializeControls() {
   $('previous-groups').addEventListener('click', () => { state.compareStart -= comparisonPageSize(); rebuildComparison(); });
   $('next-groups').addEventListener('click', () => { state.compareStart += comparisonPageSize(); rebuildComparison(); });
   $('comparison-select').addEventListener('change', event => { state.compareStart = Number(event.target.value); rebuildComparison(); });
-  $('focus-map').addEventListener('click', () => setFocusMode(!state.focusMode));
   $('fit-city').addEventListener('click', fitCity);
   $('zoom-in').addEventListener('click', () => activeContexts()[0]?.map.zoomIn(0.5));
   $('zoom-out').addEventListener('click', () => activeContexts()[0]?.map.zoomOut(0.5));
@@ -711,10 +692,10 @@ function initializeControls() {
       closeTooltips();
       if (!$('layers-panel').hidden) { toggleLayers(false); (mobile() ? $('mobile-more') : $('layers-button')).focus(); }
       else if (!$('groups-panel').hidden) { toggleGroups(false); $('groups-button').focus(); }
-      else if (state.focusMode) { event.preventDefault(); setFocusMode(false); }
+      else if (!mobile()) desktopUI?.closeDetails();
     }
     if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) && !document.querySelector('dialog[open]')) {
-      event.preventDefault(); setFocusMode(false); $('search').focus();
+      event.preventDefault(); $('search').focus();
     }
   });
   window.addEventListener('hashchange', () => { const code = hashCode(location.hash, state.features); if (code && code !== state.selected) selectCommunity(code); });
@@ -723,11 +704,13 @@ function initializeControls() {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
       const changed = lastMobile !== mobile(); lastMobile = mobile();
-      if (changed && mobile()) setCollapsed(true);
       // Keyboard and browser chrome resize the viewport. Preserve the user's camera.
       mobileUI?.refresh();
       if (state.mode === 'distribution' && (changed || lastComparisonPageSize !== comparisonPageSize())) rebuildComparison({ preserveView: true });
-      else resizeMapsKeepingView();
+      else {
+        resizeMapsKeepingView();
+        if (changed && state.wholeCity) fitCity();
+      }
     }, 150);
   });
 }
@@ -746,6 +729,7 @@ async function init() {
     activeContexts().forEach(updateLabels);
     updateDonuts();
   } });
+  desktopUI = initDesktopUI({ onLayoutChange: () => { activeContexts().forEach(updateLabels); updateDonuts(); } });
   try {
     const data = await loadData();
     state.metadata = data.metadata; state.features = data.features; state.data = data.populationData; state.basemap = data.basemap;
@@ -764,7 +748,7 @@ async function init() {
     $('loading-overlay').hidden = true;
     mobileUI.refresh();
     fitCity(); selectCommunity(state.selected, false, false);
-    if (linkedCode) fitCommunity(linkedCode);
+    if (linkedCode) selectCommunity(linkedCode, true, true);
     setReady(true);
   } catch (error) {
     $('loading-overlay').hidden = false;

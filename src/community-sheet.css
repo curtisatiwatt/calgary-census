@@ -3,14 +3,17 @@
 .community-sheet-close{display:none}
 
 @media(max-width:760px){
-  .sidebar[data-sheet-snap],.sidebar[data-sheet-snap].collapsed{
-    height:var(--community-sheet-height,160px);max-height:none;
+  .sidebar[data-sheet-snap]:not([data-sheet-snap="closed"]){
+    display:block;height:var(--community-sheet-height,160px);max-height:none;
     z-index:2300;border-radius:22px 22px 0 0;
     transition:height 240ms cubic-bezier(.2,.8,.2,1),transform 200ms ease,visibility 200ms;
     transform:translateY(0);visibility:visible;
   }
-  .sidebar[data-sheet-snap="closed"]{
-    transform:translateY(105%);visibility:hidden;pointer-events:none;
+  /* Closed is absent, not an invisible sheet with a live map behind it.
+     Include the collapsed variant so the open rule can never win specificity. */
+  .sidebar[data-sheet-snap="closed"],.sidebar[data-sheet-snap="closed"].collapsed{
+    display:none;height:0;min-height:0;max-height:0;border:0;box-shadow:none;
+    transform:translateY(100%);visibility:hidden;pointer-events:none;
   }
   .sidebar[data-sheet-snap] .detail-panel,.sidebar[data-sheet-snap].collapsed .detail-panel{
     display:flex;flex-direction:column;gap:0;height:100%;max-height:none;
@@ -72,5 +75,5 @@
   body.map-focus .sidebar[data-sheet-snap]{display:none}
 }
 @media(max-width:760px) and (prefers-reduced-motion:reduce){
-  .sidebar[data-sheet-snap],.sidebar[data-sheet-snap].collapsed{transition:none}
+  .sidebar[data-sheet-snap]:not([data-sheet-snap="closed"]){transition:none}
 }
