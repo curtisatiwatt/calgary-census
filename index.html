@@ -16,10 +16,10 @@
     <a class="brand" href="./" aria-label="Calgary 社区观察首页"><span class="brand-mark" aria-hidden="true">C<span>↗</span></span><span><strong>Calgary <span class="brand-zh">社区观察</span></strong><small>COMMUNITY ATLAS</small></span></a>
     <div class="search-wrap">
       <span class="search-icon" aria-hidden="true">⌕</span>
-      <input id="search" type="search" placeholder="搜索社区，例如 Panorama Hills" autocomplete="off" role="combobox" aria-label="搜索卡尔加里社区" aria-autocomplete="list" aria-expanded="false" aria-controls="search-results">
+      <input id="search" type="search" placeholder="搜索 Calgary 社区" autocomplete="off" role="combobox" aria-label="搜索卡尔加里社区" aria-autocomplete="list" aria-expanded="false" aria-controls="search-results">
       <kbd aria-hidden="true">/</kbd><div id="search-results" class="search-results" role="listbox" hidden></div>
     </div>
-    <button id="mobile-more" class="settings-trigger" type="button" aria-label="地图设置" aria-haspopup="dialog" aria-controls="mobile-more-dialog" aria-expanded="false"><span data-mobile-text="更多">更多</span></button>
+    <button id="mobile-more" class="settings-trigger" type="button" aria-label="菜单" aria-haspopup="dialog" aria-controls="mobile-more-dialog" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span data-mobile-text="菜单">菜单</span></button>
     <div class="header-actions"><span class="data-edition" id="data-edition">2021 年人口普查</span></div>
   </header>
 
@@ -35,7 +35,7 @@
       <span id="mode-description" class="mode-description">一个社区，一张构成图</span>
     </div>
     <section id="layers-panel" class="layers-panel" aria-label="选择地图图层" hidden>
-      <div class="filter-heading dialog-nav"><button id="back-layers" class="dialog-back" type="button" aria-label="返回地图设置"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button><div class="dialog-nav-title"><h2 id="layers-heading">地图图层</h2><p>社区构成的地理参照</p></div><button id="close-layers" class="icon-button dialog-close" type="button" aria-label="关闭地图图层">×</button></div>
+      <div class="filter-heading dialog-nav"><button id="back-layers" class="dialog-back" type="button" aria-label="返回菜单"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button><div class="dialog-nav-title"><h2 id="layers-heading">地图图层</h2><p>社区构成的地理参照</p></div><button id="close-layers" class="icon-button dialog-close" type="button" aria-label="关闭地图图层">×</button></div>
       <div class="dialog-scroll">
       <label class="layer-option"><input type="checkbox" id="roads-toggle" checked><span>道路与铁路底图<small>主要道路、道路名称及铁路轨道</small></span></label>
       <label class="layer-option"><input type="checkbox" id="labels-toggle" checked><span>社区标注<small>随缩放逐步显示；自动避开重叠</small></span></label>
@@ -46,7 +46,7 @@
       </div>
     </section>
     <section id="groups-panel" class="groups-panel" aria-label="选择人口群体" hidden>
-      <div class="filter-heading dialog-nav"><div class="dialog-nav-title"><h2 id="groups-heading">选择人口群体</h2><p>两个视图共用这份选择</p></div><button id="close-groups" class="icon-button dialog-close" type="button" aria-label="关闭人口群体选择">×</button></div>
+      <div class="filter-heading dialog-nav"><button id="back-groups" class="dialog-back" type="button" aria-label="返回菜单"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button><div class="dialog-nav-title"><h2 id="groups-heading">选择人口群体</h2><p>两个视图共用这份选择</p></div><button id="close-groups" class="icon-button dialog-close" type="button" aria-label="关闭人口群体选择">×</button></div>
       <div class="dialog-scroll">
       <input type="search" id="group-search" placeholder="搜索名称 / Search groups" aria-label="搜索人口群体">
       <div class="filter-actions"><button id="default-groups" class="text-button">常用五类</button><button id="all-groups" class="text-button">全选</button><button id="clear-groups" class="text-button">清空</button><span id="filter-count"></span></div>
@@ -60,7 +60,7 @@
     <aside class="sidebar" aria-label="社区详情">
       <section class="detail-panel" id="detail-panel">
         <button id="mobile-detail-handle" class="mobile-detail-handle" aria-label="展开或收起社区详情" aria-expanded="false" aria-controls="detail-body"><span class="handle-bar"></span><span id="mobile-detail-label">查看详情</span><span id="mobile-chevron">⌃</span></button>
-        <div class="detail-topline"><span class="eyebrow">SELECTED COMMUNITY</span><button id="focus-community" class="text-button">定位 ↗</button></div>
+        <div class="detail-topline"><span class="eyebrow">已选社区</span><button id="focus-community" class="text-button">定位 ↗</button></div>
         <h1 id="community-name">正在载入社区</h1>
         <div class="community-meta" id="community-meta">正在加载官方社区数据…</div>
         <div class="collapsed-summary" id="collapsed-summary"></div>
@@ -73,7 +73,6 @@
           </section>
           <div class="income-summary"><div><span class="metric-label" id="income-detail-label">家庭税前年收入中位数 · 2020</span><div id="income-context" class="metric-context"></div></div><strong class="income-value" id="income-value">—</strong></div>
           <div class="secondary-metrics"><div><span>0–14 岁</span><strong id="children">—</strong></div><div><span>平均每户</span><strong id="household">—</strong></div></div>
-          <div class="selection-note"><h2>选区参考</h2><p id="community-note">正在加载…</p></div>
           <p class="data-caveat" id="data-caveat" hidden></p>
           <a id="source-link" class="source-link" target="_blank" rel="noopener">查看官方社区档案 ↗</a>
         </div>
@@ -95,8 +94,9 @@
         <div class="population-legend map-legend" id="population-legend"><div class="legend-title"><strong>占社区人口比例</strong><span>所有地图使用相同色阶</span></div><div class="population-ramp" id="population-ramp"></div><div class="population-bin-labels"><span>&lt;5%</span><span>5–10%</span><span>10–20%</span><span>20–30%</span><span>30–40%</span><span>40%+</span></div><p><span class="missing-swatch"></span> 暂无数据，不是 0%</p></div>
       </section>
       <div id="transit-legend" class="transit-legend" hidden aria-label="CTrain 线路图例"><span><i class="transit-line red-line"></i>Red</span><span><i class="transit-line blue-line"></i>Blue</span><span><i class="transit-line green-line"></i>Green · 未运营</span><span><i class="transit-line future-line"></i>远期规划</span></div>
-      <button id="mobile-legend-button" class="mobile-only" type="button" aria-haspopup="dialog" aria-controls="mobile-legend-dialog" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h5v5H4zM4 14h5v5H4zM13 7h7M13 16h7"/></svg><span data-mobile-text="图例">图例</span></button>
+      <button id="mobile-legend-button" class="legend-trigger" hidden type="button" aria-haspopup="dialog" aria-controls="mobile-legend-dialog" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h5v5H4zM4 14h5v5H4zM13 7h7M13 16h7"/></svg><span data-mobile-text="图例">图例</span></button>
       <div class="map-tools"><button id="fit-city" class="map-button" aria-label="查看整个卡尔加里">全市 ⤢</button><button id="zoom-in" class="map-button square" aria-label="放大地图">+</button><button id="zoom-out" class="map-button square" aria-label="缩小地图">−</button></div>
+      <div id="mobile-map-switcher" hidden></div>
       <div id="map-warning" class="map-warning" hidden role="status"></div>
       <div id="loading-overlay" class="loading-overlay"><div class="loader"></div><strong>正在展开 Calgary</strong><span>读取官方社区边界与人口资料</span></div>
     </section>
@@ -105,12 +105,14 @@
 
 
   <dialog id="mobile-more-dialog" class="mobile-sheet" aria-labelledby="mobile-more-heading">
-    <div class="mobile-sheet-heading dialog-nav"><h2 id="mobile-more-heading" data-mobile-text="地图设置">地图设置</h2><button id="close-mobile-more" class="dialog-close" type="button" aria-label="关闭设置">×</button></div>
+    <div class="mobile-sheet-heading dialog-nav"><h2 id="mobile-more-heading" data-mobile-text="菜单">菜单</h2><button id="close-mobile-more" class="dialog-close" type="button" aria-label="关闭菜单">×</button></div>
     <div id="mobile-settings-content" class="dialog-scroll">
+      <section class="settings-section"><h3 data-mobile-text="地图视图">地图视图</h3><div id="mobile-view-slot"></div></section>
+      <section class="settings-section"><h3 data-mobile-text="数据与图层">数据与图层</h3><div id="mobile-controls-slot"></div></section>
       <section class="settings-section" aria-labelledby="map-settings-heading">
         <h3 id="map-settings-heading" data-mobile-text="地图与资料">地图与资料</h3>
         <div class="settings-group">
-          <div id="mobile-layers-slot" class="mobile-only"></div>
+
           <button id="method-button" class="text-button settings-link" type="button" aria-haspopup="dialog"><span class="settings-row-icon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></span><span class="settings-row-copy"><span data-mobile-text="数据说明">数据说明</span><small data-mobile-text="统计口径与官方来源">统计口径与官方来源</small></span><span class="settings-row-chevron"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></span></button>
         </div>
       </section>
@@ -133,7 +135,7 @@
   <dialog id="mobile-filter-dialog" class="mobile-sheet"></dialog>
 
   <dialog id="method-dialog" aria-labelledby="method-heading">
-    <div class="dialog-heading dialog-nav"><button id="back-method" class="dialog-back" type="button" aria-label="返回地图设置"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button><h2 id="method-heading" data-mobile-text="数据说明">数据说明</h2><button id="close-method" class="icon-button dialog-close" type="button" aria-label="关闭数据说明">×</button></div>
+    <div class="dialog-heading dialog-nav"><button id="back-method" class="dialog-back" type="button" aria-label="返回菜单"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button><h2 id="method-heading" data-mobile-text="数据说明">数据说明</h2><button id="close-method" class="icon-button dialog-close" type="button" aria-label="关闭数据说明">×</button></div>
     <div class="dialog-scroll">
     <h2>这张地图怎样读？</h2>
     <div class="method-grid">
@@ -142,7 +144,7 @@
       <section><h3>人口类别不等于国籍</h3><p id="population-groups-definition">采用 2021 年普查 Visible minority（Racialized population）分类。Chinese 不等于中国国籍、中国出生或普通话使用者；“非可见少数族裔”包括原住民等，不能改称白人或欧洲裔。初始不选人口群体，可自行选择一个或多个人口群体。</p></section>
       <section><h3>人数、占比与取整</h3><p>详情与热度图的占比由公布人数除以同表的私人住户人口计算，保留一位小数；这与原 PDF 中已取整的整数百分比可能略有不同。官方人数通常按 5 人取整，各类别人数之和可能略偏离总人口。分类合计少于人口总数时，差额在圆环中单独留白；超过人口总数时，圆环按分类合计缩放。详情数值仍使用表中人口基数。</p><p>“其余类别”只包含未勾选的人口类别，不包含缺失数据。带点线的留白表示原表统计差额，不是一个人口类别。公布的 0 不代表可以确认绝对没有居民；灰色虚线边界和“暂无数据”表示资料缺失，不当作 0。</p></section>
       <section><h3>年份与收入</h3><p id="year-definition"></p><p id="income-definition"></p><p>收入底色蓝色较低、黄色居中、红色较高，使用固定区间；收入不是财富、房价或个人工资。“住户”也包括单人和合住者。</p><p id="latest-census-note"></p></section>
-      <section><h3>覆盖与选区参考</h3><p id="coverage-definition"></p><p id="boundary-note"></p><p>学校分配需按具体地址核验。收入或人口构成不能等同于学校质量、治安或个人特征。地图仅覆盖 Calgary 市内社区，不含 Springbank、Bearspaw 等市外地区。</p></section>
+      <section><h3>覆盖范围</h3><p id="coverage-definition"></p><p id="boundary-note"></p><p>地图仅覆盖 Calgary 市内社区，不含 Springbank、Bearspaw 等市外地区。</p></section>
     </div>
     <div class="method-sources"><h3>原始来源</h3><div id="source-list"></div><p id="prepared-note"></p><p id="license-note"></p></div>
     </div>

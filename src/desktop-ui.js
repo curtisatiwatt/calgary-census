@@ -28,10 +28,11 @@ export function initDesktopUI({ onLayoutChange = () => {} } = {}) {
   const nav = document.querySelector('.viewbar');
   const sidebar = document.querySelector('.sidebar');
   const content = $('detail-body');
-  const more = $('mobile-more');
-  const moreLabel = more.querySelector('[data-mobile-text]');
-  const moreOrigin = document.createComment('desktop settings origin');
-  more.before(moreOrigin);
+  const railItems = [$('method-button'), $('mobile-language-slot'), $('mobile-theme-slot')];
+  const railOrigins = new Map(railItems.map(node => {
+    const marker = document.createComment('desktop preference origin');
+    node.before(marker); return [node, marker];
+  }));
   let expanded = false;
   let detailsOpen = false;
   let hasSelection = false;
@@ -81,10 +82,6 @@ export function initDesktopUI({ onLayoutChange = () => {} } = {}) {
   incomeIcon.className = 'desktop-nav-icon desktop-only';
   incomeIcon.innerHTML = icon('income');
   $('income-control').prepend(incomeIcon);
-  const settingsIcon = document.createElement('span');
-  settingsIcon.className = 'desktop-nav-icon desktop-only';
-  settingsIcon.innerHTML = icon('settings');
-  more.prepend(settingsIcon);
 
   const footer = document.createElement('div');
   footer.className = 'desktop-rail-footer desktop-only';
@@ -92,10 +89,7 @@ export function initDesktopUI({ onLayoutChange = () => {} } = {}) {
     if (hasSelection) detailsOpen ? closeDetails() : openDetails();
   });
   detailsButton.setAttribute('aria-controls', 'detail-panel');
-  const guideButton = makeButton('desktop-data-guide', 'guide', '说明', () => $('method-button').click());
-  guideButton.setAttribute('aria-haspopup', 'dialog');
-  guideButton.setAttribute('aria-controls', 'method-dialog');
-  footer.append(detailsButton, guideButton);
+  footer.append(detailsButton);
   nav.append(footer);
 
   const closeButton = makeButton('desktop-detail-close', 'close', '关闭社区详情', event => {
@@ -121,13 +115,13 @@ export function initDesktopUI({ onLayoutChange = () => {} } = {}) {
     document.body.classList.toggle('desktop-details-open', active && detailsOpen);
     if (active) {
       appliedDesktop = true;
-      if (more.parentNode !== footer) footer.append(more);
+      for (const node of railItems) if (node.parentNode !== footer) footer.append(node);
       sidebar.inert = !detailsOpen;
       sidebar.setAttribute('aria-hidden', String(!detailsOpen));
       content.inert = false;
     } else if (appliedDesktop) {
       appliedDesktop = false;
-      moreOrigin.after(more);
+      for (const [node, marker] of railOrigins) marker.after(node);
       // Match the mobile sheet state when crossing the breakpoint. Its module
       // remains the only owner of mobile height and drag behaviour.
       const snap = sidebar.dataset.sheetSnap;
@@ -135,10 +129,6 @@ export function initDesktopUI({ onLayoutChange = () => {} } = {}) {
       if (snap === 'closed') sidebar.setAttribute('aria-hidden', 'true');
       else sidebar.removeAttribute('aria-hidden');
       content.inert = snap === 'closed' || snap === 'peek';
-    }
-    if (moreLabel) {
-      moreLabel.dataset.mobileText = active ? '设置' : '更多';
-      moreLabel.textContent = t(moreLabel.dataset.mobileText);
     }
     menuButton.setAttribute('aria-expanded', String(expanded));
     menuButton.setAttribute('aria-label', t(expanded ? '收起菜单' : '展开菜单'));
@@ -150,8 +140,10 @@ export function initDesktopUI({ onLayoutChange = () => {} } = {}) {
     detailsButton.title = t(detailsLabel);
     closeButton.setAttribute('aria-label', t('关闭社区详情'));
     closeButton.title = t('关闭社区详情');
-    guideButton.setAttribute('aria-label', t('数据说明'));
-    guideButton.title = t('数据说明');
+    for (const node of railItems) {
+      const label = node.id === 'method-button' ? '数据说明' : node.id === 'mobile-language-slot' ? '语言' : '外观';
+      node.title = t(label);
+    }
     for (const node of nav.querySelectorAll('[data-desktop-label]')) node.textContent = t(node.dataset.desktopLabel);
     closeButton.querySelector('[data-desktop-label]').textContent = t('关闭社区详情');
     notifyLayout();

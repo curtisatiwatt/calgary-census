@@ -76,9 +76,9 @@ const translations = {
   '按普查原始分类展示；这些类别不等于国籍。“非可见少数族裔”包括原住民等，不能等同于白人。': 'These are original Census categories, not nationalities. “Not a visible minority” includes Indigenous people and must not be treated as “White”.',
   '社区详情': 'Community details', '展开或收起社区详情': 'Expand or collapse community details', '定位 ↗': 'Locate ↗',
   '正在载入社区': 'Loading community', '正在加载官方社区数据…': 'Loading official community data…', '社区': 'Community', '统计基数': 'population base',
-  '选中社区的人口构成': 'Selected community population composition', '人口构成': 'Population composition', '全市占比': 'City share',
-  '0–14 岁': 'Ages 0–14', '平均每户': 'People / household', '选区参考': 'Area considerations', '正在加载…': 'Loading…',
-  '查看官方社区档案 ↗': 'Official community profile ↗', '人口构成描述社区背景，不代表学校质量或治安。': 'Population composition describes a community; it does not measure school quality or safety.',
+  '已选社区': 'Selected community', '选中社区的人口构成': 'Selected community population composition', '人口构成': 'Population composition', '全市占比': 'City share',
+  '0–14 岁': 'Ages 0–14', '平均每户': 'People / household', '正在加载…': 'Loading…',
+  '查看官方社区档案 ↗': 'Official community profile ↗',
   '卡尔加里互动社区地图': 'Interactive Calgary community map', '社区构成地图，可拖动缩放，也可以搜索选择社区': 'Composition map: pan, zoom or search to choose a community',
   '正在加载社区边界…': 'Loading community boundaries…', '每个圆代表一个社区': 'One ring per community', '扇区为占比 · 灰色为未选类别': 'Slices show shares · grey shows unselected groups',
   '放大地图可查看更多社区': 'Zoom in for more communities', '家庭年收入中位数': 'Median household income',
@@ -104,13 +104,11 @@ const translations = {
   '“其余类别”只包含未勾选的人口类别，不包含缺失数据。带点线的留白表示原表统计差额，不是一个人口类别。公布的 0 不代表可以确认绝对没有居民；灰色虚线边界和“暂无数据”表示资料缺失，不当作 0。': '“Other groups” contains unselected categories only, not missing data. The dotted unfilled segment represents a source-table discrepancy, not another population category. A published zero does not confirm that no residents are present. Dashed grey boundaries and “No data” mean missing information, not zero.',
   '年份与收入': 'Years and income',
   '收入底色蓝色较低、黄色居中、红色较高，使用固定区间；收入不是财富、房价或个人工资。“住户”也包括单人和合住者。': 'Income uses fixed bins: blue is lower, yellow is mid-range and red is higher. Income is not wealth, house price or individual salary. Households include people living alone and shared households.',
-  '覆盖与选区参考': 'Coverage and area considerations',
-  '学校分配需按具体地址核验。收入或人口构成不能等同于学校质量、治安或个人特征。地图仅覆盖 Calgary 市内社区，不含 Springbank、Bearspaw 等市外地区。': 'Verify school assignments for the specific address. Income and population composition do not measure school quality, safety or personal characteristics. Census data covers Calgary communities, excluding places outside the city such as Springbank and Bearspaw.',
+  '覆盖范围': 'Coverage',
   '原始来源': 'Original sources',
   '请启用 JavaScript 以查看互动地图。官方数据可从 https://www.calgary.ca/communities/profiles.html 查阅。': 'Enable JavaScript to use the interactive map. Official profiles: https://www.calgary.ca/communities/profiles.html',
   '暂无数据': 'No data', '没有找到这个类别。': 'No matching group.', '其余类别': 'Other groups', '原表统计差额': 'Source-table discrepancy',
   '未选择人口群体 · 点击“人群”添加': 'No groups selected · choose Groups', '官方资料暂无同口径收入数值': 'No comparable income value is published',
-  '结合住房预算、具体地址对应的学校与通勤进行比较。': 'Compare housing costs, address-specific school assignments and commuting.',
   '这个区域暂无可用的人口分类资料，不能当作 0 人。': 'Population categories are unavailable for this area; this does not mean zero residents.',
   '点击“人群”选择想了解的类别。': 'Choose the categories you want to explore under Groups.',
   '占比按人数 ÷ 同表私人住户人口计算。灰色为未勾选类别，留白为原表统计差额。': 'Shares are counts divided by private-household population in the same table. Grey shows unselected groups; the unfilled segment shows the source-table discrepancy.',
@@ -197,49 +195,7 @@ export function localizeHtml(html) {
   return template.innerHTML;
 }
 
-addTranslations({
-  '不要因收入低于全市直接排除。须结合住户结构、具体住宅和公校核验。': 'Do not exclude an area solely because income is below the city median. Consider household structure, the specific home and public-school assignments.',
-  '东南湖区家庭社区。儿童占28%；可结合学校、活动设施与实际通勤进行比较。': 'A family community in the southeast lake area. Children account for 28%; compare schools, activity facilities and actual commuting.',
-  '中心区候选。人口仅675、儿童占9%；住户收入不能代表整所学校的生源。': 'A central-city option with only 675 residents and 9% children. Household income does not describe the full student population of a school.',
-  '中心区高收入候选。核验具体地址的公校、住房预算与实际通勤。': 'A higher-income central-city option. Verify public schools for the address, housing budget and actual commute.',
-  '中心区高收入候选。比较公校、住房总成本与实际通勤。': 'A higher-income central-city option. Compare public schools, total housing costs and actual commuting.',
-  '人口不足1,000，统计需谨慎。实地核验同龄家庭、公校与日常接送。': 'With fewer than 1,000 residents, interpret the statistics carefully. Check nearby families with children of similar ages, public schools and daily transport.',
-  '优先考察。西区、儿童占22%；按具体地址核验公校，不以私校作为前提。': 'An option to visit first in the west, with 22% children. Verify address-specific public schools; private schooling is not assumed.',
-  '优先考察。西区、儿童占25%；与 Aspen Woods 比较公校和住房总成本。': 'An option to visit first in the west, with 25% children. Compare public schools and total housing costs with Aspen Woods.',
-  '优先考察。西区、儿童占25%；结合公校学位与 实际通勤核验。': 'An option to visit first in the west, with 25% children. Check public-school capacity and actual commuting.',
-  '剩余分区，无同口径收入档案。通常不是以社区名称选房的比较对象。': 'A residual area without a comparable income profile. It is usually not a named residential-community comparison.',
-  '加入西区比较。按地址核验公校、同龄孩子活动及 实际通勤。': 'Include this in a west-side comparison. Verify public schools by address, activities for similar-age children and actual commuting.',
-  '大型公园区域，无同口径收入档案。通常不纳入家庭住宅社区比较。': 'A major park area without a comparable income profile, usually excluded from residential-community comparisons.',
-  '大型公园类区域的居民统计。一般不作为普通住宅社区比较。': 'Resident statistics for a major park area; not generally comparable to ordinary residential communities.',
-  '官方档案未给出可用收入值。新购房应另查当前人口、学校安排和通勤。': 'No usable income value is published. For a home purchase, check current occupancy, school arrangements and commuting separately.',
-  '工业类区域的居民统计。一般不作为普通家庭选区的直接比较对象。': 'Resident statistics for an industrial area; not generally a direct comparison for family residential areas.',
-  '工业类区域，无同口径收入档案。通常不纳入家庭住宅社区比较。': 'An industrial area without a comparable income profile, usually excluded from family residential comparisons.',
-  '已公布社区中收入最低。需单独核验街段、学校与住户结构，不能等同于不安全。': 'The lowest published community income. Check the specific street, schools and household structure; this does not imply that the area is unsafe.',
-  '平均每户人数较少。先看住户结构与孩子活动条件，不把收入等同于家庭资产。': 'Households are relatively small. Consider household structure and children’s activities; income is not household wealth.',
-  '平均每户人数较少。先看学校、街段与同龄伙伴，不以收入一项排除。': 'Households are relatively small. Check schools, streets and peers of similar ages; do not exclude an area on income alone.',
-  '平均每户仅1.5人。与多人家庭区直接比总收入容易误判。': 'Only 1.5 people per household on average. Directly comparing total household income with larger-family areas can mislead.',
-  '收入低于全市。先看每户人数、具体学校和街段，不应直接列入避开名单。': 'Income is below the city median. Check household size, specific schools and streets before drawing conclusions; this is not an automatic area to avoid.',
-  '收入低于全市。具体学校、街段和 实际通勤比全区标签更有用。': 'Income is below the city median. Specific schools, streets and actual commuting are more useful than a neighbourhood-wide label.',
-  '收入居首但人口仅260。小社区统计需谨慎，不能据此认定最适合养育孩子。': 'The highest income, but only 260 residents. Interpret small-area statistics carefully; this alone does not make it the best place to raise children.',
-  '收入明显高于全市。结合公校、住房预算与 实际通勤再筛选。': 'Income is well above the city median. Refine the comparison using public schools, housing budget and actual commuting.',
-  '收入达到或高于全市中位数。优先比较公校、同龄孩子活动和实际通勤。': 'Income is at or above the city median. Compare public schools, activities for similar-age children and actual commuting.',
-  '缺少同口径收入数据。另查当前入住、学校安排与通勤，不能视作低收入。': 'Comparable income data is missing. Check current occupancy, school arrangements and commuting; missing data does not mean low income.',
-  '西区候选。优先核验具体地址的公校、住房总成本和 实际通勤。': 'A west-side option. Verify public schools for the exact address, total housing costs and actual commuting.',
-  '西区备选。与 Aspen 一起比较公校、住房总成本和课后接送。': 'A west-side alternative. Compare public schools, total housing costs and after-school transport alongside Aspen.',
-  '西区备选。优先比较实际通勤、学校接送和孩子社交的便利程度。': 'A west-side alternative. Compare commuting, school transport and opportunities for children to socialize.',
-  '西区备选。收入低于 Aspen 不等于教育较差；按地址核验公校与活动。': 'A west-side alternative. Lower income than Aspen does not mean worse education; verify schools and activities for the address.',
-  '西区备选。比较学校接送与实际通勤，再看同龄孩子的日常活动。': 'A west-side alternative. Compare school transport and commuting, then everyday activities for similar-age children.',
-  '西区高收入候选。重点核验学校位置、校车和课后接送。': 'A higher-income west-side option. Check school locations, school buses and after-school transport.',
-  '高收入且人口较少。先确认预算、公校与同龄家庭，收入不等于可用人脉。': 'High income and a small population. Check budget, public schools and nearby families of similar ages; income does not guarantee useful social connections.',
-  '高收入且人口较少。核验同龄家庭和学校接送，再与西区方案比较。': 'High income and a small population. Check similar-age families and school transport, then compare west-side options.',
-  '高收入且人口较少。看具体街段、同龄家庭与公校，不单凭收入排名。': 'High income and a small population. Assess specific streets, similar-age families and public schools, rather than income rank alone.',
-  '高收入候选。关注同龄家庭和日常活动，不把收入排名直接当成教育排名。': 'A higher-income option. Look at similar-age families and everyday activities; income rankings are not education rankings.',
-  '人口不足1,000，取整或抑制会影响解读。': 'Population is below 1,000; rounding or suppression may affect interpretation.',
-  '人口不足1,000，取整或抑制会影响解读。原表华人人数为0，不代表可确认绝对无人。': 'Population is below 1,000; rounding or suppression may affect interpretation. The source publishes a Chinese count of 0, which does not confirm that no Chinese residents are present.',
-});
 addTranslationPatterns([
-  [/^儿童占(\d+)%[，,]高于全市(\d+)%[。.]可考察同龄活动，再核验学校和通勤。$/, (_, children, city) => `Children account for ${children}%, above the city’s ${city}%. Explore activities for similar-age children, then verify schools and commuting.`],
-  [/^平均每户([\d.]+)人。先看住户结构，再与多人家庭区比较收入和孩子活动。$/, (_, size) => `An average of ${size} people per household. Consider household structure before comparing income and children’s activities with larger-family areas.`],
   [/^(\d{4}) 普查 · (\d{4}) 收入$/, '$1 Census · $2 income'],
   [/^(\d{4}) 年人口普查$/, '$1 Census'],
   [/^私人住户人口 · (\d{4})$/, 'Private-household population · $1'],
@@ -302,3 +258,13 @@ addTranslationPatterns([
 addTranslationPatterns([[/^(东北区|东区|东南区|中心区|北区|南区|未注明|西北区|西区) · (住宅类|剩余分区|大型公园|工业类)$/, (_,sector,type) => `${translate(sector,'en')} · ${translate(type,'en')}`]]);
 
 addTranslationPatterns([[/^(.+) ↗$/, (_, label) => `${translate(label, 'en')} ↗`]]);
+
+addTranslations({
+  '地图仅覆盖 Calgary 市内社区，不含 Springbank、Bearspaw 等市外地区。': 'The map covers Calgary communities, excluding Springbank, Bearspaw and other areas outside the city.',
+  '地图仅覆盖 Edmonton 市内社区，不含 St. Albert、Sherwood Park 等市外地区。': 'The map covers Edmonton neighbourhoods, excluding St. Albert, Sherwood Park and other municipalities.',
+});
+
+addTranslations({
+  '人口不足1,000，取整或抑制会影响解读。': 'Population is below 1,000; rounding or suppression may affect interpretation.',
+  '人口不足1,000，取整或抑制会影响解读。原表华人人数为0，不代表可确认绝对无人。': 'Population is below 1,000; rounding or suppression may affect interpretation. The source publishes a Chinese count of 0, which does not confirm that no Chinese residents are present.',
+});

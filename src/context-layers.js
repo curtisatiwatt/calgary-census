@@ -19,7 +19,7 @@ export function stationContent(properties) {
 /** Context geometry never changes census statistics or the heat-map scale. */
 export function createContextLayers({ context, basemap, geography, operatingTransit, greenTransit, orientationLandmarks, communityNames = [], visible, onStationOpen, getLabelObstacles }) {
   const map = context.map;
-  const definitions = [['geography', 405], ['water', 410], ['roads', 420], ['roadLabels', 425], ['waterLabels', 430], ['transit', 440], ['stations', 480], ['stationLabels', 485], ['landmarkLabels', 490]];
+  const definitions = [['geography', 405], ['water', 410], ['roads', 420], ['roadLabels', 460], ['waterLabels', 465], ['transit', 440], ['stations', 480], ['stationLabels', 485], ['landmarkLabels', 490]];
   for (const [name, zIndex] of definitions) {
     if (!map.getPane(name)) map.createPane(name);
     const pane = map.getPane(name);

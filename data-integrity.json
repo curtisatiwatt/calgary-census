@@ -1,17 +1,32 @@
 {
-  "description": "Byte-for-byte preservation of the published Calgary data during the Vite migration.",
+  "description": "Fingerprints for the published Calgary data. The editorial-only removal is documented below; statistical values and geometry are preserved.",
   "sourceCommit": "71790d2d554c3c84e2bfbf95b5647ecfd25dbceb",
   "algorithm": "sha256",
   "files": {
     "public/data/communities.geojson": {
       "originalPath": "dist/communities.geojson",
-      "bytes": 2335203,
-      "sha256": "9729c2830d269c8ca04474f98efa860e1ba1bf55dc5ef5bdc522756d7f062c75"
+      "bytes": 2303326,
+      "sha256": "3e1d8238caf7a4d2117322c8d06a73fb8254d9fd3577cc33f66991a5918cef85"
     },
     "public/data/basemap.geojson": {
       "originalPath": "dist/basemap.geojson",
       "bytes": 1620525,
       "sha256": "8e4061339be0275e9ebe2c125ef5ad4fceef3318a7012e340cde39688aa0f5ca"
     }
-  }
+  },
+  "transformations": [
+    {
+      "date": "2026-11-04",
+      "sourceCommit": "3ed3205896411036519ed437f64eb31648e6a814",
+      "operation": "Remove editorial community-selection advice from the public dataset.",
+      "removedFields": [
+        "features[].properties.note"
+      ],
+      "removedCount": 313,
+      "inputSha256": "9729c2830d269c8ca04474f98efa860e1ba1bf55dc5ef5bdc522756d7f062c75",
+      "outputSha256": "3e1d8238caf7a4d2117322c8d06a73fb8254d9fd3577cc33f66991a5918cef85",
+      "outputBytes": 2303326,
+      "validation": "Parsed output was deeply compared to the previous published collection after deleting only properties.note. Every geometry, official statistic, source, identifier and data caveat is unchanged."
+    }
+  ]
 }

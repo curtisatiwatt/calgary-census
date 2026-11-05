@@ -7,10 +7,10 @@ const read = name => JSON.parse(readFileSync(new URL(`../public/data/${name}`, i
 const hasHan = value => /[\u3400-\u9fff]/u.test(value);
 
 test('switching language preserves numeric content and returns original Chinese', () => {
-  const source = '儿童占21%，高于全市18%。可考察同龄活动，再核验学校和通勤。';
+  const source = '人口 21,000 · 家庭收入 $118,000';
   setLanguage('en');
   assert.equal(currentLanguage(), 'en');
-  assert.match(t(source), /21%.*18%/);
+  assert.match(t(source), /21,000.*118,000/);
   assert.equal(hasHan(t(source)), false);
   assert.equal(t('暂无数据'), 'No data');
   setLanguage('zh');
@@ -19,9 +19,9 @@ test('switching language preserves numeric content and returns original Chinese'
   assert.equal(translate('Panorama Hills', 'en'), 'Panorama Hills');
 });
 
-test('every published community reference and caveat has an English equivalent', () => {
+test('every published community label and caveat has an English equivalent', () => {
   for (const feature of read('communities.geojson').features) {
-    for (const field of ['note', 'caveat', 'sectorLabel', 'typeLabel']) {
+    for (const field of ['caveat', 'sectorLabel', 'typeLabel']) {
       const source = feature.properties[field];
       if (!source) continue;
       const english = translate(source, 'en');

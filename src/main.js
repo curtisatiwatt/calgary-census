@@ -14,6 +14,7 @@ import { loadData } from './data.js';
 import { t, currentLanguage, initLanguagePreference, applyStaticTranslations, localizeHtml } from './i18n.js';
 import { initTheme, refreshThemeControl, isDarkTheme } from './theme.js';
 import { createMapTooltip } from './map-tooltip.js';
+import { createCommunityHighlight } from './community-highlight.js';
 import { createContextLayers } from './context-layers.js';
 import { INCOME_BINS, isNumber, colorFor, money, number, percent, searchFeatures, summarize, escapeHtml as esc, safeUrl, hashCode } from './map-utils.js';
 import { POPULATION_BINS, populationShare, populationColor, donutSvg } from './population-utils.js';
@@ -27,7 +28,7 @@ const state = {
   features: [], byCode: new Map(), metadata: {}, counts: {}, data: null, basemap: null,
   operatingTransit: null, greenTransit: null, geographicContext: null, orientationLandmarks: null,
   roads: true, labels: true, transit: false, landmarks: false,
-  groups: [], groupById: new Map(), selectedGroups: [], colors: {}, selected: null,
+  groups: [], groupById: new Map(), selectedGroups: [], colors: {}, selected: null, selectionActive: false,
   mode: 'composition', income: false, contexts: [], comparisonContexts: [], composition: null,
   view: null, wholeCity: true, compareStart: 0, searchMatches: [], activeSearch: -1,
 };
@@ -46,7 +47,7 @@ function localize(...roots) { roots.filter(Boolean).forEach(root => applyStaticT
 function selectedGroups() { return state.groups.filter(g => state.selectedGroups.includes(g.id)); }
 function populationRecord(code) { return state.data?.communities[code] || null; }
 function activeContexts() { return state.mode === 'composition' ? [state.composition].filter(Boolean) : state.comparisonContexts; }
-function closeTooltips(closePopups = true) { state.contexts.forEach(context => { context.tooltip.close(); if (closePopups) context.map.closePopup(); }); }
+function closeTooltips(closePopups = true) { state.contexts.forEach(context => { context.tooltip.close(); context.highlights?.clearHover(); if (closePopups) context.map.closePopup(); }); }
 function setCollapsed(collapsed) {
   if (mobile() && communitySheet && communitySheet.getState() !== 'closed') communitySheet.setSnap(collapsed ? 'peek' : 'half');
   mobileUI?.refresh();
@@ -92,6 +93,7 @@ function updateLayerVisibility() {
     updateLabels(context);
   }
   $('transit-legend').hidden = state.mode !== 'composition' || !state.transit;
+  mobileUI?.refresh();
 }
 
 function renderMetadata() {
@@ -175,7 +177,6 @@ function renderDetail() {
     : '官方资料暂无同口径收入数值';
   $('children').textContent = percent(p.children);
   $('household').textContent = isNumber(p.householdSize) ? `${p.householdSize.toFixed(1)} 人` : '暂无数据';
-  $('community-note').textContent = p.note || '结合住房预算、具体地址对应的学校与通勤进行比较。';
   $('data-caveat').textContent = p.caveat || '';
   $('data-caveat').hidden = !p.caveat;
   const sourceUrl = safeUrl(record?.sourceUrl || p.sourceUrl);
@@ -215,11 +216,10 @@ function styleFor(context, feature) {
   const p = feature.properties;
   const value = context.groupId ? populationShare(populationRecord(p.code), context.groupId) : p.income;
   const missing = context.groupId ? value === null : state.income && !isNumber(value);
-  const selected = p.code === state.selected;
   const dark = isDarkTheme();
   return {
-    color: selected ? (dark ? '#d9efdc' : '#243f42') : missing ? (dark ? '#5a7075' : '#a7b3ac') : (dark ? '#5a7075' : '#fafbf5'),
-    weight: selected ? 2.5 : 0.75, opacity: 1,
+    color: missing ? (dark ? '#5a7075' : '#a7b3ac') : (dark ? '#5a7075' : '#fafbf5'),
+    weight: 0.75, opacity: 1,
     fillColor: missing ? (dark ? '#263b42' : '#d6dcd9') : context.groupId ? populationColor(value) : state.income ? colorFor(value) : (dark ? '#263b42' : '#e0e8dc'),
     fillOpacity: missing ? 0.35 : context.groupId ? (dark ? 0.72 : 0.64) : state.income ? (dark ? 0.62 : 0.67) : 0.72,
     dashArray: missing ? '3 3' : null,
@@ -229,7 +229,8 @@ function styleFor(context, feature) {
 function refreshStyles() {
   for (const context of state.contexts) {
     for (const layer of context.layers.values()) layer.setStyle(styleFor(context, layer.feature));
-    context.layers.get(state.selected)?.bringToFront();
+    context.highlights?.setSelected(state.selectionActive ? state.selected : null);
+    context.highlights?.refresh();
     updateLabels(context);
   }
 }
@@ -237,12 +238,11 @@ function refreshStyles() {
 function tooltipContent(feature, context) {
   const p = feature.properties;
   const record = populationRecord(p.code);
-  const reference = p.note ? `<span class="tip-reference"><b>选区参考</b>${esc(t(p.note))}</span>` : '';
   if (context.groupId) {
     const group = state.groupById.get(context.groupId);
-    return localizeHtml(`<strong>${esc(p.name)}</strong>${esc(group.label)} ${percent(populationShare(record, group.id))}<br>${number(record?.counts[group.id])} 人 · 全市 ${percent(populationShare(state.data.city, group.id))}${reference}<span class="tip-note">点击固定社区，查看完整构成</span>`);
+    return localizeHtml(`<strong>${esc(p.name)}</strong>${esc(group.label)} ${percent(populationShare(record, group.id))}<br>${number(record?.counts[group.id])} 人 · 全市 ${percent(populationShare(state.data.city, group.id))}<span class="tip-note">点击固定社区，查看完整构成</span>`);
   }
-  return localizeHtml(`<strong>${esc(p.name)}</strong>家庭收入 ${money(p.income)}<br>人口 ${number(record?.population ?? p.population)}${record ? selectedGroups().slice(0, 5).map(g => `<br>${esc(g.label)} ${percent(populationShare(record, g.id))}`).join('') : '<br>人口分类暂无数据'}${reference}<span class="tip-note">点击查看社区详情</span>`);
+  return localizeHtml(`<strong>${esc(p.name)}</strong>家庭收入 ${money(p.income)}<br>人口 ${number(record?.population ?? p.population)}${record ? selectedGroups().slice(0, 5).map(g => `<br>${esc(g.label)} ${percent(populationShare(record, g.id))}`).join('') : '<br>人口分类暂无数据'}<span class="tip-note">点击查看社区详情</span>`);
 }
 
 function createMap(element, groupId = null) {
@@ -254,6 +254,8 @@ function createMap(element, groupId = null) {
     map.getPane(name).style.zIndex = zIndex;
     if (name !== 'donuts') map.getPane(name).style.pointerEvents = 'none';
   }
+  context.highlights = createCommunityHighlight({ L, map, features: state.features, isDark: isDarkTheme, hoverEnabled: () => !mobile() && window.matchMedia('(any-hover: hover)').matches });
+  context.highlights.setSelected(state.selectionActive ? state.selected : null);
   context.donuts.addTo(map);
   context.labels.addTo(map);
   context.boundaries = L.geoJSON({ type: 'FeatureCollection', features: state.features }, {
@@ -263,6 +265,7 @@ function createMap(element, groupId = null) {
       context.layers.set(code, layer);
       layer.on('add', () => { const path = layer.getElement(); path?.setAttribute('data-community', code); path?.setAttribute('aria-label', feature.properties.name); });
       layer.on('click', () => { selectCommunity(code, false); toggleGroups(false); });
+      context.highlights.bind(layer, code);
       context.tooltip.bind(layer, { content: () => tooltipContent(feature, context), anchor: event => event?.latlng || layer.getBounds().getCenter() });
     },
   }).addTo(map);
@@ -375,6 +378,7 @@ function selectCommunity(code, zoom = true, expand = true) {
   if (!state.byCode.has(code)) return;
   closeTooltips();
   state.selected = code;
+  if (expand) state.selectionActive = true;
   renderDetail();
   if (expand) {
     desktopUI?.setSelection();
@@ -390,7 +394,7 @@ function selectCommunity(code, zoom = true, expand = true) {
     const context = activeContexts()[0];
     if (centroid && context) context.map.panInside([centroid[1], centroid[0]], { ...fitPadding(context.map, true), animate: false });
   }
-  $('announcer').textContent = t(`已选择 ${state.byCode.get(code).properties.name}。人口构成已更新。`);
+  if (expand) $('announcer').textContent = t(`已选择 ${state.byCode.get(code).properties.name}。人口构成已更新。`);
   try { if (expand) history.replaceState(null, '', `#${encodeURIComponent(code)}`); } catch { /* embedded preview */ }
 }
 
@@ -425,6 +429,7 @@ function updateDonuts() {
     marker.getElement()?.setAttribute('data-population-code', p.code);
     marker.getElement()?.setAttribute('aria-label', t(`${p.name}，点击查看人口构成`));
     marker.on('click', () => { selectCommunity(p.code, false); toggleGroups(false); });
+    context.highlights.bind(marker, p.code);
     context.tooltip.bind(marker, { content: () => tooltipContent(feature, context), anchor: () => marker.getLatLng(), offset: [0, -size / 2] });
     shown++;
   }
@@ -518,7 +523,7 @@ function renderComparisonHeadings() {
     const value = populationShare(populationRecord(state.selected), group.id);
     const name = state.byCode.get(state.selected)?.properties.name || '';
     const node = document.querySelector(`[data-map-heading="${group.id}"]`);
-    if (node) node.innerHTML = `<div><h2>${esc(group.label)}</h2><span>全市 ${percent(populationShare(state.data.city, group.id))}</span></div><p title="${esc(name)}">${esc(name)} <strong>${percent(value)}</strong></p>`;
+    if (node) node.innerHTML = `<div><h2>${esc(group.label)}</h2><span>全市 ${percent(populationShare(state.data.city, group.id))}</span></div>${state.selectionActive ? `<p title="${esc(name)}">${esc(name)} <strong>${percent(value)}</strong></p>` : ''}`;
   }
   localize($('comparison-maps'), $('comparison-select'));
   renderMobileSummary();
@@ -528,7 +533,7 @@ function rebuildComparison({ preserveView = true } = {}) {
   cancelAnimationFrame(syncFrame); syncFrame = null;
   closeTooltips();
   for (const context of state.comparisonContexts) {
-    context.tooltip.destroy(); context.map.remove();
+    context.highlights.destroy(); context.tooltip.destroy(); context.map.remove();
     state.contexts = state.contexts.filter(c => c !== context);
   }
   state.comparisonContexts = [];
@@ -643,7 +648,7 @@ function initializeControls() {
   $('close-layers').addEventListener('click', () => { toggleLayers(false); (mobile() ? $('mobile-more') : $('layers-button')).focus(); });
   for (const layer of ['roads', 'labels', 'transit', 'landmarks']) $(`${layer}-toggle`).addEventListener('change', event => { state[layer] = event.target.checked; updateLayerVisibility(); });
   $('groups-button').addEventListener('click', () => toggleGroups($('groups-panel').hidden));
-  $('close-groups').addEventListener('click', () => { toggleGroups(false); $('groups-button').focus(); });
+  $('close-groups').addEventListener('click', () => { toggleGroups(false); (mobile() ? $('mobile-more') : $('groups-button')).focus({ preventScroll: true }); });
   $('empty-choose-groups').addEventListener('click', () => { toggleGroups(true); });
   $('group-search').addEventListener('input', renderGroupList);
   $('group-list').addEventListener('change', event => {
@@ -654,7 +659,7 @@ function initializeControls() {
   $('default-groups').addEventListener('click', () => updateGroupSelection(state.data.defaultGroupIds));
   $('all-groups').addEventListener('click', () => updateGroupSelection(state.groups.map(g => g.id)));
   $('clear-groups').addEventListener('click', () => updateGroupSelection([]));
-  $('income-toggle').addEventListener('change', event => { state.income = event.target.checked; $('income-legend').hidden = !state.income; refreshStyles(); });
+  $('income-toggle').addEventListener('change', event => { state.income = event.target.checked; $('income-legend').hidden = !state.income; refreshStyles(); mobileUI?.refresh(); });
   $('previous-groups').addEventListener('click', () => { state.compareStart -= comparisonPageSize(); rebuildComparison(); });
   $('next-groups').addEventListener('click', () => { state.compareStart += comparisonPageSize(); rebuildComparison(); });
   $('comparison-select').addEventListener('change', event => { state.compareStart = Number(event.target.value); rebuildComparison(); });
@@ -663,7 +668,7 @@ function initializeControls() {
   $('zoom-out').addEventListener('click', () => activeContexts()[0]?.map.zoomOut(0.5));
   $('focus-community').addEventListener('click', () => fitCommunity(state.selected));
   $('method-button').addEventListener('click', () => { toggleGroups(false); toggleLayers(false); closeTooltips(); dialog.showModal(); });
-  $('close-method').addEventListener('click', () => { dialog.close(); $('mobile-more').focus({ preventScroll: true }); });
+  $('close-method').addEventListener('click', () => { dialog.close(); (mobile() ? $('mobile-more') : $('method-button')).focus({ preventScroll: true }); });
   dialog.addEventListener('click', event => {
     if (event.target !== dialog) return;
     const rect = dialog.getBoundingClientRect();
@@ -691,14 +696,14 @@ function initializeControls() {
     if (event.key === 'Escape' && !document.querySelector('dialog[open]')) {
       closeTooltips();
       if (!$('layers-panel').hidden) { toggleLayers(false); (mobile() ? $('mobile-more') : $('layers-button')).focus(); }
-      else if (!$('groups-panel').hidden) { toggleGroups(false); $('groups-button').focus(); }
+      else if (!$('groups-panel').hidden) { toggleGroups(false); (mobile() ? $('mobile-more') : $('groups-button')).focus({ preventScroll: true }); }
       else if (!mobile()) desktopUI?.closeDetails();
     }
     if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) && !document.querySelector('dialog[open]')) {
       event.preventDefault(); $('search').focus();
     }
   });
-  window.addEventListener('hashchange', () => { const code = hashCode(location.hash, state.features); if (code && code !== state.selected) selectCommunity(code); });
+  window.addEventListener('hashchange', () => { const code = hashCode(location.hash, state.features); if (code && (!state.selectionActive || code !== state.selected)) selectCommunity(code); });
   let resizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);

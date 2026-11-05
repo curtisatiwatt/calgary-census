@@ -8,7 +8,7 @@ const read = path => JSON.parse(fs.readFileSync(new URL(path, root), 'utf8'));
 const integrity = read('data-integrity.json');
 for (const [path, expected] of Object.entries(integrity.files)) {
   const bytes = fs.readFileSync(new URL(path, root));
-  assert.equal(bytes.length, expected.bytes, `${path}: original data file size changed`);
+  assert.equal(bytes.length, expected.bytes, `${path}: published data file size changed`);
   assert.equal(createHash('sha256').update(bytes).digest('hex'), expected.sha256,
     `${path}: differs from the published Calgary data snapshot`);
 }
@@ -50,7 +50,8 @@ const counts = { income: 0, chinese: 0, chineseZero: 0, chineseSum: 0 };
 const types = {};
 for (const feature of communities.features) {
   const p = feature.properties;
-  assert.ok(p.name && p.code && p.note, 'Every area needs its original identity and reference note');
+  assert.ok(p.name && p.code, 'Every area needs its original identity');
+  assert.ok(!Object.hasOwn(p, 'note'), 'Public areas must not contain editorial selection advice');
   assert.ok(['Polygon', 'MultiPolygon'].includes(feature.geometry.type));
   assert.ok(Array.isArray(p.centroid) && p.centroid[0] > -115 && p.centroid[0] < -113
     && p.centroid[1] > 50 && p.centroid[1] < 52);
@@ -86,4 +87,4 @@ assert.equal(basemap.features.filter(f => f.properties.kind === 'water').length,
 assert.equal(searchFeatures(communities.features, 'aspen woods')[0].properties.code, 'ASP');
 assert.equal(searchFeatures(communities.features, 'AUB')[0].properties.code, 'AUB');
 
-console.log(`PASS: original data SHA-256 matches; 313 unique Calgary areas; ${counts.income} income and ${counts.chinese} Chinese values; 7 published zeros; all anchors inside boundaries; metadata, sources and basemap valid.`);
+console.log(`PASS: published data SHA-256 matches; 313 unique Calgary areas; ${counts.income} income and ${counts.chinese} Chinese values; 7 published zeros; all anchors inside boundaries; metadata, sources and basemap valid.`);

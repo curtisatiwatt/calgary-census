@@ -54,7 +54,7 @@
   "anchorNote": "centroid is a display anchor [longitude, latitude]: uses the largest component outer-ring planar centroid when interior; otherwise a verified interior scanline point. It does not locate individual people or homes.",
   "geometrySimplified": false,
   "sourceNotes": "Geometry and classifications are from the downloaded current City boundary registry. Census measures retain 2021 profile boundaries and are joined by community code/name; not recomputed for new boundaries.",
-  "notesSource": "Analytical community-selection notes; public edition removes personalized residence, school-history and workplace references. Not school or crime ratings.",
+  "notesSource": "Editorial community-selection advice was removed from public feature properties on 2026-11-04. Official statistics, sources, geometries and data caveats are unchanged.",
   "parseExceptions": [],
   "topChineseCount": [
     {
