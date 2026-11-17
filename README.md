@@ -16,13 +16,15 @@
 
 使用 **Vite + 原生 JavaScript + Leaflet 1.9.4**，依赖版本由 `package-lock.json` 锁定。社区统计、边界和道路／水域底图随网站托管，不需要 API key、数据库或外部地图瓦片服务。
 
-电脑端地图铺满浏览器，左侧菜单可展开或收起。语言、外观和数据说明都能从侧栏直接打开。鼠标悬停会勾勒社区边界并显示统计；点击社区会保留选中边界并打开左侧详情。X 可关闭详情，侧栏的详情按钮可重新打开。
+电脑端地图铺满浏览器，左侧菜单可展开或收起。语言、外观和数据说明都能从侧栏直接打开。鼠标悬停会勾勒社区边界并显示统计；点击社区会保留选中边界并打开左侧详情。X 可关闭详情，侧栏的详情按钮可重新打开。图例在电脑端常驻地图左下角，可收起为“图例”按钮；“分布对比”的切换器旁显示当前序号（如 1 / 5）和该人群的全市占比。
+
+键盘用户按 Tab 进入地图后，方向键在相邻社区之间移动（地图随之平移），Enter 或空格选中社区；每张地图只占一个 Tab 位置。
 
 道路名称按当前可见路段定位，放大后逐步显示主要道路、河流水域和少量重点地标；它们参与标注避让，避免远景挤满文字。地理补充仅用于社区构成。
 
 手机与电脑使用相同的社区搜索框。手机右上角的“菜单”可切换视图、选择人口群体、开关收入底色或地图图层，也可打开数据说明和调整语言或外观。菜单与说明页的导航固定，滚动后仍可返回或关闭。
 
-点选社区会打开半屏详情。拖动灰色横条可切换摘要、半屏或接近全屏，点右侧 X 可完全关闭。点选另一社区会重新打开半屏。选择人口群体，或在社区构成中开启收入底色或轻轨后，可点地图上的“图例”查看当前符号与色阶。
+点选社区会打开半屏详情。拖动灰色横条可切换摘要、半屏或接近全屏，点右侧 X 可完全关闭。点选另一社区会重新打开半屏。选择人口群体，或在社区构成中开启收入底色或轻轨后，手机可点地图上的“图例”查看当前符号与色阶。
 
 手机和平板隐藏 +/−，使用手势缩放；手机“全市”仅在详情完全关闭时出现。电脑保留右下角缩放控件。
 
@@ -37,23 +39,48 @@ npm ci
 npm run dev
 ```
 
-打开终端显示的 Vite 地址，默认 <http://localhost:5173>。修改源码后自动更新。
+打开终端显示的 Vite 地址，默认 <http://localhost:5173>。修改源码后自动更新。开发服务器只监听本机；要用手机等同一网络的设备测试，运行 `npm run dev -- --host`。
 
 检查、构建与预览生产版本：
 
 ```sh
+npm run format:check
 npm run check
 npm run build
 npm run preview
 ```
 
+`npm run check` 运行单元测试和三套数据校验。端到端冒烟测试在桌面和手机（Pixel 7）尺寸下打开生产构建，第一次运行前需安装浏览器：
+
+```sh
+npx playwright install chromium
+npm run test:e2e
+```
+
+代码格式由 Prettier 统一，提交前可运行 `npm run format`。`index.html` 和发布数据不参与格式化：页面文字由翻译表逐字匹配，数据文件带有指纹。
+
 生产预览默认 <http://localhost:4173>。开发和生产预览都使用 Vite，运行项目只需 Node.js。`dist/` 是自动生成的构建结果，不能在里面修改源码。不要直接双击 HTML 文件。
 
-Vite 使用相对资源路径，兼容 GitHub Pages 的 `/calgary-census/` 子目录。地址后加社区代码可直接定位，例如 <https://curtisatiwatt.github.io/calgary-census/#ASP>。
+Vite 使用相对资源路径，兼容 GitHub Pages 的 `/calgary-census/` 子目录。
+
+### 分享链接
+
+地址的 `#` 部分保存当前视图，复制链接即可分享同一画面，例如 <https://curtisatiwatt.github.io/calgary-census/#ASP?view=compare&groups=south_asian,chinese&compare=chinese&income=1&layers=transit>：
+
+| 参数 | 含义 |
+| --- | --- |
+| `#ASP` | 选中的社区代码；只有代码的旧链接仍可直接定位 |
+| `view=compare` | 打开“分布对比”（省略为“社区构成”） |
+| `groups=…` | 已选人口群体，逗号分隔 |
+| `compare=…` | 分布对比中当前显示的人群（省略为第一个） |
+| `income=1` | 开启收入底色 |
+| `layers=transit,landmarks` | 开启 CTrain 或地理地标 |
+
+无法识别的社区、人群或图层会被忽略。
 
 ## GitHub Pages
 
-仓库 **Settings → Pages → Build and deployment → Source** 应为 **GitHub Actions**。推送 `main` 后，工作流依次执行 `npm ci`、`npm run check`、`npm run build`，再将 `dist/` 发布到 Pages。也可手动运行 **Deploy Calgary map to GitHub Pages**。
+仓库 **Settings → Pages → Build and deployment → Source** 应为 **GitHub Actions**。工作流 **Check and deploy Calgary map** 分两步：`verify` 在每个 pull request 和推送上执行 `npm ci`、格式检查、`npm run check`、`npm run build` 和端到端测试；只有 `main` 通过后，`deploy` 才把 `dist/` 发布到 Pages。也可手动运行该工作流。
 
 源码、校验脚本及审计清单不会被当作网站页面发布。页面不再展示源码入口；官方数据来源和第三方许可继续保留。
 
@@ -62,36 +89,42 @@ Vite 使用相对资源路径，兼容 GitHub Pages 的 `/calgary-census/` 子�
 | 文件 | 用途 |
 | --- | --- |
 | `index.html` | 页面结构与数据说明对话框 |
-| `src/mobile-ui.js` / `src/mobile-ui.css` | 手机浮动控件、原生底部面板和动态布局 |
-| `src/community-sheet.js` / `src/community-sheet-utils.js` / `src/community-sheet.css` | 社区面板三档拖动、滚动衔接与键盘操作 |
-| `src/mobile-dialogs.css` | 移动菜单、图例、固定导航及独立滚动 |
-| `src/map-legibility.css` | 社区名、道路和地理标注的清晰度 |
-| `src/main.js` | Leaflet 地图、搜索、图层、详情及手机交互 |
-| `src/data.js` | 加载本地数据，保留原有统计值及显示名次 |
-| `src/map-utils.js` | 收入分档、搜索、格式化等纯函数 |
-| `src/population-utils.js` | 人口占比、完整构成、共享色阶与环形图纯函数 |
+| `src/main.js` | 地图、搜索、图层、详情、分布对比、键盘操作与分享链接 |
+| `src/data.js` | 先载入首屏所需的社区数据；道路、铁路在后台载入，CTrain 与地标在首次开启时载入 |
+| `src/context-layers.js` | 道路、水域、铁路、CTrain、公园与地标图层及其标注（装饰图层用 Canvas 绘制） |
+| `src/label-placement.js` | 道路、水域标注的可见锚点与道路优先级 |
+| `src/community-highlight.js` | 悬停、键盘焦点与选中社区的独立轮廓图层 |
 | `src/map-tooltip.js` | 每张地图唯一的提示框，防止拖动时提示堆叠 |
-| `src/community-highlight.js` | 悬停与选中社区的独立轮廓图层 |
-| `src/styles.css` | 桌面及手机样式 |
+| `src/map-utils.js` | 收入分档、搜索、格式化、分享链接解析等纯函数 |
+| `src/population-utils.js` | 人口占比、完整构成、浅色与深色共享色阶、环形图纯函数 |
+| `src/i18n.js` | 中英文字典、带参数的语句（`t('key', { … })`）与语言偏好 |
+| `src/theme.js` | 白天／夜间与跟随系统 |
+| `src/desktop-ui.js` / `src/desktop-ui.css` | 电脑端侧栏、详情面板与常驻图例 |
+| `src/mobile-ui.js` / `src/mobile-ui.css` | 手机浮动控件、菜单、图例与动态布局 |
+| `src/community-sheet.js` / `src/community-sheet-utils.js` / `src/community-sheet.css` | 手机社区面板三档拖动、滚动衔接与键盘操作 |
+| `src/styles.css`、`src/mobile-dialogs.css`、`src/map-legibility.css`、`src/map-controls.css` | 基础样式、手机对话框、地图文字清晰度与地图控件 |
 | `public/data/communities.geojson` | 313 个区域的边界、统计和来源 |
-| `public/data/orientation-landmarks.geojson` | 少量有官方来源的定位地标点 |
-| `public/data/basemap.geojson` | 官方主要道路和水域几何 |
-| `public/data/metadata.json` | 年份、统计口径、全市值和数据来源 |
 | `public/data/population-groups.json` | 206 个社区及全市的 13 类人口原始人数、原公布占比与分母 |
+| `public/data/metadata.json` | 年份、统计口径定义、全市值和数据来源（数据说明直接读取这些字段） |
+| `public/data/basemap.geojson` | 官方主要道路和水域几何 |
+| `public/data/railways.geojson` | 非轻轨铁路，随道路底图显示 |
+| `public/data/geographic-context.geojson` | 机场、公园及邻近保留区边界 |
 | `public/data/ctrain-operating.geojson` | 官方 Red/Blue Line 走线及运营站点 |
 | `public/data/ctrain-green.geojson` | Green Line 在建、规划走线及站点，均为未运营 |
-| `public/data/geographic-context.geojson` | 非轻轨铁路、机场、公园及邻近保留区边界 |
+| `public/data/orientation-landmarks.geojson` | 少量有官方来源的定位地标点 |
 | `public/licenses/leaflet.txt` | Leaflet 许可证 |
-| `tests/map-utils.test.js` | 分档、缺失值、比例面积、搜索及链接测试 |
-| `scripts/validate-data.mjs` | 原数据指纹、覆盖、坐标、来源与显示点校验 |
+| `tests/*.test.js` | 单元测试（`node --test`）：分档、搜索、分享链接、人口构成、翻译覆盖、主题、语言、提示框、轮廓、标注与手机面板 |
+| `tests/e2e/smoke.spec.js`、`playwright.config.js` | 桌面与手机端到端冒烟测试 |
+| `scripts/validate-data.mjs` | 社区与底图指纹、覆盖、坐标、来源与显示点校验 |
 | `scripts/validate-population-data.mjs` | 人口分类、来源、覆盖、取整差异和原华人人数一致性校验 |
+| `scripts/validate-geography.mjs` | 交通、铁路、地理背景与定位地标的指纹、坐标、站点和线路状态校验 |
+| `scripts/round-coordinates.mjs` | 把发布几何坐标统一为 5 位小数（约 1 米）并自检 |
+| `scripts/update-integrity.mjs` | 有意更新数据后，附原因记录新指纹 |
 | `scripts/extract-population-groups.py` | 从官方 PDF 文本重建人口快照 |
-| `population-data-audit.json` | 人口表提取来源及一致性审计 |
-| `scripts/validate-geography.mjs`、`geography-integrity.json` | 地理快照指纹、坐标、站点去重与线路状态校验 |
-| `ctrain-operating-audit.json`、`ctrain-green-audit.json`、`geographic-context-audit.json` | 交通及地理资料来源、处理方法和限制 |
-| `data-integrity.json` | 发布数据的 SHA-256、字节数、源版本和字段变更记录 |
-| `data-audit.json`、`basemap-audit.json` | 原有来源与整理审计记录 |
-| `.github/workflows/pages.yml` | 检查、构建和 GitHub Pages 部署 |
+| `scripts/build-ctrain-operating.py`、`scripts/build-ctrain-green.py`、`scripts/build-geographic-context.py` | 从官方来源重建交通与地理图层 |
+| `data/audit/data-integrity.json`、`data/audit/geography-integrity.json` | 发布数据的 SHA-256、字节数与变更记录 |
+| `data/audit/*-audit.json`、`data/audit/orientation-landmarks.json` | 各数据集的来源、处理方法、限制与一致性审计 |
+| `.github/workflows/pages.yml` | 检查、构建、端到端测试与 GitHub Pages 部署 |
 
 ## 数据口径
 
@@ -108,15 +141,23 @@ Vite 使用相对资源路径，兼容 GitHub Pages 的 `/calgary-census/` 子�
 
 ## 数据完整性与视觉编码
 
-社区和底图快照来自版本 `71790d2d554c3c84e2bfbf95b5647ecfd25dbceb`。社区发布数据已移除编辑撰写的 `properties.note` 字段，变更记录见 `data-integrity.json`。 `npm run check` 校验当前数据的 SHA-256、字节数，以及 313 个社区显示点的位置。
+社区和底图快照来自版本 `71790d2d554c3c84e2bfbf95b5647ecfd25dbceb`。社区发布数据已移除编辑撰写的 `properties.note` 字段；所有发布几何的坐标已统一为 5 位小数（约 1 米，最大缩放下不足一个像素），属性、统计值和显示点不变。变更记录见 `data/audit/data-integrity.json` 与 `data/audit/geography-integrity.json`。`npm run check` 校验当前数据的 SHA-256、字节数，以及 313 个社区显示点仍位于各自边界内。
 
-未来若主动更新数据，应重新核对官方资料、同步元数据和审计记录，并明确更新 `data-integrity.json` 的快照版本与指纹；不要仅为让检查通过而修改指纹。
+未来若主动更新数据，应重新核对官方资料、同步元数据和审计记录，然后：
+
+```sh
+node scripts/round-coordinates.mjs public/data/<更新的文件>
+node scripts/update-integrity.mjs --reason "更新原因" public/data/<更新的文件>
+npm run check
+```
+
+`update-integrity.mjs` 必须附原因，并记录新旧指纹；不要仅为让检查通过而修改指纹。
 
 收入档位保持原版：低于 60,000；60,000–79,999；80,000–97,999；98,000–124,999；125,000–149,999；150,000–199,999；200,000 及以上。缺失使用灰色和虚线边界。
 
 环形图用于比较构成，圆的大小不表示人数。地图缩小时隐藏相互重叠的环形图，放大后显示更多；选中的社区优先显示。圆心是社区内的显示点，不是居民住址。键盘操作时有可见的焦点提示。
 
-分布图使用固定共享占比色阶，禁止针对每个类别分别拉伸颜色范围。较深的颜色表示较高占比，不是人数更多，也不表示收入、学校质量或治安更好。可在社区详情查看实际人数。
+分布图使用固定共享占比色阶，禁止针对每个类别分别拉伸颜色范围。白天模式颜色越深、夜间模式颜色越亮，表示占比越高，不是人数更多，也不表示收入、学校质量或治安更好。可在社区详情查看实际人数。
 
 人口快照的重建需要先从[市府社区档案](https://www.calgary.ca/communities/profiles.html)取得 PDF，并以 `pdftotext -layout` 转为对应文件名的 `.txt`。将全部档案文本放在同一目录，执行：
 
