@@ -117,6 +117,32 @@ test('switching language updates the interface and returns cleanly', async ({ pa
   expect(await untranslatedText(page)).toEqual([]);
 });
 
+test('switching theme restyles the basemap straight away', async ({ page }) => {
+  await openMap(page);
+  // Mean brightness of the road canvas: white roads in the light theme, grey-blue in the dark one.
+  const roadBrightness = () =>
+    page.evaluate(() => {
+      const canvas = document.querySelector('#composition-map .leaflet-roads-pane canvas');
+      const { data } = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
+      let sum = 0;
+      let count = 0;
+      for (let i = 0; i < data.length; i += 4)
+        if (data[i + 3] > 200) {
+          sum += data[i] + data[i + 1] + data[i + 2];
+          count++;
+        }
+      return count ? sum / count / 3 : 0;
+    });
+  await expect.poll(roadBrightness).toBeGreaterThan(200);
+  await page.evaluate(() => {
+    const select = document.getElementById('theme-preference');
+    select.value = 'dark';
+    select.dispatchEvent(new Event('change'));
+  });
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect.poll(roadBrightness).toBeLessThan(180);
+});
+
 test('communities are reachable from the keyboard', async ({ page, isMobile }) => {
   test.skip(isMobile, 'keyboard navigation is a desktop interaction');
   await openMap(page);

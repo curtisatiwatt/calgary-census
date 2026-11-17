@@ -1282,6 +1282,9 @@ function initializeControls() {
     closeTooltips();
     refreshStyles();
     state.contexts.forEach(context => context.refreshBasemap?.());
+    // Roads, water, transit and landmarks restyle in the overlay pass; without it
+    // they kept the previous theme's colours until the map was next moved.
+    renderOverlays(state.contexts);
   });
   for (const mode of ['composition', 'distribution'])
     $(`${mode}-tab`).addEventListener('click', () => selectView(mode));
