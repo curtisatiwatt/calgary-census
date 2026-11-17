@@ -263,9 +263,15 @@ function renderGroupList() {
   refreshGroupControl();
 }
 
-function updateGroupSelection(ids, rerender = true) {
+/** Record a new group selection in state and in every control; the maps are redrawn by the caller. */
+function setGroupSelection(ids, rerender = true) {
+  const compared = selectedGroups()[state.compareStart]?.id;
   state.selectedGroups = [...new Set(ids)].filter(id => state.groupById.has(id));
-  state.compareStart = Math.min(state.compareStart, Math.max(0, state.selectedGroups.length - 1));
+  // compareStart is a position in the selected list: keep pointing at the same
+  // group when one listed before it is added or removed.
+  const position = selectedGroups().findIndex(g => g.id === compared);
+  state.compareStart =
+    position >= 0 ? position : Math.min(state.compareStart, Math.max(0, state.selectedGroups.length - 1));
   $('group-count').textContent = state.selectedGroups.length;
   mobileUI?.refresh();
   $('filter-count').textContent = t('groups.selectedCount', {
@@ -276,6 +282,10 @@ function updateGroupSelection(ids, rerender = true) {
   refreshGroupControl();
   renderDonutKey();
   renderDetail();
+}
+
+function updateGroupSelection(ids, rerender = true) {
+  setGroupSelection(ids, rerender);
   renderOverlays();
   if (state.mode === 'distribution') rebuildComparison();
   writeUrlState();
@@ -617,6 +627,7 @@ function ensureVisibleLayers() {
   if (state.landmarks) ensureLayer('landmarks');
 }
 
+const LAYER_TOGGLES = ['roads', 'labels', 'transit', 'landmarks'];
 const ARROWS = { ArrowRight: [1, 0], ArrowLeft: [-1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1] };
 function setRovingCommunity(context, code) {
   if (!context.layers.has(code)) return;
@@ -801,6 +812,8 @@ function writeUrlState() {
     income: state.income,
     transit: state.transit,
     landmarks: state.landmarks,
+    roads: state.roads,
+    labels: state.labels,
   });
   try {
     history.replaceState(null, '', hash || `${location.pathname}${location.search}`);
@@ -819,21 +832,25 @@ function applyUrlState(link) {
   state.income = link.income;
   $('income-toggle').checked = link.income;
   $('income-legend').hidden = !link.income;
-  for (const layer of ['transit', 'landmarks']) {
+  for (const layer of LAYER_TOGGLES) {
     state[layer] = link[layer];
     $(`${layer}-toggle`).checked = link[layer];
   }
   updateLayerVisibility();
   ensureVisibleLayers();
-  updateGroupSelection(link.groups);
+  // Settle the groups and the compared one first, then draw the view once.
+  setGroupSelection(link.groups);
   state.compareStart = Math.max(
     0,
     selectedGroups().findIndex(g => g.id === link.compare),
   );
   if (link.view !== state.mode) selectView(link.view);
   else if (state.mode === 'distribution') rebuildComparison();
+  else renderOverlays();
   refreshStyles();
-  if (link.code && (!state.selectionActive || link.code !== state.selected)) selectCommunity(link.code);
+  // A link without a community means "nothing selected", not "keep the last one".
+  if (!link.code) clearSelection();
+  else if (!state.selectionActive || link.code !== state.selected) selectCommunity(link.code);
   writeUrlState();
 }
 
@@ -1329,7 +1346,7 @@ function initializeControls() {
     toggleLayers(false);
     (mobile() ? $('mobile-more') : $('layers-button')).focus();
   });
-  for (const layer of ['roads', 'labels', 'transit', 'landmarks'])
+  for (const layer of LAYER_TOGGLES)
     $(`${layer}-toggle`).addEventListener('change', event => {
       state[layer] = event.target.checked;
       ensureVisibleLayers();
@@ -1478,7 +1495,8 @@ function initializeControls() {
     // A bare #CODE (the original link format) only jumps to that community and
     // keeps the current view; a link carrying view parameters restores all of it.
     if (location.hash.includes('?')) applyUrlState(link);
-    else if (link.code && (!state.selectionActive || link.code !== state.selected)) selectCommunity(link.code);
+    else if (!link.code) clearSelection();
+    else if (!state.selectionActive || link.code !== state.selected) selectCommunity(link.code);
   });
   let resizeTimer;
   window.addEventListener('resize', () => {

@@ -100,6 +100,23 @@ test('groups, compare view and URL state work together', async ({ page, isMobile
   await expect(copy.locator('#community-name')).toHaveText('Aspen Woods');
 });
 
+test('links keep every layer toggle, and a link without a community deselects', async ({ page }) => {
+  await openMap(page, 'ASP?groups=chinese&hide=roads,labels');
+  await expect(page.locator('#roads-toggle')).not.toBeChecked();
+  await expect(page.locator('#labels-toggle')).not.toBeChecked();
+  await expect(page).toHaveURL(/#ASP\?groups=chinese&hide=roads,labels$/);
+  const outline = page.locator('#composition-map .community-selected-outline');
+  await expect(outline).not.toHaveCount(0);
+
+  // Editing the address to a link with no community code restores "nothing selected".
+  await page.evaluate(() => {
+    location.hash = '#?groups=chinese';
+  });
+  await expect(outline).toHaveCount(0);
+  await expect(page.locator('#roads-toggle')).toBeChecked();
+  await expect(page).toHaveURL(/#\?groups=chinese$/);
+});
+
 test('switching language updates the interface and returns cleanly', async ({ page }) => {
   await openMap(page, 'ASP');
   const select = page.locator('#language-preference');

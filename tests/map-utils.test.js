@@ -65,6 +65,8 @@ test('view state round-trips through the URL hash and ignores unknown values', (
     income: true,
     transit: true,
     landmarks: false,
+    roads: true,
+    labels: true,
   };
   const hash = buildHashState(view);
   assert.equal(hash, '#ASP?view=compare&groups=chinese,south_asian&compare=south_asian&income=1&layers=transit');
@@ -78,6 +80,8 @@ test('view state round-trips through the URL hash and ignores unknown values', (
     income: false,
     transit: false,
     landmarks: false,
+    roads: true,
+    labels: true,
   });
   const messy = parseHashState(
     '#nope?view=compare&groups=chinese,<script>,chinese&compare=black&layers=roads,landmarks',
@@ -92,10 +96,27 @@ test('view state round-trips through the URL hash and ignores unknown values', (
     income: false,
     transit: false,
     landmarks: true,
+    roads: true,
+    labels: true,
   });
   assert.equal(hashCode('#ASP?groups=chinese', features), 'ASP');
   assert.equal(buildHashState({}), '');
   assert.equal(buildHashState({ groups: ['black'] }), '#?groups=black');
+});
+
+test('the default layers are kept in the link only when they are switched off', () => {
+  assert.equal(buildHashState({ code: 'ASP', roads: true, labels: true }), '#ASP');
+  assert.equal(buildHashState({ code: 'ASP', roads: false }), '#ASP?hide=roads');
+  const hash = buildHashState({ transit: true, roads: false, labels: false });
+  assert.equal(hash, '#?layers=transit&hide=roads,labels');
+  const parsed = parseHashState(hash, features, []);
+  assert.equal(parsed.roads, false);
+  assert.equal(parsed.labels, false);
+  assert.equal(parsed.transit, true);
+  assert.equal(parsed.code, null);
+  // Unknown names are ignored; "layers=roads" in an older link never hid anything.
+  const odd = parseHashState('#ASP?layers=roads&hide=transit,nothing', features, []);
+  assert.deepEqual([odd.roads, odd.labels, odd.transit], [true, true, false]);
 });
 
 test('blendColor paints a translucent colour over an opaque ground', () => {

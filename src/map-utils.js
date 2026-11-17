@@ -130,8 +130,10 @@ export function safeUrl(value) {
 
 /**
  * Shareable view state in the URL hash, e.g.
- * `#ASP?view=compare&groups=chinese,south_asian&compare=south_asian&income=1&layers=transit`.
- * A bare `#ASP` (the original deep-link format) still selects a community.
+ * `#ASP?view=compare&groups=chinese,south_asian&compare=south_asian&income=1&layers=transit&hide=roads`.
+ * `layers` lists the optional layers switched on (transit, landmarks); `hide`
+ * lists the default layers switched off (roads, labels). A bare `#ASP` (the
+ * original deep-link format) still selects a community.
  */
 export function parseHashState(hash, features, groupIds = []) {
   const raw = String(hash ?? '').replace(/^#/, '');
@@ -154,6 +156,7 @@ export function parseHashState(hash, features, groupIds = []) {
   const groups = [...new Set(list('groups').filter(id => valid.has(id)))];
   const compare = groups.includes(params.get('compare')) ? params.get('compare') : null;
   const layers = new Set(list('layers'));
+  const hidden = new Set(list('hide'));
   return {
     code,
     groups,
@@ -162,6 +165,8 @@ export function parseHashState(hash, features, groupIds = []) {
     income: params.get('income') === '1',
     transit: layers.has('transit'),
     landmarks: layers.has('landmarks'),
+    roads: !hidden.has('roads'),
+    labels: !hidden.has('labels'),
   };
 }
 
@@ -173,6 +178,8 @@ export function buildHashState({
   income = false,
   transit = false,
   landmarks = false,
+  roads = true,
+  labels = true,
 } = {}) {
   const params = [];
   if (view === 'distribution') params.push('view=compare');
@@ -182,6 +189,8 @@ export function buildHashState({
   if (income) params.push('income=1');
   const layers = [transit && 'transit', landmarks && 'landmarks'].filter(Boolean);
   if (layers.length) params.push(`layers=${layers.join(',')}`);
+  const hidden = [!roads && 'roads', !labels && 'labels'].filter(Boolean);
+  if (hidden.length) params.push(`hide=${hidden.join(',')}`);
   const head = code ? encodeURIComponent(code) : '';
   return head || params.length ? `#${head}${params.length ? `?${params.join('&')}` : ''}` : '';
 }

@@ -77,8 +77,9 @@ Vite 使用相对资源路径，兼容 GitHub Pages 的 `/calgary-census/` 子�
 | `compare=…` | 分布对比中当前显示的人群（省略为第一个） |
 | `income=1` | 开启收入底色 |
 | `layers=transit,landmarks` | 开启 CTrain 或地理地标 |
+| `hide=roads,labels` | 关闭默认显示的道路与铁路底图或社区标注 |
 
-无法识别的社区、人群或图层会被忽略。
+无法识别的社区、人群或图层会被忽略。带参数的链接会完整还原画面：其中没有社区代码就表示不选中任何社区。
 
 ## GitHub Pages
 
