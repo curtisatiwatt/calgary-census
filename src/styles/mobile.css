@@ -346,6 +346,11 @@
     align-items: center;
     z-index: 2100;
   }
+  /* The details sheet (z-index 2300) may be fully expanded: while the search box
+     is in use, its results must show above the sheet, not behind it. */
+  .app-header:focus-within {
+    z-index: 2400;
+  }
   .app-header .brand,
   .app-header .header-actions {
     display: none;

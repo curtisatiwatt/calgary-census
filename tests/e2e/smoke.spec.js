@@ -451,6 +451,17 @@ test('a community tapped low on a phone stays visible above the details sheet', 
     .toBeLessThan(sheetTop);
 });
 
+test('search results show above the fully expanded details sheet on a phone', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'the bottom sheet only exists on small screens');
+  await openMap(page, 'ASP');
+  await page.locator('#mobile-detail-handle').click();
+  await expect(page.locator('.sidebar')).toHaveAttribute('data-sheet-snap', 'full');
+  await page.locator('#search').fill('saddle ridge');
+  // A real tap: it fails if the sheet covers the result.
+  await page.locator('.search-result').first().click();
+  await expect(page.locator('#community-name')).toHaveText('Saddle Ridge');
+});
+
 test('the mobile details sheet opens for a linked community', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'the bottom sheet only exists on small screens');
   await openMap(page, 'ASP');
