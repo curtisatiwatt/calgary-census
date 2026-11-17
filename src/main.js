@@ -81,8 +81,7 @@ function resizeMapsKeepingView() {
   }
   syncing = false;
   syncMaps(current);
-  contexts.forEach(updateLabels);
-  updateDonuts();
+  renderOverlays(contexts);
 }
 
 
@@ -152,7 +151,7 @@ function updateGroupSelection(ids, rerender = true) {
   refreshGroupControl();
   renderDonutKey();
   renderDetail();
-  updateDonuts();
+  renderOverlays();
   if (state.mode === 'distribution') rebuildComparison();
 }
 
@@ -238,7 +237,6 @@ function refreshStyles() {
     for (const layer of context.layers.values()) layer.setStyle(styleFor(context, layer.feature));
     context.highlights?.setSelected(state.selectionActive ? state.selected : null);
     context.highlights?.refresh();
-    updateLabels(context);
   }
 }
 
@@ -281,7 +279,7 @@ function createMap(element, groupId = null) {
     },
   }).addTo(map);
   if (!groupId) {
-    context.contextLayers = createContextLayers({ context, basemap: state.basemap, geography: state.geographicContext, orientationLandmarks: state.orientationLandmarks, operatingTransit: state.operatingTransit, greenTransit: state.greenTransit, communityNames: state.features.map(f => f.properties.name), visible: { roads: state.roads, transit: state.transit, landmarks: state.landmarks, communityLabels: state.labels }, getLabelObstacles: () => mapLabelObstacles(map), onStationOpen: () => { closeTooltips(); toggleGroups(false); toggleLayers(false); if (mobile()) setCollapsed(true); } });
+    context.contextLayers = createContextLayers({ context, basemap: state.basemap, geography: state.geographicContext, orientationLandmarks: state.orientationLandmarks, operatingTransit: state.operatingTransit, greenTransit: state.greenTransit, communityNames: state.features.map(f => f.properties.name), visible: { roads: state.roads, transit: state.transit, landmarks: state.landmarks, communityLabels: state.labels }, getLabelObstacles: () => [...mapLabelObstacles(map), ...(context.donutBoxes || [])], onStationOpen: () => { closeTooltips(); toggleGroups(false); toggleLayers(false); if (mobile()) setCollapsed(true); } });
   } else {
     renderComparisonBasemap(context);
   }
@@ -300,8 +298,7 @@ function createMap(element, groupId = null) {
   map.on('moveend', () => {
     if (syncing || !activeContexts().includes(context)) return;
     syncMaps(context);
-    for (const c of activeContexts()) updateLabels(c);
-    if (context === state.composition) updateDonuts();
+    renderOverlays();
   });
   return context;
 }
@@ -332,14 +329,27 @@ function syncMaps(source) {
 }
 
 function mapLabelObstacles(map) {
-  const { top, bottom, left, right } = mobile() ? getMobileMapInsets() : (desktopUI?.getInsets() || { top: 0, bottom: 0, left: 0, right: 0 });
   const size = map.getSize();
   const mapRect = map.getContainer().getBoundingClientRect();
-  const controls = [...document.querySelectorAll('.map-tools, #mobile-legend-button')].filter(node => node.offsetWidth && node.offsetHeight).map(node => {
+  const visible = node => node.offsetWidth && node.offsetHeight;
+  const rectOf = node => {
     const r = node.getBoundingClientRect();
     return { x: r.left - mapRect.left - 5, y: r.top - mapRect.top - 5, w: r.width + 10, h: r.height + 10 };
-  });
-  return [{ x: 0, y: 0, w: size.x, h: top }, { x: 0, y: size.y - bottom, w: size.x, h: bottom }, { x: 0, y: 0, w: left, h: size.y }, { x: size.x - right, y: 0, w: right, h: size.y }, ...controls];
+  };
+  const floating = ['.map-tools', '#mobile-legend-button'];
+  let bands;
+  if (mobile()) {
+    const { top, bottom, left, right } = getMobileMapInsets();
+    bands = [{ x: 0, y: 0, w: size.x, h: top }, { x: 0, y: size.y - bottom, w: size.x, h: bottom }, { x: 0, y: 0, w: left, h: size.y }, { x: size.x - right, y: 0, w: right, h: size.y }];
+  } else {
+    // Desktop only covers the map with a rail/details panel on the left and a
+    // few floating boxes; the rest of the top edge stays available for labels.
+    const { left } = desktopUI?.getInsets() || { left: 0 };
+    bands = [{ x: 0, y: 0, w: left, h: size.y }];
+    floating.push('.app-header', '.comparison-pager');
+  }
+  const controls = [...document.querySelectorAll(floating.join(','))].filter(visible).map(rectOf);
+  return [...bands, ...controls];
 }
 
 function fitPadding(map, community = false) {
@@ -367,8 +377,7 @@ function fitCity() {
   syncing = false;
   syncMaps(first);
   state.wholeCity = true;
-  contexts.forEach(updateLabels);
-  updateDonuts();
+  renderOverlays(contexts);
 }
 
 function fitCommunity(code, collapse = true) {
@@ -381,8 +390,7 @@ function fitCommunity(code, collapse = true) {
   syncing = false;
   state.wholeCity = false;
   syncMaps(contexts[0]);
-  contexts.forEach(updateLabels);
-  updateDonuts();
+  renderOverlays(contexts);
 }
 
 function selectCommunity(code, zoom = true, expand = true) {
@@ -397,7 +405,7 @@ function selectCommunity(code, zoom = true, expand = true) {
     else desktopUI?.openDetails();
   } else communitySheet?.refresh();
   refreshStyles();
-  updateDonuts();
+  renderOverlays();
   renderComparisonHeadings();
   if (zoom) fitCommunity(code, false);
   else if (expand && !mobile()) {
@@ -409,11 +417,19 @@ function selectCommunity(code, zoom = true, expand = true) {
   try { if (expand) history.replaceState(null, '', `#${encodeURIComponent(code)}`); } catch { /* embedded preview */ }
 }
 
+/** Rings claim their space first so every map label can avoid them. */
+function renderOverlays(contexts = activeContexts()) {
+  updateDonuts();
+  contexts.forEach(updateLabels);
+}
+
 function updateDonuts() {
   const context = state.composition;
   if (!context || state.mode !== 'composition' || !context.map._loaded) return;
   context.tooltip.close();
   context.donuts.clearLayers();
+  context.donutBoxes = [];
+  context.donutCodes = new Set();
   const groups = selectedGroups();
   if (!groups.length) { $('donut-status').textContent = t('未选人口群体，暂不显示构成圆'); return; }
   const map = context.map;
@@ -433,6 +449,8 @@ function updateDonuts() {
     const html = donutSvg(populationRecord(p.code), state.selectedGroups, state.colors, size);
     if (!html) continue;
     occupied.push(point);
+    context.donutBoxes.push({ x: point.x - size / 2 - 2, y: point.y - size / 2 - 2, w: size + 4, h: size + 4, code: p.code, ring: true });
+    context.donutCodes.add(p.code);
     const marker = L.marker([p.centroid[1], p.centroid[0]], {
       icon: L.divIcon({ className: `population-donut${p.code === state.selected ? ' selected-donut' : ''}`, html, iconSize: [hitSize, hitSize], iconAnchor: [hitSize / 2, hitSize / 2] }),
       pane: 'donuts', keyboard: true, title: t(`${p.name} 人口构成`), alt: t(`${p.name} 人口构成`), riseOnHover: false,
@@ -480,7 +498,7 @@ function updateLabels(context) {
     return { feature, priority: (p.population || 0) + area * 400000 };
   }).sort((a, b) => Number(b.feature.properties.code === state.selected) - Number(a.feature.properties.code === state.selected)
     || b.priority - a.priority || a.feature.properties.code.localeCompare(b.feature.properties.code));
-  const occupied = [...(context.contextLayers?.labelBoxes || mapLabelObstacles(map))];
+  const occupied = [...(context.contextLayers?.labelBoxes || [...mapLabelObstacles(map), ...(context.donutBoxes || [])])];
   let shown = 0;
   for (const { feature } of candidates) {
     if (shown >= cap) break;
@@ -500,14 +518,23 @@ function updateLabels(context) {
     const width = Math.ceil(Math.max(54, ...lines.map(line => labelMeasure.measureText(line).width)) + 6);
     const height = Math.ceil(lines.length * size * 1.22);
     const point = map.latLngToContainerPoint([p.centroid[1], p.centroid[0]]);
-    let offset = comparison ? -height / 2 : 20;
-    const overlaps = box => occupied.some(a => box.x < a.x + a.w + 8 && box.x + box.w + 8 > a.x && box.y < a.y + a.h + 6 && box.y + box.h + 6 > a.y);
-    if (prominent) offset = [offset, -height - 18, 32].find(candidate => !overlaps({ x: point.x - width / 2, y: point.y + candidate, w: width, h: height })) ?? offset;
-    const box = { x: point.x - width / 2, y: point.y + offset, w: width, h: height };
-    if ((box.x < 6 || box.y < 8 || box.x + width > viewport.x - 6 || box.y + height > viewport.y - 18)) continue;
+    // Sit below (or else above) this community's own ring; centre the name when
+    // no ring is drawn. Other communities' rings are hard obstacles with no gap.
+    const hasRing = !comparison && context.donutCodes?.has(p.code);
+    const others = occupied.filter(a => !(a.ring && a.code === p.code));
     const gapX = zoom < 12 ? 16 : 10;
     const gapY = zoom < 12 ? 12 : 7;
-    if (occupied.some(a => box.x < a.x + a.w + gapX && box.x + box.w + gapX > a.x && box.y < a.y + a.h + gapY && box.y + box.h + gapY > a.y)) continue;
+    const blocked = (box, loose = false) => others.some(a => {
+      const gx = a.ring ? 0 : loose ? 8 : gapX;
+      const gy = a.ring ? 0 : loose ? 6 : gapY;
+      return box.x < a.x + a.w + gx && box.x + box.w + gx > a.x && box.y < a.y + a.h + gy && box.y + box.h + gy > a.y;
+    });
+    const inView = box => box.x >= 6 && box.y >= 8 && box.x + width <= viewport.x - 6 && box.y + height <= viewport.y - 18;
+    const candidates = hasRing ? [20, -height - 18] : prominent ? [-height / 2, -height - 18, 32] : [-height / 2];
+    const boxAt = candidate => ({ x: point.x - width / 2, y: point.y + candidate, w: width, h: height });
+    const offset = candidates.find(candidate => { const box = boxAt(candidate); return inView(box) && !blocked(box, prominent); });
+    if (offset === undefined) continue;
+    const box = boxAt(offset);
     occupied.push(box);
     L.marker([p.centroid[1], p.centroid[0]], {
       icon: L.divIcon({ className: `community-label hierarchy-community-label${prominent ? ' focus-label' : ''}`, html: `<span style="font-size:${size}px;line-height:1.22;font-weight:600">${lines.map(esc).join('<br>')}</span>`, iconSize: [width, height], iconAnchor: [width / 2, -offset] }),
@@ -605,7 +632,7 @@ function selectView(mode) {
     if (state.view) state.composition.map.setView(state.view.center, state.view.zoom, { animate: false });
     syncing = false;
     if (state.wholeCity) fitCity();
-    else { updateLabels(state.composition); updateDonuts(); }
+    else renderOverlays();
   });
 }
 
@@ -643,7 +670,7 @@ function initializeControls() {
     if (state.data) {
       renderMetadata(); renderGroupList(); renderDonutKey(); renderDetail(); renderComparisonHeadings(); communitySheet?.refresh();
       $('mode-description').textContent = t(state.mode === 'composition' ? '一个社区，一张构成图' : '同一色阶，查看聚居分布');
-      updateDonuts(); state.contexts.forEach(updateLabels);
+      renderOverlays(state.contexts);
       if ($('search').value) renderSearch();
     }
   });
@@ -742,10 +769,9 @@ async function init() {
     const changedText = nextTextSize !== observedTextSize;
     observedTextSize = nextTextSize;
     if (changedText && state.wholeCity && activeContexts().length) fitCity();
-    activeContexts().forEach(updateLabels);
-    updateDonuts();
+    renderOverlays();
   } });
-  desktopUI = initDesktopUI({ onLayoutChange: () => { activeContexts().forEach(updateLabels); updateDonuts(); } });
+  desktopUI = initDesktopUI({ onLayoutChange: () => renderOverlays() });
   try {
     const data = await loadData();
     state.metadata = data.metadata; state.features = data.features; state.data = data.populationData; state.basemap = data.basemap;
