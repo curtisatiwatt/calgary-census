@@ -1578,7 +1578,10 @@ function initializeControls() {
       // Keyboard and browser chrome resize the viewport. Preserve the user's camera.
       mobileUI?.refresh();
       resizeMapsKeepingView();
-      if (changed && state.wholeCity) fitCity();
+      // An untouched whole-city view is the exception: it is fitted again to the
+      // new window. On a phone only a layout change does that, so the map stays
+      // put while the on-screen keyboard comes and goes.
+      if (state.wholeCity && (changed || !mobile())) fitCity();
     }, 150);
   });
 }

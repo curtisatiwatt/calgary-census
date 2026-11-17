@@ -611,6 +611,33 @@ test('the legend lists "Other groups" only while some group is unselected', asyn
   await expect(key).toContainText('Source-table discrepancy');
 });
 
+test('an untouched city view is fitted again when the desktop window is resized', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'a phone keeps its camera while the keyboard resizes the viewport');
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await openMap(page);
+  const cityFits = async () => {
+    const { height } = page.viewportSize();
+    return page.evaluate(height => {
+      const boxes = [...document.querySelectorAll('#composition-map path[data-community]')]
+        .map(path => path.getBoundingClientRect())
+        .filter(box => box.width > 0);
+      return Math.min(...boxes.map(box => box.top)) >= 0 && Math.max(...boxes.map(box => box.bottom)) <= height;
+    }, height);
+  };
+  expect(await cityFits()).toBe(true);
+  await page.setViewportSize({ width: 900, height: 600 });
+  await expect.poll(cityFits).toBe(true);
+  // Once the user has zoomed, resizing keeps their zoom instead of fitting the city again.
+  const scale = async () => (await page.locator('#composition-map path[data-community="BLN"]').boundingBox()).width;
+  const fitted = await scale();
+  await page.locator('#zoom-in').click();
+  await expect.poll(scale).toBeGreaterThan(fitted * 1.3);
+  const zoomed = await scale();
+  await page.setViewportSize({ width: 1500, height: 950 });
+  await page.waitForTimeout(500);
+  expect(Math.abs((await scale()) - zoomed)).toBeLessThan(1);
+});
+
 test('desktop keeps a legend card; mobile opens it on demand', async ({ page, isMobile }) => {
   await openMap(page);
   await chooseTopFive(page, isMobile);
