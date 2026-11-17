@@ -484,8 +484,18 @@ html[data-theme='dark'] .orientation-label:before {
   white-space: normal;
   overflow-wrap: break-word;
 }
-.community-tooltip.leaflet-tooltip:before {
+/* The arrow takes the tooltip's colour on whichever side it opens. */
+.community-tooltip.leaflet-tooltip-top:before {
   border-top-color: #243f42;
+}
+.community-tooltip.leaflet-tooltip-bottom:before {
+  border-bottom-color: #243f42;
+}
+.community-tooltip.leaflet-tooltip-left:before {
+  border-left-color: #243f42;
+}
+.community-tooltip.leaflet-tooltip-right:before {
+  border-right-color: #243f42;
 }
 .community-tooltip strong {
   display: block;
@@ -735,6 +745,12 @@ html[data-theme='dark'] .community-tooltip.leaflet-tooltip-top:before {
 }
 html[data-theme='dark'] .community-tooltip.leaflet-tooltip-bottom:before {
   border-bottom-color: #658384;
+}
+html[data-theme='dark'] .community-tooltip.leaflet-tooltip-left:before {
+  border-left-color: #658384;
+}
+html[data-theme='dark'] .community-tooltip.leaflet-tooltip-right:before {
+  border-right-color: #658384;
 }
 html[data-theme='dark'] .tip-note {
   color: #b9d3c7;

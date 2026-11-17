@@ -483,6 +483,15 @@ function createMap(element, groupId = null) {
     tooltip: L.tooltip({ className: 'community-tooltip', direction: 'top', opacity: 0.98 }),
     enabled: () => !mobile(),
     hoverEnabled: () => window.matchMedia('(any-hover: hover)').matches,
+    // Stay inside the window and out from under the rail or the details drawer.
+    area: () => {
+      const frame = map.getContainer().getBoundingClientRect();
+      return {
+        left: frame.left + (desktopUI?.getInsets().left || 0),
+        top: frame.top + 8,
+        right: frame.right - 8,
+      };
+    },
   });
   for (const [name, zIndex] of [
     ['water', 410],

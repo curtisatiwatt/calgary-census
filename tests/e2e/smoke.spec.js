@@ -439,6 +439,19 @@ test('on a narrow desktop window the legend and the switcher stay clear of other
   await expect(page.locator('#comparison-select option:checked')).toHaveText('Chinese');
 });
 
+test('a hover tooltip near the top of the map opens where it can be read', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'tooltips are a pointer-hover feature');
+  await page.setViewportSize({ width: 1280, height: 620 });
+  await openMap(page, '?groups=south_asian,chinese,black,filipino,latin_american');
+  // Livingston is at the northern edge of the city view: a tooltip above it would leave the window.
+  await page.locator('#composition-map path[data-community="LIV"]').hover();
+  const tooltip = page.locator('.community-tooltip');
+  await expect(tooltip).toBeVisible();
+  await expect(tooltip).toContainText('Livingston');
+  await expect(tooltip).toBeInViewport({ ratio: 1 });
+  await expect(tooltip).toHaveClass(/leaflet-tooltip-bottom/);
+});
+
 test('desktop keeps a legend card; mobile opens it on demand', async ({ page, isMobile }) => {
   await openMap(page);
   await chooseTopFive(page, isMobile);
