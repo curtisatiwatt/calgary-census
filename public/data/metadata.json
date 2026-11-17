@@ -83,7 +83,7 @@
       "url": "https://services1.arcgis.com/AVP60cs0Q9PEA8rH/ArcGIS/rest/services/Attractions/FeatureServer/0"
     }
   ],
-  "populationGroupsDefinition": "人口视图采用市府社区档案的 13 个 Visible Minority（Racialized Population）互斥分类，默认勾选全市人数最多的五个可见少数族裔类别。非可见少数族裔为普查分类，包含原住民等人口，不可视作白人或欧洲裔。",
+  "populationGroupsDefinition": "人口视图采用市府社区档案的 13 个 Visible Minority（Racialized Population）互斥分类，初始不选人口群体，可自行选择一个或多个人口群体。非可见少数族裔为普查分类，包含原住民等人口，不可视作白人或欧洲裔。",
   "populationChartNote": "普查人数经过取整，原表分类加总与私人住户人口可能存在差异。详情及分布图用人数除以同表人口计算占比。环形图以同表人口为分母；分类合计不足时以点纹留白显示统计差额，合计超出时仅为闭合一圈而按分类合计归一化。灰色代表未勾选类别；统计差额不是新增人口类别，缺失数据另行标记。",
   "geographyPreparedDate": "2026-11-03",
   "transitDefinition": "Red / Blue Line 为运营线路；Green Line 包含在建及规划部分，全部未运营，远期延伸尚未落实建设资金。线路与站点按官方资料快照展示，规划站址及走线可能调整，不提供实时班次。"

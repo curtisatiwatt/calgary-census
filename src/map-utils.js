@@ -1,3 +1,5 @@
+import { t } from './i18n.js';
+
 export const INCOME_BINS = [
   { max: 60000, color: '#3979b5', label: '低于 $60,000' },
   { max: 80000, color: '#82b8d6', label: '$60,000–79,999' },
@@ -12,11 +14,14 @@ export const isNumber = value => typeof value === 'number' && Number.isFinite(va
 export const colorFor = value => isNumber(value)
   ? INCOME_BINS.find(bin => value < bin.max).color
   : '#d6dcd9';
-export const number = value => isNumber(value) ? value.toLocaleString('en-CA') : '暂无数据';
-export const money = value => isNumber(value) ? `$${number(value)}` : '暂无数据';
+// Missing values are spelled out in the current language so they read correctly
+// inside translated sentences ("No data", never a bare 0).
+const noData = () => t('暂无数据');
+export const number = value => isNumber(value) ? value.toLocaleString('en-CA') : noData();
+export const money = value => isNumber(value) ? `$${number(value)}` : noData();
 export const percent = value => isNumber(value)
   ? `${(value * 100).toLocaleString('zh-CN', { maximumFractionDigits: 1 })}%`
-  : '暂无数据';
+  : noData();
 
 export function normalize(value) {
   return String(value ?? '').normalize('NFKD').toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]/g, '');

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { translate, setLanguage, currentLanguage, t, translationConflicts } from '../src/i18n.js';
+import { translate, setLanguage, currentLanguage, t, translationConflicts, MESSAGES } from '../src/i18n.js';
 import '../src/mobile-ui.js';
 import '../src/desktop-ui.js';
 import '../src/community-sheet.js';
@@ -9,16 +9,40 @@ import '../src/community-sheet.js';
 const read = name => JSON.parse(readFileSync(new URL(`../public/data/${name}`, import.meta.url)));
 const hasHan = value => /[\u3400-\u9fff]/u.test(value);
 
-test('switching language preserves numeric content and returns original Chinese', () => {
-  const source = '人口 21,000 · 家庭收入 $118,000';
+test('keyed sentences render in the current language with their values', () => {
+  const values = { population: '21,000', income: '$118,000' };
   setLanguage('en');
   assert.equal(currentLanguage(), 'en');
-  assert.match(t(source), /21,000.*118,000/);
-  assert.equal(hasHan(t(source)), false);
+  assert.equal(t('detail.summary', values), 'Population 21,000 · Income $118,000');
   assert.equal(t('暂无数据'), 'No data');
   setLanguage('zh');
-  assert.equal(t(source), source);
+  assert.equal(t('detail.summary', values), '人口 21,000 · 家庭收入 $118,000');
   assert.equal(translate('Panorama Hills', 'en'), 'Panorama Hills');
+});
+
+test('every keyed message has Chinese and English text with the same placeholders', () => {
+  const placeholders = text => [...text.matchAll(/\{(\w+)\}/g)].map(match => match[1]).sort();
+  for (const [key, message] of Object.entries(MESSAGES)) {
+    assert.ok(message.zh && message.en, `${key}: missing a language`);
+    assert.deepEqual(placeholders(message.en), placeholders(message.zh), `${key}: placeholders differ`);
+    assert.equal(hasHan(message.en), false, `${key}: English text contains Chinese`);
+  }
+});
+
+test('every static page string and displayed metadata field has English text', () => {
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8')
+    .replace(/<script[\s\S]*?<\/script>/g, '').replace(/<style[\s\S]*?<\/style>/g, '');
+  const strings = new Set();
+  // Text between tags, and the attributes the page translates.
+  for (const [, text] of html.matchAll(/>([^<>]+)</g)) if (hasHan(text)) strings.add(text);
+  for (const [, , value] of html.matchAll(/\s(aria-label|placeholder|title|alt|content|data-mobile-text)="([^"]*)"/g)) if (hasHan(value)) strings.add(value);
+  // Chinese-only spans marked lang="zh-CN" (e.g. the language option) are intentionally untranslated.
+  for (const [, text] of html.matchAll(/lang="zh-CN"[^>]*>([^<]+)</g)) strings.delete(text);
+  const metadata = read('metadata.json');
+  for (const field of ['incomeDefinition', 'latestCensusNote', 'boundaryNote', 'populationGroupsDefinition']) strings.add(metadata[field]);
+  for (const source of metadata.sources) strings.add(source.label);
+  const missing = [...strings].filter(text => hasHan(translate(text, 'en')));
+  assert.deepEqual(missing, []);
 });
 
 test('every published community label and caveat has an English equivalent', () => {
@@ -44,10 +68,12 @@ test('all population groups and displayed transit explanations are translated', 
 });
 
 test('missing data and published zeros keep distinct translated meanings', () => {
-  assert.equal(translate('0 人', 'en'), '0 people');
+  setLanguage('en');
+  assert.equal(t('unit.people', { count: 0 }), '0 people');
+  assert.equal(t('error.load', { path: 'communities.geojson', status: 404 }), 'Could not load communities.geojson (404)');
+  setLanguage('zh');
   assert.equal(translate('暂无数据', 'en'), 'No data');
   assert.equal(translate('暂无数据，不是 0%', 'en'), 'No data, not 0%');
-  assert.equal(translate('无法载入 communities.geojson（404）', 'en'), 'Could not load communities.geojson (404)');
 });
 
 test('modules never register conflicting English text for the same source string', () => {

@@ -95,17 +95,17 @@ function updateLayerVisibility() {
 
 function renderMetadata() {
   const m = state.metadata;
-  $('data-edition').textContent = `${m.populationYear} 普查 · ${m.incomeYear} 收入`;
-  $('income-detail-label').textContent = `家庭税前年收入中位数 · ${m.incomeYear}`;
-  $('city-income').textContent = `全市 ${money(m.cityIncomeMedian)}`;
-  $('coverage-text').textContent = `${state.counts.total} 个区域 · ${m.populationYear} 普查`;
-  $('year-definition').textContent = `人口资料来自 ${m.populationYear} 年人口普查，收入参考期为 ${m.incomeYear} 年，不是今天的收入与人口。`;
+  $('data-edition').textContent = t('meta.edition', { population: m.populationYear, income: m.incomeYear });
+  $('income-detail-label').textContent = t('meta.incomeLabel', { year: m.incomeYear });
+  $('city-income').textContent = t('city.value', { value: money(m.cityIncomeMedian) });
+  $('coverage-text').textContent = t('meta.coverageShort', { areas: state.counts.total, year: m.populationYear });
+  $('year-definition').textContent = t('meta.years', { population: m.populationYear, income: m.incomeYear });
   $('income-definition').textContent = m.incomeDefinition || '';
   $('latest-census-note').textContent = m.latestCensusNote || '';
-  if (m.populationGroupsDefinition) $('population-groups-definition').textContent = m.populationGroupsDefinition.replace('默认勾选全市人数最多的五个可见少数族裔类别', '初始不选人口群体，可自行选择一个或多个人口群体');
-  $('coverage-definition').textContent = `覆盖 ${state.counts.total} 个官方区域，${Object.keys(state.data.communities).length} 个有可用人口分类，${state.counts.income} 个有收入数据；保留缺失区域的边界。`;
+  if (m.populationGroupsDefinition) $('population-groups-definition').textContent = m.populationGroupsDefinition;
+  $('coverage-definition').textContent = t('meta.coverage', { areas: state.counts.total, groups: Object.keys(state.data.communities).length, income: state.counts.income });
   $('boundary-note').textContent = m.boundaryNote || '';
-  $('prepared-note').textContent = m.preparedDate ? `原始数据整理于 ${m.preparedDate}；本图为官方资料快照。` : '';
+  $('prepared-note').textContent = m.preparedDate ? t('meta.prepared', { date: m.preparedDate }) : '';
   $('license-note').textContent = m.license || '';
   $('source-list').replaceChildren();
   for (const source of m.sources || []) {
@@ -135,7 +135,7 @@ function renderGroupList() {
   const query = $('group-search').value.trim().toLowerCase();
   const groups = state.groups.filter(g => `${g.label} ${g.name}`.toLowerCase().includes(query));
   $('group-list').innerHTML = groups.length ? groups.map(g => `<label class="group-option" for="group-${g.id}"><input type="checkbox" id="group-${g.id}" data-group="${g.id}" ${state.selectedGroups.includes(g.id) ? 'checked' : ''}><span class="group-name">${esc(g.label)}<small>${esc(currentLanguage() === 'zh' ? g.name : '')}</small></span><span class="group-city">${percent(populationShare(state.data.city, g.id))}</span></label>`).join('') : '<p class="no-results">没有找到这个类别。</p>';
-  $('filter-count').textContent = t(`已选 ${state.selectedGroups.length} / ${state.groups.length}`);
+  $('filter-count').textContent = t('groups.selectedCount', { selected: state.selectedGroups.length, total: state.groups.length });
   localize($('group-list'));
   refreshGroupControl();
 }
@@ -145,7 +145,7 @@ function updateGroupSelection(ids, rerender = true) {
   state.compareStart = Math.min(state.compareStart, Math.max(0, state.selectedGroups.length - 1));
   $('group-count').textContent = state.selectedGroups.length;
   mobileUI?.refresh();
-  $('filter-count').textContent = t(`已选 ${state.selectedGroups.length} / ${state.groups.length}`);
+  $('filter-count').textContent = t('groups.selectedCount', { selected: state.selectedGroups.length, total: state.groups.length });
   if (rerender) renderGroupList();
   refreshGroupControl();
   renderDonutKey();
@@ -170,14 +170,14 @@ function renderDetail() {
   $('community-name').textContent = p.name;
   $('community-meta').innerHTML = [p.sectorLabel, p.typeLabel].filter(Boolean).map(tag => `<span>${esc(tag)}</span>`).join('');
   $('population').textContent = number(record?.population ?? p.population);
-  $('collapsed-summary').textContent = `人口 ${number(record?.population ?? p.population)} · 家庭收入 ${money(p.income)}`;
+  $('collapsed-summary').textContent = t('detail.summary', { population: number(record?.population ?? p.population), income: money(p.income) });
   $('income-value').textContent = money(p.income);
   $('income-value').classList.toggle('missing', !isNumber(p.income));
   $('income-context').textContent = isNumber(p.income)
-    ? `全市的 ${(p.income / state.metadata.cityIncomeMedian).toFixed(2)} 倍 · 第 ${p.incomeRank} / ${state.counts.income}`
+    ? t('detail.incomeContext', { ratio: (p.income / state.metadata.cityIncomeMedian).toFixed(2), rank: p.incomeRank, total: state.counts.income })
     : '官方资料暂无同口径收入数值';
   $('children').textContent = percent(p.children);
-  $('household').textContent = isNumber(p.householdSize) ? `${p.householdSize.toFixed(1)} 人` : '暂无数据';
+  $('household').textContent = isNumber(p.householdSize) ? t('unit.people', { count: p.householdSize.toFixed(1) }) : t('暂无数据');
   $('data-caveat').textContent = p.caveat || '';
   $('data-caveat').hidden = !p.caveat;
   const sourceUrl = safeUrl(record?.sourceUrl || p.sourceUrl);
@@ -206,12 +206,12 @@ function renderDetail() {
     city: remainder.reduce((sum, g) => sum + state.data.city.counts[g.id], 0) / state.data.city.population,
     color: COMPOSITION_OTHER_COLOR,
   });
-  $('composition-bars').innerHTML = rows.map(row => `<div class="composition-row" data-detail-group="${row.id}"><div class="bar-heading"><span>${esc(row.label)}</span><span><small>${number(row.count)} 人</small><strong>${percent(row.share)}</strong></span></div><div class="bar-track"><span class="bar-fill" style="width:${Math.min(100, Math.max(0, (row.share || 0) * 100))}%;background:${row.color}"></span><i class="city-reference" style="left:${Math.min(100, Math.max(0, (row.city || 0) * 100))}%" title="全市 ${percent(row.city)}"></i></div><span class="sr-only">全市占比 ${percent(row.city)}</span></div>`).join('');
+  $('composition-bars').innerHTML = rows.map(row => `<div class="composition-row" data-detail-group="${row.id}"><div class="bar-heading"><span>${esc(row.label)}</span><span><small>${t('unit.people', { count: number(row.count) })}</small><strong>${percent(row.share)}</strong></span></div><div class="bar-track"><span class="bar-fill" style="width:${Math.min(100, Math.max(0, (row.share || 0) * 100))}%;background:${row.color}"></span><i class="city-reference" style="left:${Math.min(100, Math.max(0, (row.city || 0) * 100))}%" title="${esc(t('city.value', { value: percent(row.city) }))}"></i></div><span class="sr-only">${esc(t('city.share', { value: percent(row.city) }))}</span></div>`).join('');
   const sum = Object.values(record.counts).reduce((a, b) => a + b, 0);
   const difference = Math.abs(sum - record.population);
   const basis = [
     t('占比按人数 ÷ 同表私人住户人口计算。灰色为未勾选类别，留白为原表统计差额。'),
-    difference > 35 || difference / record.population > 0.01 ? t(` 分类合计 ${number(sum)}，表内人口 ${number(record.population)}；原表存在差异，保留原数值。`) : t('原始人数经过统计取整。'),
+    difference > 35 || difference / record.population > 0.01 ? t('detail.discrepancy', { sum: number(sum), population: number(record.population) }) : t('原始人数经过统计取整。'),
   ];
   // Chinese sentences run together; English ones need a space after the full stop.
   $('composition-basis').textContent = basis.map(part => part.trim()).join(currentLanguage() === 'en' ? ' ' : '');
@@ -246,12 +246,13 @@ function tooltipContent(feature, context) {
   if (context.groupId) {
     const group = state.groupById.get(context.groupId);
     const count = record?.counts[group.id];
-    const city = `全市 ${percent(populationShare(state.data.city, group.id))}`;
+    const share = percent(populationShare(state.data.city, group.id));
     // Without a published count, show only the city reference rather than "No data people".
-    const detail = isNumber(count) ? `${number(count)} 人 · ${city}` : city;
-    return localizeHtml(`<strong>${esc(p.name)}</strong>${esc(group.label)} ${percent(populationShare(record, group.id))}<br>${detail}<span class="tip-note">点击固定社区，查看完整构成</span>`);
+    const detail = isNumber(count) ? t('tooltip.groupCity', { count: number(count), share }) : t('city.value', { value: share });
+    return localizeHtml(`<strong>${esc(p.name)}</strong>${esc(t('tooltip.groupShare', { group: t(group.label), value: percent(populationShare(record, group.id)) }))}<br>${esc(detail)}<span class="tip-note">点击固定社区，查看完整构成</span>`);
   }
-  return localizeHtml(`<strong>${esc(p.name)}</strong>家庭收入 ${money(p.income)}<br>人口 ${number(record?.population ?? p.population)}${record ? selectedGroups().slice(0, 5).map(g => `<br>${esc(g.label)} ${percent(populationShare(record, g.id))}`).join('') : '<br>人口分类暂无数据'}<span class="tip-note">点击查看社区详情</span>`);
+  const groups = record ? selectedGroups().slice(0, 5).map(g => `<br>${esc(t('tooltip.groupShare', { group: t(g.label), value: percent(populationShare(record, g.id)) }))}`).join('') : '<br>人口分类暂无数据';
+  return localizeHtml(`<strong>${esc(p.name)}</strong>${esc(t('tooltip.income', { value: money(p.income) }))}<br>${esc(t('tooltip.population', { value: number(record?.population ?? p.population) }))}${groups}<span class="tip-note">点击查看社区详情</span>`);
 }
 
 function createMap(element, groupId = null) {
@@ -345,7 +346,7 @@ function renderLayerWarning() {
   const failed = [...layerFailures].map(name => LAYER_NAMES[name]);
   $('map-warning').hidden = !failed.length;
   if (!failed.length) return;
-  $('map-warning').textContent = `${failed.join('、')}暂未载入，社区统计仍可使用。`;
+  $('map-warning').textContent = t('warning.layers', { layers: failed.map(label => t(label)).join(t('list.separator')) });
   localize($('map-warning'));
 }
 function ensureVisibleLayers() {
@@ -537,7 +538,7 @@ function selectCommunity(code, zoom = true, expand = true) {
     const context = activeContexts()[0];
     if (centroid && context) context.map.panInside([centroid[1], centroid[0]], { ...fitPadding(context.map, true), animate: false });
   }
-  if (expand) $('announcer').textContent = t(`已选择 ${state.byCode.get(code).properties.name}。人口构成已更新。`);
+  if (expand) $('announcer').textContent = t('announce.selected', { name: state.byCode.get(code).properties.name });
   if (expand) writeUrlState();
 }
 
@@ -578,7 +579,7 @@ function updateDonuts() {
     const marker = L.marker([p.centroid[1], p.centroid[0]], {
       icon: L.divIcon({ className: `population-donut${p.code === state.selected ? ' selected-donut' : ''}`, html, iconSize: [hitSize, hitSize], iconAnchor: [hitSize / 2, hitSize / 2] }),
       // Communities are reached by keyboard through their polygons; rings would duplicate every stop.
-      pane: 'donuts', keyboard: false, title: t(`${p.name} 人口构成`), alt: t(`${p.name} 人口构成`), riseOnHover: false,
+      pane: 'donuts', keyboard: false, title: t('ring.title', { name: p.name }), alt: t('ring.title', { name: p.name }), riseOnHover: false,
     }).addTo(context.donuts);
     marker.getElement()?.setAttribute('data-population-code', p.code);
     marker.getElement()?.setAttribute('aria-hidden', 'true');
@@ -673,7 +674,7 @@ function renderMobileSummary() {
   if (!p) return;
   if (state.mode === 'distribution') {
     const group = selectedGroups()[state.compareStart];
-    $('collapsed-summary').textContent = group ? `${t(group.label)} ${t(percent(populationShare(populationRecord(p.code), group.id)))} · ${t('全市占比')} ${t(percent(populationShare(state.data.city, group.id)))}` : t('选择人口群体');
+    $('collapsed-summary').textContent = group ? t('summary.compare', { group: t(group.label), share: percent(populationShare(populationRecord(p.code), group.id)), city: percent(populationShare(state.data.city, group.id)) }) : t('选择人口群体');
   }
   mobileUI?.refresh();
 }
@@ -681,8 +682,9 @@ function renderMobileSummary() {
 /** The compared group's city-wide baseline sits beside the group switcher. */
 function renderComparisonHeadings() {
   const group = state.groupById.get(state.comparisonContexts[0]?.groupId);
-  $('comparison-city').textContent = group ? `全市 ${percent(populationShare(state.data.city, group.id))}` : '';
-  localize($('comparison-maps'), $('comparison-select'), $('comparison-city'));
+  $('comparison-city').textContent = group ? t('city.value', { value: percent(populationShare(state.data.city, group.id)) }) : '';
+  if (group) $('comparison-map')?.setAttribute('aria-label', t('compare.mapLabel', { group: t(group.label) }));
+  localize($('comparison-select'));
   renderMobileSummary();
 }
 
@@ -727,7 +729,6 @@ function rebuildComparison({ preserveView = true } = {}) {
     context.groupId = group.id;
     for (const layer of context.layers.values()) layer.setStyle(styleFor(context, layer.feature));
   }
-  $('comparison-map').setAttribute('aria-label', `${group.label}在 Calgary 各社区的占比地图`);
   renderComparisonHeadings();
   writeUrlState();
   // The map may have been hidden (composition view) or just created: settle its size.
@@ -807,7 +808,7 @@ function initializeControls() {
     if (state.data) {
       renderMetadata(); renderGroupList(); renderDonutKey(); renderDetail(); renderComparisonHeadings(); communitySheet?.refresh();
       $('mode-description').textContent = t(state.mode === 'composition' ? '一个社区，一张构成图' : '同一色阶，查看聚居分布');
-      renderOverlays(state.contexts);
+      renderOverlays(state.contexts); renderLayerWarning();
       if ($('search').value) renderSearch();
     }
   });

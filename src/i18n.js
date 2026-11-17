@@ -52,15 +52,13 @@ export function initLanguagePreference() {
 const translations = {
   '常用五类': 'Top five groups',
   '人口视图采用市府社区档案的 13 个 Visible Minority（Racialized Population）互斥分类，初始不选人口群体，可自行选择一个或多个人口群体。非可见少数族裔为普查分类，包含原住民等人口，不可视作白人或欧洲裔。': 'The population view uses the 13 mutually exclusive visible-minority (racialized-population) categories from city community profiles. No population groups are selected initially; choose one or several groups to explore. “Not a visible minority” is a census category that includes Indigenous people and cannot be treated as White or European.',
-  '人口视图采用市府 2021 年普查定制汇总的 13 个 Visible Minority（Racialized Population）互斥分类，初始不选人口群体，可自行选择一个或多个人口群体。非可见少数族裔为普查分类，包含原住民等人口，不可视作白人或欧洲裔。': 'The population view uses the 13 mutually exclusive visible-minority (racialized-population) categories from the city’s custom 2021 Census tabulation. No population groups are selected initially; choose one or several groups to explore. “Not a visible minority” is a census category that includes Indigenous people and cannot be treated as White or European.',
 
-  '跟随系统': 'System default', '白天': 'Light', '夜间': 'Dark', '选择语言': 'Choose language', '选择外观': 'Choose appearance',
-  '社区观察': 'Community Atlas',
+  '跟随系统': 'System default', '白天': 'Light', '夜间': 'Dark','社区观察': 'Community Atlas',
   'Calgary 社区观察 · 人口构成与分布': 'Calgary Community Atlas · Population & neighbourhoods',
   'Calgary 社区观察首页': 'Calgary Community Atlas home',
   '探索 Calgary 社区的人口构成、不同人口群体的分布和家庭收入。基于官方 2021 年人口普查社区资料。': 'Explore population composition, group distribution and household income across Calgary neighbourhoods using official 2021 Census profiles.',
-  '搜索社区，例如 Panorama Hills': 'Find a community, e.g. Panorama Hills', '搜索卡尔加里社区': 'Search Calgary communities',
-  '数据说明 ↗': 'About the data ↗', '地图视图与人口群体': 'Map views and population groups', '地图视图': 'Map view',
+'搜索卡尔加里社区': 'Search Calgary communities',
+'地图视图与人口群体': 'Map views and population groups', '地图视图': 'Map view',
   '社区构成': 'Composition', '分布对比': 'Compare', '人口群体': 'Groups', '地图图层': 'Map layers', '收入底色': 'Income layer',
   '一个社区，一张构成图': 'One community, one composition chart', '同一色阶，查看聚居分布': 'A shared scale for comparing distributions',
   '选择地图图层': 'Choose map layers', '社区构成的地理参照': 'Context for the composition map', '关闭地图图层': 'Close map layers',
@@ -71,13 +69,12 @@ const translations = {
   '机场': 'Airport', '公园': 'Parks', '保留区': 'Reserves', '铁路': 'Railways',
   '地理底色不代表收入或人口占比。点击车站可查看线路与建设状态。': 'Geographic shading is separate from income and population. Select a station for its line and project status.',
   '人群': 'Groups', '选择人口群体': 'Choose population groups', '两个视图共用这份选择': 'Your selection applies to both views', '关闭人口群体选择': 'Close population groups',
-  '搜索名称 / Search groups': 'Search groups', '搜索人口群体': 'Search population groups', '默认五类': 'Top five', '全选': 'Select all', '清空': 'Clear',
+  '搜索名称 / Search groups': 'Search groups', '搜索人口群体': 'Search population groups','全选': 'Select all', '清空': 'Clear',
   '按普查原始分类展示；这些类别不等于国籍。“非可见少数族裔”包括原住民等，不能等同于白人。': 'These are original Census categories, not nationalities. “Not a visible minority” includes Indigenous people and must not be treated as “White”.',
   '社区详情': 'Community details', '展开或收起社区详情': 'Expand or collapse community details', '定位 ↗': 'Locate ↗',
   '正在载入社区': 'Loading community', '正在加载官方社区数据…': 'Loading official community data…', '社区': 'Community', '统计基数': 'population base',
   '已选社区': 'Selected community', '选中社区的人口构成': 'Selected community population composition', '人口构成': 'Population composition', '全市占比': 'City share',
-  '0–14 岁': 'Ages 0–14', '平均每户': 'People / household', '正在加载…': 'Loading…',
-  '查看官方社区档案 ↗': 'Official community profile ↗',
+  '0–14 岁': 'Ages 0–14', '平均每户': 'People / household',  '查看官方社区档案 ↗': 'Official community profile ↗',
   '卡尔加里互动社区地图': 'Interactive Calgary community map', '社区构成地图，可拖动缩放，也可以搜索选择社区': 'Composition map: pan, zoom or search to choose a community',
   '正在加载社区边界…': 'Loading community boundaries…', '每个圆代表一个社区': 'One ring per community', '扇区为占比 · 灰色为未选类别': 'Slices show shares · grey shows unselected groups',
   '家庭年收入中位数': 'Median household income',
@@ -97,7 +94,6 @@ const translations = {
   'Red / Blue 为运营线路；Green Line 采用绿色虚线，标注未运营及各段建设状态。点击车站查看名称与线路，放大可显示更多车站名。规划线路及站位可能调整，示意位置会特别注明。地理图层覆盖范围可超出社区统计范围；不会为市外区域推算人口资料。': 'Red and Blue are operating lines. The dashed Green Line is not in service; project phases are identified. Select a station for its name, line and status, and zoom in for more station labels. Planned alignments and stations may change; schematic positions are identified. Geographic context may extend beyond the census map, without estimating population outside the city.',
   '人口类别不等于国籍': 'Population categories are not nationalities',
   '采用 2021 年普查 Visible minority（Racialized population）分类。Chinese 不等于中国国籍、中国出生或普通话使用者；“非可见少数族裔”包括原住民等，不能改称白人或欧洲裔。初始不选人口群体，可自行选择一个或多个人口群体。': 'The map uses 2021 Census visible-minority (racialized-population) categories. Chinese does not mean Chinese citizenship, birthplace or Mandarin use. “Not a visible minority” includes Indigenous people and cannot be renamed White or European. No population groups are selected initially; choose one or several groups to explore.',
-  '采用 2021 年普查 Visible minority（Racialized population）分类。Chinese 不等于中国国籍、中国出生或普通话使用者；“非可见少数族裔”包括原住民等，不能改称白人或欧洲裔。默认勾选五个人数最多的可见少数族裔类别，也可选择其余类别。': 'The map uses 2021 Census visible-minority (racialized-population) categories. Chinese does not mean Chinese citizenship, birthplace or Mandarin use. “Not a visible minority” includes Indigenous people and cannot be renamed White or European. The five largest visible-minority groups are selected by default; other categories are also available.',
   '人数、占比与取整': 'Counts, shares and rounding',
   '详情与热度图的占比由公布人数除以同表的私人住户人口计算，保留一位小数；这与原 PDF 中已取整的整数百分比可能略有不同。官方人数通常按 5 人取整，各类别人数之和可能略偏离总人口。分类合计少于人口总数时，差额在圆环中单独留白；超过人口总数时，圆环按分类合计缩放。详情数值仍使用表中人口基数。': 'Detail and heat-map shares divide published counts by the private-household population in the same table, rounded to one decimal. They may differ slightly from whole percentages in the source PDF. Counts are generally rounded to multiples of five, so categories may not sum to population. A shortfall appears as a separate unfilled ring segment; if category totals exceed population, only the ring is scaled to close the circle. Detail shares keep the source population denominator.',
   '“其余类别”只包含未勾选的人口类别，不包含缺失数据。带点线的留白表示原表统计差额，不是一个人口类别。公布的 0 不代表可以确认绝对没有居民；灰色虚线边界和“暂无数据”表示资料缺失，不当作 0。': '“Other groups” contains unselected categories only, not missing data. The dotted unfilled segment represents a source-table discrepancy, not another population category. A published zero does not confirm that no residents are present. Dashed grey boundaries and “No data” mean missing information, not zero.',
@@ -116,14 +112,12 @@ const translations = {
   '人口分类暂无数据': 'Population groups unavailable', '点击查看社区详情': 'Select for community details',
   '没有找到社区，可输入英文名或社区代码。': 'No community found. Try its name or community code.',
   '地图暂时无法载入': 'The map could not load', '重新载入': 'Reload', '数据载入失败': 'Data failed to load',
-  '道路与河流': 'roads and water', '运营 CTrain': 'operating CTrain', '铁路与地理地标': 'railways and landmarks',
-  '南亚裔': 'South Asian', '华人': 'Chinese', '黑人': 'Black', '菲律宾裔': 'Filipino', '阿拉伯裔': 'Arab', '拉丁美洲裔': 'Latin American',
+  '道路与河流': 'roads and water',  '南亚裔': 'South Asian', '华人': 'Chinese', '黑人': 'Black', '菲律宾裔': 'Filipino', '阿拉伯裔': 'Arab', '拉丁美洲裔': 'Latin American',
   '东南亚裔': 'Southeast Asian', '西亚裔': 'West Asian', '韩裔': 'Korean', '日裔': 'Japanese', '其他可见少数族裔': 'Visible minority, n.i.e.',
-  '多重可见少数族裔': 'Multiple visible minorities', '非可见少数族裔': 'Not a visible minority',
+'非可见少数族裔': 'Not a visible minority',
   '东北区': 'Northeast', '东区': 'East', '东南区': 'Southeast', '中心区': 'Centre', '北区': 'North', '南区': 'South', '未注明': 'Unspecified', '西北区': 'Northwest', '西区': 'West',
   '住宅类': 'Residential', '剩余分区': 'Residual area', '大型公园': 'Major park', '工业类': 'Industrial',
   '运营中': 'In service', '建设中 · 未运营': 'Under construction · not in service', '规划中 · 未运营': 'Planned · not in service', '未运营': 'Not in service',
-  ' · 远期规划 / 未获建设资金': ' · Future plan / construction funding not secured',
   '规划示意位置，非最终站位': 'Schematic planning position, not the final station location', '官方线路资料 ↗': 'Official line information ↗',
   '一期东南段': 'Phase 1 southeast', '一期市中心段': 'Phase 1 downtown', '远期北延线': 'Future north extension', '远期南延线': 'Future south extension',
   '2026-09-22 获批的市中心地面方案，处于规划设计阶段，尚未运营。': 'The downtown surface alignment approved on September 22, 2026 is in planning and design, and is not in service.',
@@ -141,8 +135,6 @@ export function addTranslations(entries) {
     translations[key] = value;
   }
 }
-const patterns = [];
-export function addTranslationPatterns(entries) { patterns.push(...entries); }
 export function translate(value, lang = language) {
   const text = String(value ?? '');
   if (lang !== 'en') return text;
@@ -150,10 +142,45 @@ export function translate(value, lang = language) {
   if (exact !== undefined) return exact;
   const trimmed = text.trim();
   if (translations[trimmed] !== undefined) return text.replace(trimmed, translations[trimmed]);
-  for (const [pattern, replace] of patterns) if (pattern.test(text)) return text.replace(pattern, replace);
   return text;
 }
-export function t(key, params = {}) { return translate(key).replace(/\{(\w+)\}/g, (match, name) => params[name] ?? match); }
+/**
+ * Sentences with values use semantic keys and {param} placeholders, so wording
+ * can change without breaking a reverse-matching pattern. Callers pass params
+ * that are already formatted (and translated) for the current language.
+ */
+export const MESSAGES = Object.freeze({
+  'meta.edition': { zh: '{population} 普查 · {income} 收入', en: '{population} Census · {income} income' },
+  'meta.incomeLabel': { zh: '家庭税前年收入中位数 · {year}', en: 'Median before-tax household income · {year}' },
+  'meta.coverageShort': { zh: '{areas} 个区域 · {year} 普查', en: '{areas} areas · {year} Census' },
+  'meta.years': { zh: '人口资料来自 {population} 年人口普查，收入参考期为 {income} 年，不是今天的收入与人口。', en: 'Population data comes from the {population} Census and income refers to {income}, not current population or income.' },
+  'meta.coverage': { zh: '覆盖 {areas} 个官方区域，{groups} 个有可用人口分类，{income} 个有收入数据；保留缺失区域的边界。', en: 'Covers {areas} official areas: {groups} have usable population categories and {income} have income data. Boundaries remain visible where data is missing.' },
+  'meta.prepared': { zh: '原始数据整理于 {date}；本图为官方资料快照。', en: 'Source data prepared on {date}; this map is a snapshot of official information.' },
+  'city.value': { zh: '全市 {value}', en: 'City {value}' },
+  'city.share': { zh: '全市占比 {value}', en: 'City share {value}' },
+  'groups.selectedCount': { zh: '已选 {selected} / {total}', en: '{selected} / {total} selected' },
+  'detail.summary': { zh: '人口 {population} · 家庭收入 {income}', en: 'Population {population} · Income {income}' },
+  'detail.incomeContext': { zh: '全市的 {ratio} 倍 · 第 {rank} / {total}', en: '{ratio}× city median · Rank {rank} / {total}' },
+  'detail.discrepancy': { zh: '分类合计 {sum}，表内人口 {population}；原表存在差异，保留原数值。', en: 'Category total: {sum}; table population: {population}. The original discrepancy and values are preserved.' },
+  'unit.people': { zh: '{count} 人', en: '{count} people' },
+  'tooltip.income': { zh: '家庭收入 {value}', en: 'Household income {value}' },
+  'tooltip.population': { zh: '人口 {value}', en: 'Population {value}' },
+  'tooltip.groupShare': { zh: '{group} {value}', en: '{group} {value}' },
+  'tooltip.groupCity': { zh: '{count} 人 · 全市 {share}', en: '{count} people · City {share}' },
+  'summary.compare': { zh: '{group} {share} · 全市占比 {city}', en: '{group} {share} · City share {city}' },
+  'announce.selected': { zh: '已选择 {name}。人口构成已更新。', en: '{name} selected. Population composition updated.' },
+  'ring.title': { zh: '{name} 人口构成', en: '{name} population composition' },
+  'compare.mapLabel': { zh: '{group}在 Calgary 各社区的占比地图', en: '{group} share by Calgary community' },
+  'warning.layers': { zh: '{layers}暂未载入，社区统计仍可使用。', en: '{layers} could not load. Community statistics are still available.' },
+  'error.load': { zh: '无法载入 {path}（{status}）', en: 'Could not load {path} ({status})' },
+  'station.unfunded': { zh: '{phase} · 远期规划 / 未获建设资金', en: '{phase} · Future plan / construction funding not secured' },
+  'list.separator': { zh: '、', en: ', ' },
+});
+export function t(key, params = {}) {
+  const message = MESSAGES[key];
+  const template = message ? message[language === 'en' ? 'en' : 'zh'] : translate(key);
+  return template.replace(/\{(\w+)\}/g, (match, name) => params[name] ?? match);
+}
 const originalText = new WeakMap();
 const originalAttributes = new WeakMap();
 const translatedAttributes = ['aria-label', 'placeholder', 'title', 'alt', 'content'];
@@ -193,37 +220,16 @@ export function localizeHtml(html) {
   return template.innerHTML;
 }
 
-addTranslationPatterns([
-  [/^(\d{4}) 普查 · (\d{4}) 收入$/, '$1 Census · $2 income'],
-  [/^(\d{4}) 年人口普查$/, '$1 Census'],
-  [/^私人住户人口 · (\d{4})$/, 'Private-household population · $1'],
-  [/^家庭税前年收入中位数 · (\d{4})$/, 'Median before-tax household income · $1'],
-  [/^全市 (.+)$/, 'City $1'], [/^全市占比 (.+)$/, 'City share $1'],
-  [/^(\d+) 个区域 · (\d{4}) 普查$/, '$1 areas · $2 Census'],
-  [/^人口资料来自 (\d{4}) 年人口普查，收入参考期为 (\d{4}) 年，不是今天的收入与人口。$/, 'Population data comes from the $1 Census and income refers to $2, not current population or income.'],
-  [/^覆盖 (\d+) 个官方区域，(\d+) 个有可用人口分类，(\d+) 个有收入数据；保留缺失区域的边界。$/, 'Covers $1 official areas: $2 have usable population categories and $3 have income data. Boundaries remain visible where data is missing.'],
-  [/^原始数据整理于 (.+)；本图为官方资料快照。$/, 'Source data prepared on $1; this map is a snapshot of official information.'],
-  [/^已选 (\d+) \/ (\d+)$/, '$1 / $2 selected'],
-  [/^人口 (.+) · 家庭收入 (.+)$/, (_, pop, income) => `Population ${translate(pop, 'en')} · Income ${translate(income, 'en')}`],
-  [/^全市的 ([\d.]+) 倍 · 第 (\d+) \/ (\d+)$/, '$1× city median · Rank $2 / $3'],
-  [/^([\d.,]+) 人$/, '$1 people'],
-  [/^ 分类合计 (.+)，表内人口 (.+)；原表存在差异，保留原数值。$/, ' Category total: $1; table population: $2. The original discrepancy and values are preserved.'],
-  [/^已选择 (.+)。人口构成已更新。$/, '$1 selected. Population composition updated.'],
-  [/^(.+) 人口构成$/, '$1 population composition'],
-  [/^(.+)，点击查看人口构成$/, '$1: select to view population composition'],
-  [/^(.+)在 Calgary 各社区的占比地图$/, (_, group) => `${translate(group, 'en')} share by Calgary community`],
-  [/^(.+)暂未载入，社区统计仍可使用。$/, (_, parts) => `${parts.split('、').map(p => translate(p, 'en')).join(', ')} could not load. Community statistics are still available.`],
-  [/^低于 \$(.+)$/, 'Under $$$1'], [/^\$(.+) 及以上$/, '$$$1 and above'], [/^40% 及以上$/, '40% and above'],
-  [/^家庭收入 (.+)$/, (_, value) => `Household income ${translate(value, 'en')}`], [/^人口 (.+)$/, (_, value) => `Population ${translate(value, 'en')}`],
-  [/^(.+) 人 · 全市 (.+)$/, (_, count, share) => `${translate(count, 'en')} people · City ${translate(share, 'en')}`],
-  [/^(.+) · 未运营$/, '$1 · not in service'],
-]);
+addTranslations({
+  // Fixed legend and placeholder labels shown before data loads.
+  '2021 年人口普查': '2021 Census', '家庭税前年收入中位数 · 2020': 'Median before-tax household income · 2020', '私人住户人口 · 2021': 'Private-household population · 2021', '全市 $98,000': 'City $98,000',
+  '低于 $60,000': 'Under $60,000', '$200,000 及以上': '$200,000 and above', '40% 及以上': '40% and above',
+});
 
 addTranslations({
   "2021 年普查中的 2020 年私人住户税前总年收入中位数，单位为加元。不是个人工资、经济家庭收入、税后收入或当前收入。": "Median total before-tax income of private households in 2020, from the 2021 Census, in Canadian dollars. This is not individual salary, economic-family income, after-tax income or current income.",
   "底图使用数据整理时下载的官方社区边界名录；统计来自 2021 年社区档案，按社区代码／名称对应，未针对后续边界变化重新分配统计。圆心为经检查位于社区边界内的显示点，不是居民住址。": "The basemap uses official community boundaries downloaded during preparation. Statistics come from 2021 profiles matched by community code/name and have not been redistributed for later boundary changes. Ring centres are checked display points within boundaries, not residents’ addresses.",
   "2026 年联邦普查已完成采集，但截至 2026-11-03 尚未公布结果。首次人口结果计划于 2027-02-10 发布；收入为 2027-07-14；民族文化资料为 2027-10-27。本图仍使用已发布的 2021 年社区数据。": "The 2026 federal Census has completed collection, but no results had been published as of November 3, 2026. The first population release is scheduled for February 10, 2027, income for July 14, 2027, and ethnocultural data for October 27, 2027. This map continues to use published 2021 community data.",
-  "人口视图采用市府社区档案的 13 个 Visible Minority（Racialized Population）互斥分类，默认勾选全市人数最多的五个可见少数族裔类别。非可见少数族裔为普查分类，包含原住民等人口，不可视作白人或欧洲裔。": "Population views use the 13 mutually classified visible-minority (racialized-population) categories in the city’s profiles. The five largest visible-minority categories citywide are selected by default. “Not a visible minority” includes Indigenous people and must not be interpreted as White or European.",
   "City of Calgary · 社区普查档案": "City of Calgary · Community Census profiles",
   "City of Calgary · 社区边界": "City of Calgary · Community boundaries",
   "City of Calgary · 主要道路": "City of Calgary · Major roads",
@@ -244,16 +250,8 @@ addTranslations({
   '多个可见少数族裔': 'Multiple visible minorities', '非可见少数族裔（普查分类）': 'Not a visible minority (Census category)',
   '社区边界数据格式不完整': 'Community boundary data is incomplete', '社区人口分类数据格式不完整': 'Population category data is incomplete', '社区身份或显示坐标缺失': 'A community identifier or display coordinate is missing',
 });
-addTranslationPatterns([
-  [/^无法载入 (.+)（(\d+)）$/, 'Could not load $1 ($2)'],
-  [/^(.+) ([\d.]+%|暂无数据)$/, (_, group, value) => `${translate(group, 'en')} ${translate(value, 'en')}`],
-  [/^(.+) · (.+) · (运营中|建设中 · 未运营|规划中 · 未运营)$/, (_, name, line, status) => `${name} · ${line} · ${translate(status, 'en')}`],
-  [/^(一期东南段|一期市中心段|远期北延线|远期南延线) · 远期规划 \/ 未获建设资金$/, (_, phase) => `${translate(phase, 'en')} · Future plan / construction funding not secured`],
-]);
 
-addTranslationPatterns([[/^(东北区|东区|东南区|中心区|北区|南区|未注明|西北区|西区) · (住宅类|剩余分区|大型公园|工业类)$/, (_,sector,type) => `${translate(sector,'en')} · ${translate(type,'en')}`]]);
 
-addTranslationPatterns([[/^(.+) ↗$/, (_, label) => `${translate(label, 'en')} ↗`]]);
 
 addTranslations({
   '地图仅覆盖 Calgary 市内社区，不含 Springbank、Bearspaw 等市外地区。': 'The map covers Calgary communities, excluding Springbank, Bearspaw and other areas outside the city.',

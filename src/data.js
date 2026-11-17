@@ -1,6 +1,8 @@
+import { t } from './i18n.js';
+
 async function readJson(path) {
   const response = await fetch(`${import.meta.env.BASE_URL}data/${path}`);
-  if (!response.ok) throw new Error(`无法载入 ${path}（${response.status}）`);
+  if (!response.ok) throw new Error(t('error.load', { path, status: response.status }));
   return response.json();
 }
 
