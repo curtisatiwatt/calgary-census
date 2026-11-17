@@ -64,7 +64,7 @@
   .sidebar .community-sheet-header{position:relative;display:flex;flex-direction:column;flex:none;gap:0;margin:0;padding:8px 64px 18px 20px;border-bottom:1px solid var(--desktop-border);touch-action:auto;user-select:text}
   .sidebar .community-sheet-header h1{margin:0;padding:0;font-size:24px;font-weight:650;line-height:1.25;letter-spacing:-.4px;color:var(--desktop-text);overflow-wrap:anywhere}
   .sidebar .community-sheet-header .community-meta{display:flex;gap:5px 8px;margin-top:8px;font-size:12px;line-height:1.45;color:var(--desktop-muted)}
-  .sidebar .community-sheet-header .collapsed-summary,.sidebar .mobile-detail-handle,.sidebar .community-sheet-close,.sidebar-footer{display:none}
+  .sidebar .community-sheet-header .collapsed-summary,.sidebar .mobile-detail-handle,.sidebar .community-sheet-close{display:none}
   .desktop-detail-close{position:absolute;right:12px;top:8px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;min-height:40px;padding:8px;border-radius:50%;background:var(--desktop-hover);color:var(--desktop-text)}
   .desktop-detail-close:hover{background:var(--desktop-selected)}
   .desktop-detail-close .desktop-nav-label{display:none}
@@ -77,7 +77,7 @@
   .sidebar .bar-heading small{font-size:11px}
   .sidebar .income-value{font-family:inherit;font-size:25px;font-weight:600;letter-spacing:-.5px;color:var(--desktop-text)}
   .sidebar .income-value.missing{font-size:14px}
-  .sidebar .selection-note h2,.sidebar .selection-note p,.sidebar .source-link,.sidebar .secondary-metrics span{font-size:12px;line-height:1.65}
+  .sidebar .source-link,.sidebar .secondary-metrics span{font-size:12px;line-height:1.65}
   .sidebar .source-link{padding:8px 0}
 
   .viewbar>.groups-panel,.viewbar>.layers-panel{position:fixed;left:calc(var(--desktop-rail-width) + 12px);right:auto;top:76px;bottom:auto;display:flex;flex-direction:column;width:min(380px,calc(100vw - var(--desktop-rail-width) - 36px));max-height:calc(100dvh - 88px);margin:0;padding:0;overflow:hidden;border:1px solid var(--desktop-border);border-radius:16px;background:var(--desktop-surface);box-shadow:0 5px 24px #20342925;z-index:2200}
@@ -120,7 +120,7 @@
   #mobile-legend-dialog .population-bin-labels>span:before{width:14px;height:12px}
   #mobile-legend-dialog .transit-legend{gap:8px 12px;font-size:.75rem}
   .comparison-maps{grid-template-columns:minmax(0,1fr);gap:0}
-  .comparison-card-heading{display:none}
+  
   .empty-map{inset:0;padding:80px 40px 40px calc(var(--desktop-rail-width) + 40px);text-align:center}
   .map-tools,.comparing .map-tools{top:auto;right:20px;bottom:28px;gap:8px}
   .map-tools .map-button{min-height:42px;border:1px solid var(--desktop-border);border-radius:10px;background:var(--desktop-surface);color:var(--desktop-text);box-shadow:var(--desktop-shadow);font-size:13px}

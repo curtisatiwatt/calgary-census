@@ -3,10 +3,7 @@
    including every bin of the light and dark population scales. */
 html { --map-label-halo: 0 0 1px #fff, 0 0 2px #fff, 0 0 3px rgba(255, 255, 255, .85); }
 html[data-theme=dark] { --map-label-halo: 0 0 1px #0d1f25, 0 0 2px #0d1f25, 0 0 3px rgba(13, 31, 37, .9); }
-html .community-label,
-html .community-label.hierarchy-community-label,
-html .community-label.all-community-label,
-html .community-label.focus-label {
+html .community-label,html .community-label.hierarchy-community-label,html .community-label.focus-label{
   color: #171a1d;
   font-weight: 550;
   letter-spacing: 0;
@@ -64,10 +61,7 @@ html .population-donut.selected-donut { outline: none; box-shadow: none; }
 html .population-donut.selected-donut svg { outline: 1.5px solid #222a30; outline-offset: 2px; border-radius: 50%; }
 html[data-theme=dark] .population-donut.selected-donut svg { outline-color: #f5f7fa; }
 html .orientation-label:before { box-shadow: none; background: #69527a; }
-html[data-theme=dark] .community-label,
-html[data-theme=dark] .community-label.hierarchy-community-label,
-html[data-theme=dark] .community-label.all-community-label,
-html[data-theme=dark] .community-label.focus-label {
+html[data-theme=dark] .community-label,html[data-theme=dark] .community-label.hierarchy-community-label,html[data-theme=dark] .community-label.focus-label{
   color: #f5f7fa;
 }
 html[data-theme=dark] .road-label { color: #f3f5f8; }

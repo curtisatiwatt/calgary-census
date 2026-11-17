@@ -72,7 +72,7 @@
   .sidebar .mobile-detail-handle:focus-visible,.sidebar .community-sheet-close:focus-visible{
     outline:3px solid var(--accent);outline-offset:-3px;
   }
-  body.map-focus .sidebar[data-sheet-snap]{display:none}
+  
 }
 @media(max-width:760px) and (prefers-reduced-motion:reduce){
   .sidebar[data-sheet-snap]:not([data-sheet-snap="closed"]){transition:none}

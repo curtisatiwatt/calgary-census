@@ -70,7 +70,7 @@
   #method-dialog .method-sources a{color:var(--accent);padding:6px 0}
 }
 
-#mobile-more-dialog #mobile-layers-slot #layers-button{padding:12px 14px;min-height:64px;gap:12px;border-bottom:1px solid var(--line)}
+
 
 /* Shared navigation: one menu model, with a right drawer on small screens. */
 #mobile-legend-dialog[open]{display:flex;flex-direction:column;overflow:hidden;width:min(440px,calc(100vw - 32px));max-height:85dvh;margin:auto;padding:0;border:1px solid var(--line);border-radius:18px;background:var(--paper);color:var(--ink)}
@@ -83,7 +83,7 @@
 #mobile-legend-dialog .map-key strong,#mobile-legend-dialog .legend-title strong{font-size:1rem;line-height:1.4;color:var(--ink)}
 #mobile-legend-dialog .map-key>p,#mobile-legend-dialog .legend-title>span,#mobile-legend-dialog .map-legend>p,#mobile-legend-dialog .ramp-ticks,#mobile-legend-dialog .population-bin-labels{font-size:.8125rem;line-height:1.5;color:var(--muted)}
 #mobile-legend-dialog .donut-key{display:flex;flex-wrap:wrap;font-size:.875rem;line-height:1.5;gap:10px 12px;color:var(--ink)}
-#mobile-legend-dialog .declutter-note{display:none}
+
 #mobile-legend-dialog .legend-title{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 #mobile-legend-dialog .income-ramp{height:12px}
 #mobile-legend-dialog .population-ramp{display:none}
