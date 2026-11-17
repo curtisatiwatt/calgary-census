@@ -126,6 +126,30 @@ test('search selects a community and records it in the URL', async ({ page }) =>
   await expect(page).toHaveURL(/#ASP$/);
 });
 
+test('the search list tracks its active option and closes when focus leaves', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'keyboard navigation is a desktop interaction');
+  await openMap(page);
+  const search = page.locator('#search');
+  await search.fill('a');
+  await search.press('ArrowDown');
+  await search.press('ArrowDown');
+  await expect(search).toHaveAttribute('aria-activedescendant', 'search-option-1');
+  // Typing rebuilds the list: the previously active option no longer exists.
+  await search.pressSequentially('s');
+  await expect(search).not.toHaveAttribute('aria-activedescendant', /.+/);
+  await expect(page.locator('.search-result[aria-selected="true"]')).toHaveCount(0);
+  // A mouse click on a result still works (focus stays in the box while it is pressed).
+  await page.locator('.search-result').first().click();
+  await expect(page.locator('#search-results')).toBeHidden();
+  await expect(page).toHaveURL(/#[A-Z0-9]+$/);
+  // Tabbing away closes the list; options are reached with the arrow keys, not Tab.
+  await search.fill('park');
+  await expect(page.locator('.search-result').first()).toBeVisible();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#search-results')).toBeHidden();
+  await expect(search).toHaveAttribute('aria-expanded', 'false');
+});
+
 test('groups, compare view and URL state work together', async ({ page, isMobile }) => {
   await openMap(page, 'ASP');
   await chooseTopFive(page, isMobile);

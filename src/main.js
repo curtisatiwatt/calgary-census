@@ -1306,6 +1306,8 @@ function renderSearch() {
   const query = $('search').value.trim();
   state.searchMatches = searchFeatures(state.features, query);
   state.activeSearch = -1;
+  // The list is rebuilt, so no option is active any more.
+  $('search').removeAttribute('aria-activedescendant');
   if (!query) return closeSearch();
   $('search-results').hidden = false;
   $('search').setAttribute('aria-expanded', 'true');
@@ -1313,7 +1315,7 @@ function renderSearch() {
     ? state.searchMatches
         .map((feature, i) => {
           const p = feature.properties;
-          return `<button class="search-result" id="search-option-${i}" role="option" aria-selected="false" data-code="${esc(p.code)}"><span><strong>${esc(p.name)}</strong><small>${esc(
+          return `<button class="search-result" id="search-option-${i}" role="option" tabindex="-1" aria-selected="false" data-code="${esc(p.code)}"><span><strong>${esc(p.name)}</strong><small>${esc(
             [p.sectorLabel, p.typeLabel]
               .filter(Boolean)
               .map(tag => t(tag))
@@ -1474,7 +1476,15 @@ function initializeControls() {
     const button = event.target.closest('[data-code]');
     if (button) chooseSearchResult(button.dataset.code);
   });
+  // Clicking a result must not take focus out of the box first (which would close the list).
+  $('search-results').addEventListener('mousedown', event => event.preventDefault());
+  // Tabbing away closes the list, like clicking elsewhere does.
+  document.querySelector('.search-wrap').addEventListener('focusout', event => {
+    if (!event.currentTarget.contains(event.relatedTarget)) closeSearch();
+  });
   $('search').addEventListener('keydown', event => {
+    // Enter and the arrows belong to the input method while it is composing (e.g. pinyin).
+    if (event.isComposing || event.keyCode === 229) return;
     if (event.key === 'Escape') {
       // Only leave the search box; the same press must not also close a panel or the selection.
       event.stopPropagation();
