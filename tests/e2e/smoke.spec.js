@@ -254,6 +254,21 @@ test('communities are reachable from the keyboard', async ({ page, isMobile }) =
   expect(focused).toBeTruthy();
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(new RegExp(`#${focused}$`));
+  await expect(stop).toHaveCount(1);
+});
+
+test('the comparison map keeps a single tab stop while moving between communities', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'keyboard navigation is a desktop interaction');
+  await openMap(page, '?view=compare&groups=chinese');
+  const stop = page.locator('#comparison-map path[data-community][tabindex="0"]');
+  await expect(stop).toHaveCount(1);
+  await stop.focus();
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowDown');
+  await expect(stop).toHaveCount(1);
+  await expect(stop).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(stop).toHaveCount(1);
 });
 
 test('CTrain stations share one tab stop and are reached with arrow keys', async ({ page, isMobile }) => {

@@ -468,7 +468,16 @@ function createMap(element, groupId = null) {
     maxZoom: 17,
     attributionControl: false,
   });
-  const context = { map, groupId, layers: new Map(), donuts: L.layerGroup(), labels: L.layerGroup(), donutCount: 0 };
+  const context = {
+    map,
+    groupId,
+    layers: new Map(),
+    donuts: L.layerGroup(),
+    labels: L.layerGroup(),
+    donutCount: 0,
+    // The community that currently holds this map's single tab stop.
+    focusCode: state.selected,
+  };
   context.tooltip = createMapTooltip({
     map,
     tooltip: L.tooltip({ className: 'community-tooltip', direction: 'top', opacity: 0.98 }),
@@ -509,7 +518,7 @@ function createMap(element, groupId = null) {
           path.setAttribute('aria-label', feature.properties.name);
           path.setAttribute('role', 'button');
           // Roving tab stop: one community per map is tabbable; arrows move between them.
-          path.setAttribute('tabindex', code === (context.focusCode ?? state.selected) ? '0' : '-1');
+          path.setAttribute('tabindex', code === context.focusCode ? '0' : '-1');
         });
         layer.on('click', () => {
           selectCommunity(code, false);
@@ -873,7 +882,7 @@ function selectCommunity(code, zoom = true, expand = true) {
 /** Keyboard focus returns to the map's community tab stop when its panel goes away. */
 function focusMapCommunity() {
   const context = activeContexts()[0];
-  const path = context?.layers.get(context.focusCode ?? state.selected)?.getElement();
+  const path = context?.layers.get(context.focusCode)?.getElement();
   (path || context?.map.getContainer())?.focus({ preventScroll: true });
 }
 
