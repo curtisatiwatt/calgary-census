@@ -144,6 +144,7 @@ function updateGroupSelection(ids, rerender = true) {
   state.selectedGroups = [...new Set(ids)].filter(id => state.groupById.has(id));
   state.compareStart = Math.min(state.compareStart, Math.max(0, state.selectedGroups.length - 1));
   $('group-count').textContent = state.selectedGroups.length;
+  mobileUI?.refresh();
   $('filter-count').textContent = t(`已选 ${state.selectedGroups.length} / ${state.groups.length}`);
   if (rerender) renderGroupList();
   refreshGroupControl();

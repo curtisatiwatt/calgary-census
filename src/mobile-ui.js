@@ -158,13 +158,8 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
   filters.addEventListener('cancel', event => { event.preventDefault(); closeFilters(); });
   const layoutObserver = new ResizeObserver(scheduleMeasure);
   for (const node of [header, sidebar, $('mobile-map-switcher')]) layoutObserver.observe(node);
-  const stateObserver = new MutationObserver(refresh);
-  stateObserver.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
-  stateObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-  stateObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
-  stateObserver.observe(document.querySelector('.map-workspace'), { attributes: true, attributeFilter: ['class'] });
-  for (const panel of [$('groups-panel'), $('layers-panel'), $('income-legend'), $('transit-legend')]) stateObserver.observe(panel, { attributes: true, attributeFilter: ['hidden'] });
-  stateObserver.observe($('group-count'), { childList: true, characterData: true, subtree: true });
+  // State changes are announced explicitly by main.js and the community sheet
+  // (refresh()); only layout size changes are observed.
   media.addEventListener('change', refresh);
   activeUI = { insets: readInsets };
   refresh();
