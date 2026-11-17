@@ -156,6 +156,8 @@ strong {
   border-radius: 7px;
   font-size: 13px;
   color: var(--ink);
+  /* A placeholder longer than a narrow box ends in an ellipsis instead of mid-letter. */
+  text-overflow: ellipsis;
 }
 .search-wrap input:focus {
   background: white;
