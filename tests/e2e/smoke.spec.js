@@ -349,6 +349,25 @@ test('nothing is highlighted until a community is chosen, and closing the detail
   else await expect(page.locator('#desktop-details-toggle')).toBeDisabled();
 });
 
+test('ring segments follow the legend order, whatever order the groups were ticked in', async ({ page, isMobile }) => {
+  await openMap(page);
+  await openMenu(page, isMobile);
+  await page.locator('#groups-button').click();
+  for (const id of ['filipino', 'chinese', 'south_asian']) await page.locator(`#group-${id}`).check();
+  await page.locator('#close-groups').click();
+  const ringColours = () =>
+    page
+      .locator('.population-donut svg')
+      .first()
+      .evaluate(svg => [...svg.querySelectorAll('circle[stroke]')].slice(0, 3).map(c => c.getAttribute('stroke')));
+  // South Asian, Chinese, Filipino: the order of the legend and of a reloaded link.
+  const expected = ['#518a7b', '#c29b4d', '#5c8eac'];
+  await expect.poll(ringColours).toEqual(expected);
+  await page.reload();
+  await expect(page.locator('#loading-overlay')).toBeHidden();
+  await expect.poll(ringColours).toEqual(expected);
+});
+
 test('desktop keeps a legend card; mobile opens it on demand', async ({ page, isMobile }) => {
   await openMap(page);
   await chooseTopFive(page, isMobile);

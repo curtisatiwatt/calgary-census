@@ -927,6 +927,8 @@ function updateDonuts() {
   context.donutCodes = new Set();
   const groups = selectedGroups();
   if (!groups.length) return;
+  // Segments follow the legend and detail order, not the order groups were ticked in.
+  const groupIds = groups.map(g => g.id);
   const map = context.map;
   const size = mobile() ? 28 : 32;
   const hitSize = mobile() ? 44 : size;
@@ -969,7 +971,7 @@ function updateDonuts() {
     )
       continue;
     if (occupied.some(other => point.distanceTo(other) < hitSize + 14) && p.code !== selected) continue;
-    const html = donutSvg(populationRecord(p.code), state.selectedGroups, state.colors, size);
+    const html = donutSvg(populationRecord(p.code), groupIds, state.colors, size);
     if (!html) continue;
     occupied.push(point);
     context.donutBoxes.push({
