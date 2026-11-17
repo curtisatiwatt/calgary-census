@@ -880,7 +880,9 @@ function selectCommunity(code, zoom = true, expand = true) {
   renderOverlays();
   renderComparisonHeadings();
   if (zoom) fitCommunity(code, false);
-  else if (expand && !mobile()) {
+  else if (expand) {
+    // Keep the chosen community clear of the details: the drawer on desktop, the
+    // half-height sheet on a phone. Nothing moves when it is already in the open.
     const centroid = state.byCode.get(code).properties.centroid;
     const context = activeContexts()[0];
     if (centroid && context)

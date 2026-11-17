@@ -384,6 +384,25 @@ test('desktop keeps a legend card; mobile opens it on demand', async ({ page, is
   }
 });
 
+test('a community tapped low on a phone stays visible above the details sheet', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'the bottom sheet only exists on small screens');
+  await openMap(page);
+  // Cranston sits in the lower half of the city view, where the half-height sheet opens.
+  const community = page.locator('#composition-map path[data-community="CRA"]');
+  const before = await community.boundingBox();
+  await page.touchscreen.tap(before.x + before.width / 2, before.y + before.height / 2);
+  await expect(page.locator('.sidebar')).toHaveAttribute('data-sheet-snap', 'half');
+  await expect(page).toHaveURL(/#CRA$/);
+  const sheetTop = (await page.locator('.sidebar').boundingBox()).y;
+  expect(before.y + before.height / 2).toBeGreaterThan(sheetTop);
+  await expect
+    .poll(async () => {
+      const box = await community.boundingBox();
+      return box.y + box.height / 2;
+    })
+    .toBeLessThan(sheetTop);
+});
+
 test('the mobile details sheet opens for a linked community', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'the bottom sheet only exists on small screens');
   await openMap(page, 'ASP');
