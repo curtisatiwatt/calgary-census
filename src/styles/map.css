@@ -971,14 +971,22 @@ html[data-theme='dark'] .loading-overlay {
   .comparison-map {
     inset: 0;
   }
-  /* Persistent, non-modal legend card at the map's bottom-left. */
+  /* Where the map begins on the left: after the rail, and after the details drawer when it is open. */
+  body {
+    --legend-left: calc(var(--desktop-rail-width) + 12px);
+  }
+  body.desktop-details-open {
+    --legend-left: calc(var(--desktop-rail-width) + var(--desktop-drawer-width) + 24px);
+  }
+  /* Persistent, non-modal legend card at the map's bottom-left. On a narrow
+     window it shrinks rather than reach the City and zoom buttons opposite. */
   #mobile-legend-dialog[open] {
     display: block;
     position: fixed;
-    inset: auto auto 28px calc(var(--desktop-rail-width) + 12px);
+    inset: auto auto 28px var(--legend-left);
     z-index: 900;
     width: 300px;
-    max-width: calc(100vw - var(--desktop-rail-width) - 150px);
+    max-width: calc(100vw - var(--legend-left) - 104px);
     max-height: calc(100dvh - 140px);
     margin: 0;
     padding: 10px 14px 14px;
@@ -988,9 +996,6 @@ html[data-theme='dark'] .loading-overlay {
     background: var(--desktop-surface);
     color: var(--desktop-text);
     box-shadow: var(--desktop-shadow);
-  }
-  body.desktop-details-open #mobile-legend-dialog[open] {
-    left: calc(var(--desktop-rail-width) + var(--desktop-drawer-width) + 24px);
   }
   #mobile-legend-dialog .dialog-nav {
     display: flex;

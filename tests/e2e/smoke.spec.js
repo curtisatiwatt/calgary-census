@@ -387,6 +387,35 @@ test('a chosen community is framed clear of the desktop legend card', async ({ p
   }
 });
 
+test('on a narrow desktop window the legend and the switcher stay clear of other controls', async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, 'this is about the desktop layout at tablet width');
+  await page.setViewportSize({ width: 768, height: 900 });
+  const overlap = async (first, second) => {
+    const a = await page.locator(first).boundingBox();
+    const b = await page.locator(second).boundingBox();
+    const x = Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x);
+    const y = Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y);
+    return x > 0 && y > 0;
+  };
+  // Details drawer, wide menu and a full legend at once: the tightest case.
+  await openMap(page, 'ASP?groups=south_asian,chinese,black,filipino,latin_american&income=1&layers=transit');
+  await page.locator('#desktop-menu-toggle').click();
+  await expect(page.locator('body')).toHaveClass(/desktop-menu-expanded/);
+  await expect(page.locator('#close-mobile-legend')).toBeInViewport({ ratio: 1 });
+  expect(await overlap('#mobile-legend-dialog', '.map-tools')).toBe(false);
+  await page.locator('#fit-city').click();
+
+  await page.locator('#distribution-tab').click();
+  await expect(page.locator('.comparison-pager')).toBeVisible();
+  expect(await overlap('.search-wrap', '.comparison-pager')).toBe(false);
+  await expect(page.locator('#next-groups')).toBeInViewport({ ratio: 1 });
+  await page.locator('#next-groups').click();
+  await expect(page.locator('#comparison-select option:checked')).toHaveText('Chinese');
+});
+
 test('desktop keeps a legend card; mobile opens it on demand', async ({ page, isMobile }) => {
   await openMap(page);
   await chooseTopFive(page, isMobile);
