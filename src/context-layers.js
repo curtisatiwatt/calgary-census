@@ -479,8 +479,11 @@ export function createContextLayers({ context, visible, onStationOpen, getLabelO
       stationLayers.forEach(({ marker, shared, properties }) => {
         marker.setRadius(detail ? (shared ? 4.7 : 3.8) : shared ? 3.1 : 2.4);
         const id = shared ? 'blue' : properties.lineIds?.[0] || 'green';
+        // Stations on the unfunded extensions stay muted, like the route they sit on.
+        const line = dark ? { red: '#ee7d87', blue: '#74b9e9', green: '#7bbf8c' }[id] : LINE_COLORS[id];
+        const future = dark ? '#668e70' : '#65a17b';
         marker.setStyle({
-          color: dark ? { red: '#ee7d87', blue: '#74b9e9', green: '#7bbf8c' }[id] : LINE_COLORS[id],
+          color: properties.funding === 'unfunded' ? future : line,
           fillColor: shared ? (dark ? '#a25c67' : '#efb3b6') : dark ? '#20343a' : '#fffef8',
         });
       });

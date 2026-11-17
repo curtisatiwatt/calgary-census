@@ -346,6 +346,27 @@ test('the comparison map keeps a single tab stop while moving between communitie
   await expect(stop).toHaveCount(1);
 });
 
+test('stations on unfunded Green Line extensions are drawn muted', async ({ page }) => {
+  await openMap(page, '?layers=transit');
+  await expect(page.locator('[data-station-id]').first()).toBeAttached();
+  const strokes = await page.evaluate(async () => {
+    const data = await (await fetch('./data/ctrain-green.geojson')).json();
+    const stations = data.features.filter(feature => feature.properties.kind === 'transit_station');
+    const colours = unfunded => [
+      ...new Set(
+        stations
+          .filter(feature => (feature.properties.funding === 'unfunded') === unfunded)
+          .map(feature =>
+            document.querySelector(`[data-station-id="${feature.properties.id}"]`).getAttribute('stroke'),
+          ),
+      ),
+    ];
+    return { unfunded: colours(true), funded: colours(false) };
+  });
+  expect(strokes.unfunded).toEqual(['#65a17b']);
+  expect(strokes.funded).toEqual(['#22834b']);
+});
+
 test('CTrain stations share one tab stop and are reached with arrow keys', async ({ page, isMobile }) => {
   test.skip(isMobile, 'keyboard navigation is a desktop interaction');
   await openMap(page, '?layers=transit');
