@@ -548,6 +548,19 @@ test('group search matches the label shown in the current language', async ({ pa
   await expect(page.locator('#group-list')).toHaveText('No matching group.');
 });
 
+test('the legend lists "Other groups" only while some group is unselected', async ({ page, isMobile }) => {
+  await openMap(page);
+  await openMenu(page, isMobile);
+  await page.locator('#groups-button').click();
+  await page.locator('#default-groups').click();
+  const key = page.locator('#donut-key');
+  await expect(key).toContainText('Other groups');
+  await page.locator('#all-groups').click();
+  await expect(page.locator('#group-count')).toHaveText('13');
+  await expect(key).not.toContainText('Other groups');
+  await expect(key).toContainText('Source-table discrepancy');
+});
+
 test('desktop keeps a legend card; mobile opens it on demand', async ({ page, isMobile }) => {
   await openMap(page);
   await chooseTopFive(page, isMobile);

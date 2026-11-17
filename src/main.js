@@ -294,10 +294,15 @@ function updateGroupSelection(ids, rerender = true) {
 function renderDonutKey() {
   const groups = selectedGroups();
   $('composition-key').hidden = !groups.length;
+  // "Other groups" is only a ring segment while some category is left unselected.
+  const other =
+    groups.length < state.groups.length
+      ? `<span><i style="background:${COMPOSITION_OTHER_COLOR}"></i>其余类别</span>`
+      : '';
   $('donut-key').innerHTML =
     groups.map(g => `<span><i style="background:${state.colors[g.id]}"></i>${esc(g.label)}</span>`).join('') +
     (groups.length
-      ? `<span><i style="background:${COMPOSITION_OTHER_COLOR}"></i>其余类别</span><span><i class="gap-swatch"></i>原表统计差额</span>`
+      ? `${other}<span><i class="gap-swatch"></i>原表统计差额</span>`
       : '<span>未选择人口群体 · 点击“人群”添加</span>');
   localize($('donut-key'));
 }
