@@ -328,9 +328,11 @@ test('no-data areas are hatched, names pick a readable ink and the legend shows 
 test('switching theme restyles the basemap straight away', async ({ page, isMobile }) => {
   await openMap(page);
   // Mean brightness of the road canvas: white roads in the light theme, grey-blue in the dark one.
+  // The road layer is fetched after the census map is usable, so its canvas may not exist yet.
   const roadBrightness = () =>
     page.evaluate(() => {
       const canvas = document.querySelector('#composition-map .leaflet-roads-pane canvas');
+      if (!canvas) return 0;
       const { data } = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
       let sum = 0;
       let count = 0;
