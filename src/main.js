@@ -879,7 +879,14 @@ function initializeControls() {
       event.preventDefault(); $('search').focus();
     }
   });
-  window.addEventListener('hashchange', () => { if (state.data) applyUrlState(readUrlState()); });
+  window.addEventListener('hashchange', () => {
+    if (!state.data) return;
+    const link = readUrlState();
+    // A bare #CODE (the original link format) only jumps to that community and
+    // keeps the current view; a link carrying view parameters restores all of it.
+    if (location.hash.includes('?')) applyUrlState(link);
+    else if (link.code && (!state.selectionActive || link.code !== state.selected)) selectCommunity(link.code);
+  });
   let resizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
