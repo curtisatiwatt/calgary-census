@@ -95,6 +95,29 @@ test('optional layers load on demand', async ({ page, isMobile }) => {
   expect(requested).toContain('ctrain-operating.geojson');
 });
 
+test('a layer that fails to load is named in a readable warning until it is switched off', async ({
+  page,
+  isMobile,
+}) => {
+  await page.route('**/ctrain-operating.geojson', route => route.fulfill({ status: 404, body: 'missing' }));
+  // The 404 is logged by the browser, so this test does not use openMap's error check.
+  await page.goto('./#?groups=chinese&layers=transit');
+  await expect(page.locator('#loading-overlay')).toBeHidden();
+  const warning = page.locator('#map-warning');
+  await expect(warning).toHaveText('CTrain lines & stations could not load. Community statistics are still available.');
+  // Nothing (the legend card in particular) lies on top of the message.
+  const covered = await warning.evaluate(node => {
+    const box = node.getBoundingClientRect();
+    let hidden = 0;
+    for (let x = box.left + 8; x < box.right - 8; x += 16)
+      if (document.elementFromPoint(x, box.top + box.height / 2) !== node) hidden++;
+    return hidden;
+  });
+  expect(covered).toBe(0);
+  await setLayer(page, isMobile, 'transit', false);
+  await expect(warning).toBeHidden();
+});
+
 test('search selects a community and records it in the URL', async ({ page }) => {
   await openMap(page);
   await page.locator('#search').fill('aspen');

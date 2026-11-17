@@ -635,14 +635,18 @@ function attachLayers() {
   }
   renderOverlays();
 }
+/** Names the layers that failed to load, as long as they are still switched on. */
 function renderLayerWarning() {
-  const failed = [...layerFailures].map(name => LAYER_NAMES[name]);
+  const wanted = { basemap: true, railways: state.roads, transit: state.transit, landmarks: state.landmarks };
+  const failed = [...layerFailures].filter(name => wanted[name]).map(name => t(LAYER_NAMES[name]));
+  const changed = $('map-warning').hidden !== !failed.length;
   $('map-warning').hidden = !failed.length;
+  // Map labels and rings keep clear of the banner, so place them again when it comes or goes.
+  if (changed) renderOverlays();
   if (!failed.length) return;
-  $('map-warning').textContent = t('warning.layers', {
-    layers: failed.map(label => t(label)).join(t('list.separator')),
-  });
-  localize($('map-warning'));
+  const sentence = t('warning.layers', { layers: failed.join(t('list.separator')) });
+  // The list opens the sentence, and some layer names are lower-case mid-sentence words.
+  $('map-warning').textContent = sentence.charAt(0).toUpperCase() + sentence.slice(1);
 }
 function ensureVisibleLayers() {
   ensureLayer('basemap');
@@ -742,7 +746,7 @@ function mapLabelObstacles(map) {
     const r = node.getBoundingClientRect();
     return { x: r.left - mapRect.left - 5, y: r.top - mapRect.top - 5, w: r.width + 10, h: r.height + 10 };
   };
-  const floating = ['.map-tools', '#mobile-legend-button'];
+  const floating = ['.map-tools', '#mobile-legend-button', '#map-warning'];
   let bands;
   if (mobile()) {
     const { top, bottom, left, right } = getMobileMapInsets();
@@ -863,6 +867,7 @@ function applyUrlState(link) {
   }
   updateLayerVisibility();
   ensureVisibleLayers();
+  renderLayerWarning();
   // Settle the groups and the compared one first, then draw the view once.
   setGroupSelection(link.groups);
   state.compareStart = Math.max(
@@ -1379,6 +1384,7 @@ function initializeControls() {
       state[layer] = event.target.checked;
       ensureVisibleLayers();
       updateLayerVisibility();
+      renderLayerWarning();
       writeUrlState();
     });
   $('groups-button').addEventListener('click', () => toggleGroups($('groups-panel').hidden));

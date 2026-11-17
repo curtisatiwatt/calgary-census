@@ -1058,13 +1058,13 @@ html[data-theme='dark'] .loading-overlay {
   .map-status {
     display: none;
   }
+  /* Under the search row, beside the details drawer: clear of the legend card,
+     which sits above everything in the bottom-left corner. */
   .map-warning {
-    left: calc(var(--desktop-rail-width) + 12px);
-    right: 80px;
-    bottom: 155px;
-  }
-  .desktop-details-open .map-warning {
-    left: calc(var(--desktop-rail-width) + var(--desktop-drawer-width) + 24px);
+    top: 76px;
+    right: 20px;
+    bottom: auto;
+    left: var(--legend-left);
   }
 }
 
