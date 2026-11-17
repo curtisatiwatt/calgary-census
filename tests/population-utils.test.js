@@ -50,7 +50,11 @@ test('under-reported categories leave an explicit gap instead of inflating known
   const all = compositionSegments(data, POPULATION_GROUP_IDS);
   assert.equal(all.some(segment => segment.id === 'other'), false);
   assert.deepEqual(all.at(-1), { id: 'statistical_gap', count: 40, share: 40 / 460 });
-  assert.match(donutSvg(data, ['chinese'], { chinese: '#C084FC' }), /stroke="#ffffff"/);
+  const svg = donutSvg(data, ['chinese'], { chinese: '#C084FC' });
+  // The gap is unfilled (no solid stroke) so it follows the light or dark ring background.
+  assert.doesNotMatch(svg, /stroke="#fff(?:fff)?"/i);
+  assert.match(svg, /class="donut-gap"[^>]*stroke-dasharray="1\.2 2\.2"/);
+  assert.equal((svg.match(/<circle cx="20" cy="20" r="14"/g) || []).length, 2);
 });
 
 test('missing categories cannot be quietly included as zero or as the remainder', () => {

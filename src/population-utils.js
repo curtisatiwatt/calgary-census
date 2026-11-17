@@ -16,8 +16,9 @@ export const POPULATION_BINS = Object.freeze([
 ]);
 
 export const POPULATION_NO_DATA_COLOR = '#d6dcd9';
-export const COMPOSITION_OTHER_COLOR = '#d2d8d5';
-export const COMPOSITION_GAP_COLOR = '#ffffff';
+// One grey for "other groups" in the ring, legend and detail bars; it must stay
+// visible on the white/dark ring background and on the detail bar track.
+export const COMPOSITION_OTHER_COLOR = '#bcc7bd';
 
 const validCount = value => typeof value === 'number' && Number.isFinite(value) && value >= 0;
 const validPopulation = record => typeof record?.population === 'number'
@@ -78,16 +79,18 @@ export function donutSvg(record, selectedIds, colorById = {}, size = 32) {
   let offset = 0;
   const circles = segments.map(segment => {
     const length = segment.share * 100;
-    const color = segment.id === 'other' ? COMPOSITION_OTHER_COLOR
-      : segment.id === 'statistical_gap' ? COMPOSITION_GAP_COLOR : safeColor(colorById[segment.id]);
-    let circle = `<circle cx="20" cy="20" r="14" fill="none" stroke="${color}" stroke-width="9" pathLength="100" stroke-dasharray="${length.toFixed(6)} ${(100 - length).toFixed(6)}" stroke-dashoffset="${(-offset).toFixed(6)}" transform="rotate(-90 20 20)"/>`;
+    let circle;
     if (segment.id === 'statistical_gap') {
-      // An unfilled, dashed arc is distinct from real unselected people (gray).
+      // Leave the arc genuinely unfilled so the ring background (light or dark)
+      // shows through; only a dotted guide marks the source-table discrepancy.
       const point = value => {
         const angle = value / 100 * 2 * Math.PI - Math.PI / 2;
         return `${(20 + 14 * Math.cos(angle)).toFixed(6)} ${(20 + 14 * Math.sin(angle)).toFixed(6)}`;
       };
-      circle += `<path d="M ${point(offset)} A 14 14 0 ${length > 50 ? 1 : 0} 1 ${point(offset + length)}" fill="none" stroke="#a6b4ac" stroke-width="1.4" stroke-dasharray="1.2 2.2"/>`;
+      circle = `<path class="donut-gap" d="M ${point(offset)} A 14 14 0 ${length > 50 ? 1 : 0} 1 ${point(offset + length)}" fill="none" stroke="#a6b4ac" stroke-width="1.4" stroke-dasharray="1.2 2.2"/>`;
+    } else {
+      const color = segment.id === 'other' ? COMPOSITION_OTHER_COLOR : safeColor(colorById[segment.id]);
+      circle = `<circle cx="20" cy="20" r="14" fill="none" stroke="${color}" stroke-width="9" pathLength="100" stroke-dasharray="${length.toFixed(6)} ${(100 - length).toFixed(6)}" stroke-dashoffset="${(-offset).toFixed(6)}" transform="rotate(-90 20 20)"/>`;
     }
     offset += length;
     return circle;

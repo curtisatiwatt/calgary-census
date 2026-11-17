@@ -81,3 +81,7 @@ html[data-theme=dark] .water-label > span,
 html[data-theme=dark] .station-label > span,
 html[data-theme=dark] .landmark-label > span,
 html[data-theme=dark] .orientation-label > span { background: transparent; }
+
+/* Source-table discrepancy swatch: unfilled, so it matches the ring in either theme. */
+.donut-key i.gap-swatch { background: transparent; border: 1px dotted #819080; box-sizing: border-box; }
+html[data-theme=dark] .donut-key i.gap-swatch { border-color: #a6b4ac; }

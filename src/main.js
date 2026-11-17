@@ -17,7 +17,7 @@ import { createMapTooltip } from './map-tooltip.js';
 import { createCommunityHighlight } from './community-highlight.js';
 import { createContextLayers } from './context-layers.js';
 import { INCOME_BINS, isNumber, colorFor, money, number, percent, searchFeatures, summarize, escapeHtml as esc, safeUrl, hashCode } from './map-utils.js';
-import { POPULATION_BINS, populationShare, populationColor, donutSvg } from './population-utils.js';
+import { POPULATION_BINS, COMPOSITION_OTHER_COLOR, populationShare, populationColor, donutSvg } from './population-utils.js';
 
 const $ = id => document.getElementById(id);
 const mobile = () => window.matchMedia('(max-width: 760px)').matches;
@@ -157,7 +157,7 @@ function updateGroupSelection(ids, rerender = true) {
 function renderDonutKey() {
   const groups = selectedGroups();
   $('composition-key').hidden = !groups.length;
-  $('donut-key').innerHTML = groups.map(g => `<span><i style="background:${state.colors[g.id]}"></i>${esc(g.label)}</span>`).join('') + (groups.length ? '<span><i style="background:#d5dbd5"></i>其余类别</span><span><i style="background:#fff;border:1px dotted #819080"></i>原表统计差额</span>' : '<span>未选择人口群体 · 点击“人群”添加</span>');
+  $('donut-key').innerHTML = groups.map(g => `<span><i style="background:${state.colors[g.id]}"></i>${esc(g.label)}</span>`).join('') + (groups.length ? `<span><i style="background:${COMPOSITION_OTHER_COLOR}"></i>其余类别</span><span><i class="gap-swatch"></i>原表统计差额</span>` : '<span>未选择人口群体 · 点击“人群”添加</span>');
   localize($('donut-key'));
 }
 
@@ -203,7 +203,7 @@ function renderDetail() {
     count: remainder.reduce((sum, g) => sum + record.counts[g.id], 0),
     share: remainder.reduce((sum, g) => sum + record.counts[g.id], 0) / record.population,
     city: remainder.reduce((sum, g) => sum + state.data.city.counts[g.id], 0) / state.data.city.population,
-    color: '#bcc7bd',
+    color: COMPOSITION_OTHER_COLOR,
   });
   $('composition-bars').innerHTML = rows.map(row => `<div class="composition-row" data-detail-group="${row.id}"><div class="bar-heading"><span>${esc(row.label)}</span><span><small>${number(row.count)} 人</small><strong>${percent(row.share)}</strong></span></div><div class="bar-track"><span class="bar-fill" style="width:${Math.min(100, Math.max(0, (row.share || 0) * 100))}%;background:${row.color}"></span><i class="city-reference" style="left:${Math.min(100, Math.max(0, (row.city || 0) * 100))}%" title="全市 ${percent(row.city)}"></i></div><span class="sr-only">全市占比 ${percent(row.city)}</span></div>`).join('');
   const sum = Object.values(record.counts).reduce((a, b) => a + b, 0);
