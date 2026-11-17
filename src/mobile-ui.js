@@ -10,7 +10,6 @@ addTranslations({
   '更多': 'More', '地图设置': 'Map menu', '关闭设置': 'Close menu',
   '图例': 'Legend', '关闭图例': 'Close legend', '查看详情': 'Details', '收起': 'Collapse',
   '语言': 'Language', '外观': 'Appearance',
-  '跟随系统': 'System default', '白天': 'Light', '夜间': 'Dark', '常用五类': 'Top five groups',
   '搜索 Calgary 社区': 'Search Calgary communities', '搜索 Edmonton 社区': 'Search Edmonton communities',
 });
 

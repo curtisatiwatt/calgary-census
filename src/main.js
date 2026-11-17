@@ -210,7 +210,12 @@ function renderDetail() {
   $('composition-bars').innerHTML = rows.map(row => `<div class="composition-row" data-detail-group="${row.id}"><div class="bar-heading"><span>${esc(row.label)}</span><span><small>${number(row.count)} 人</small><strong>${percent(row.share)}</strong></span></div><div class="bar-track"><span class="bar-fill" style="width:${Math.min(100, Math.max(0, (row.share || 0) * 100))}%;background:${row.color}"></span><i class="city-reference" style="left:${Math.min(100, Math.max(0, (row.city || 0) * 100))}%" title="全市 ${percent(row.city)}"></i></div><span class="sr-only">全市占比 ${percent(row.city)}</span></div>`).join('');
   const sum = Object.values(record.counts).reduce((a, b) => a + b, 0);
   const difference = Math.abs(sum - record.population);
-  $('composition-basis').textContent = t('占比按人数 ÷ 同表私人住户人口计算。灰色为未勾选类别，留白为原表统计差额。') + (difference > 35 || difference / record.population > 0.01 ? t(` 分类合计 ${number(sum)}，表内人口 ${number(record.population)}；原表存在差异，保留原数值。`) : t('原始人数经过统计取整。'));
+  const basis = [
+    t('占比按人数 ÷ 同表私人住户人口计算。灰色为未勾选类别，留白为原表统计差额。'),
+    difference > 35 || difference / record.population > 0.01 ? t(` 分类合计 ${number(sum)}，表内人口 ${number(record.population)}；原表存在差异，保留原数值。`) : t('原始人数经过统计取整。'),
+  ];
+  // Chinese sentences run together; English ones need a space after the full stop.
+  $('composition-basis').textContent = basis.map(part => part.trim()).join(currentLanguage() === 'en' ? ' ' : '');
   localize(sidebar);
 }
 

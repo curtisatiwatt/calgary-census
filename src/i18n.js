@@ -54,7 +54,7 @@ const translations = {
   '人口视图采用市府社区档案的 13 个 Visible Minority（Racialized Population）互斥分类，初始不选人口群体，可自行选择一个或多个人口群体。非可见少数族裔为普查分类，包含原住民等人口，不可视作白人或欧洲裔。': 'The population view uses the 13 mutually exclusive visible-minority (racialized-population) categories from city community profiles. No population groups are selected initially; choose one or several groups to explore. “Not a visible minority” is a census category that includes Indigenous people and cannot be treated as White or European.',
   '人口视图采用市府 2021 年普查定制汇总的 13 个 Visible Minority（Racialized Population）互斥分类，初始不选人口群体，可自行选择一个或多个人口群体。非可见少数族裔为普查分类，包含原住民等人口，不可视作白人或欧洲裔。': 'The population view uses the 13 mutually exclusive visible-minority (racialized-population) categories from the city’s custom 2021 Census tabulation. No population groups are selected initially; choose one or several groups to explore. “Not a visible minority” is a census category that includes Indigenous people and cannot be treated as White or European.',
 
-  '跟随系统': 'Use device setting', '白天': 'Light', '夜间': 'Dark', '选择语言': 'Choose language', '选择外观': 'Choose appearance',
+  '跟随系统': 'System default', '白天': 'Light', '夜间': 'Dark', '选择语言': 'Choose language', '选择外观': 'Choose appearance',
   'theme.toDark': 'Switch to dark mode', 'theme.toLight': 'Switch to light mode',
   '社区观察': 'Community Atlas',
   'Calgary 社区观察 · 人口构成与分布': 'Calgary Community Atlas · Population & neighbourhoods',
@@ -136,7 +136,14 @@ const translations = {
   '远期站点；与现阶段线路的连接尚未确定，建设资金尚未落实。': 'Future station; its connection to the current phase remains undetermined and construction funding is not secured.',
 };
 const chineseKeys = { 'theme.toDark': '切换至夜间模式', 'theme.toLight': '切换至白天模式' };
-export function addTranslations(entries) { Object.assign(translations, entries); }
+/** Keys whose English text was registered twice with different wording (should stay empty). */
+export const translationConflicts = [];
+export function addTranslations(entries) {
+  for (const [key, value] of Object.entries(entries)) {
+    if (key in translations && translations[key] !== value) translationConflicts.push({ key, before: translations[key], after: value });
+    translations[key] = value;
+  }
+}
 const patterns = [];
 export function addTranslationPatterns(entries) { patterns.push(...entries); }
 export function translate(value, lang = language) {
@@ -251,7 +258,6 @@ addTranslations({
 addTranslationPatterns([
   [/^无法载入 (.+)（(\d+)）$/, 'Could not load $1 ($2)'],
   [/^(.+) ([\d.]+%|暂无数据)$/, (_, group, value) => `${translate(group, 'en')} ${translate(value, 'en')}`],
-  [/^(.+) 人 · 全市 (.+)$/, (_, count, share) => `${translate(count, 'en')} people · City ${translate(share, 'en')}`],
   [/^(.+) · (.+) · (运营中|建设中 · 未运营|规划中 · 未运营)$/, (_, name, line, status) => `${name} · ${line} · ${translate(status, 'en')}`],
   [/^(一期东南段|一期市中心段|远期北延线|远期南延线) · 远期规划 \/ 未获建设资金$/, (_, phase) => `${translate(phase, 'en')} · Future plan / construction funding not secured`],
 ]);

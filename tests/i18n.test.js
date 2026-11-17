@@ -1,7 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { translate, setLanguage, currentLanguage, t } from '../src/i18n.js';
+import { translate, setLanguage, currentLanguage, t, translationConflicts } from '../src/i18n.js';
+import '../src/mobile-ui.js';
+import '../src/desktop-ui.js';
+import '../src/community-sheet.js';
 
 const read = name => JSON.parse(readFileSync(new URL(`../public/data/${name}`, import.meta.url)));
 const hasHan = value => /[\u3400-\u9fff]/u.test(value);
@@ -46,4 +49,8 @@ test('missing data and published zeros keep distinct translated meanings', () =>
   assert.equal(translate('暂无数据', 'en'), 'No data');
   assert.equal(translate('暂无数据，不是 0%', 'en'), 'No data, not 0%');
   assert.equal(translate('无法载入 communities.geojson（404）', 'en'), 'Could not load communities.geojson (404)');
+});
+
+test('modules never register conflicting English text for the same source string', () => {
+  assert.deepEqual(translationConflicts, []);
 });
