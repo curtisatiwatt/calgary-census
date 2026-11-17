@@ -11,23 +11,16 @@ async function withBrowser(options, check) {
   const events = [];
   const windowListeners = new Map();
   const mediaListeners = new Set();
-  const buttonListeners = new Map();
   const selectListeners = new Map();
   const select = { value: '', addEventListener: (type, listener) => selectListeners.set(type, listener) };
-  const attributes = new Map();
   const meta = new Map();
-  const button = {
-    innerHTML: '',
-    setAttribute: (key, value) => attributes.set(key, value),
-    addEventListener: (type, listener) => buttonListeners.set(type, listener),
-  };
   const media = {
     matches: Boolean(options.systemDark),
     addEventListener(type, listener) { if (type === 'change') mediaListeners.add(listener); },
   };
   const document = {
     documentElement: { dataset: {}, style: {} },
-    getElementById: id => id === 'theme-toggle' ? button : id === 'theme-preference' ? select : null,
+    getElementById: id => id === 'theme-preference' ? select : null,
     querySelector: selector => selector === 'meta[name="theme-color"]' ? { setAttribute: (key, value) => meta.set(key, value) } : null,
   };
   const window = {
@@ -60,9 +53,8 @@ async function withBrowser(options, check) {
   try {
     const theme = await import(`../src/theme.js?theme-test=${++moduleId}`);
     await check({
-      theme, document, saved, writes, events, attributes, meta, select,
+      theme, document, saved, writes, events, meta, select,
       choose: value => selectListeners.get('change')({ target: { value } }),
-      click: () => buttonListeners.get('click')(),
       changeSystem(dark) { media.matches = dark; mediaListeners.forEach(listener => listener({ matches: dark })); },
       receivePreference(value) {
         if (value === null) saved.delete(storageKey); else saved.set(storageKey, value);
@@ -91,14 +83,13 @@ test('first visit follows system changes without saving an unsolicited override'
   });
 });
 
-test('a manual toggle persists and stays in control when the system theme changes', async () => {
+test('a manual choice persists and stays in control when the system theme changes', async () => {
   let remembered;
-  await withBrowser({ systemDark: false }, ({ theme, click, changeSystem, saved, attributes }) => {
+  await withBrowser({ systemDark: false }, ({ theme, choose, changeSystem, saved, select }) => {
     theme.initTheme();
-    click();
+    choose('dark');
     assert.equal(theme.getTheme(), 'dark');
-    assert.equal(attributes.get('aria-pressed'), 'true');
-    assert.ok(attributes.get('aria-label'));
+    assert.equal(select.value, 'dark');
     remembered = saved.get(storageKey);
     assert.equal(remembered, 'dark');
     changeSystem(true);
@@ -127,10 +118,10 @@ test('saved light mode overrides a dark system and invalid saved values fall bac
 });
 
 test('blocked storage still allows system defaults and an in-session manual choice', async () => {
-  await withBrowser({ blockedStorage: true, systemDark: true }, ({ theme, click, changeSystem, meta }) => {
+  await withBrowser({ blockedStorage: true, systemDark: true }, ({ theme, choose, changeSystem, meta }) => {
     assert.doesNotThrow(() => theme.initTheme());
     assert.equal(theme.getTheme(), 'dark');
-    assert.doesNotThrow(click);
+    assert.doesNotThrow(() => choose('light'));
     assert.equal(theme.getTheme(), 'light');
     assert.equal(meta.get('content'), '#fbfcf9');
     changeSystem(false);

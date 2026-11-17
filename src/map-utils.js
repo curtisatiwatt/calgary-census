@@ -18,12 +18,6 @@ export const percent = value => isNumber(value)
   ? `${(value * 100).toLocaleString('zh-CN', { maximumFractionDigits: 1 })}%`
   : '暂无数据';
 
-/** A fixed scale within each mode: circle AREA, not radius, represents the value. */
-export function bubbleRadius(value, maximum, mobile = false) {
-  if (!isNumber(value) || value <= 0 || !isNumber(maximum) || maximum <= 0) return 0;
-  return Math.sqrt(value / maximum) * 24 * (mobile ? 0.7 : 1);
-}
-
 export function normalize(value) {
   return String(value ?? '').normalize('NFKD').toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]/g, '');
 }
@@ -51,9 +45,6 @@ export function summarize(features) {
   return {
     total: features.length,
     income: incomes.length,
-    chinese: features.filter(f => isNumber(f.properties.chineseCount)).length,
-    maxCount: Math.max(1, ...features.map(f => f.properties.chineseCount || 0)),
-    maxPercent: Math.max(0.01, ...features.map(f => f.properties.chinesePct || 0)),
   };
 }
 

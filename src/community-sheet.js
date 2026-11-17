@@ -56,7 +56,7 @@ export function initCommunitySheet({ onChange = () => {}, onClose = () => {} } =
   let heights = sheetHeights(window.innerHeight, 150);
   let refreshFrame = 0;
   const viewportHeight = () => Math.min(window.innerHeight, window.visualViewport?.height || window.innerHeight);
-  const isVisible = () => mobile.matches && snap !== 'closed' && !document.body.classList.contains('map-focus');
+  const isVisible = () => mobile.matches && snap !== 'closed';
 
   function measure() {
     // The header remains natural height even when the body is clipped or scrolled.

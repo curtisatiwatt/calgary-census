@@ -18,7 +18,6 @@ test('switching language preserves numeric content and returns original Chinese'
   assert.equal(t('暂无数据'), 'No data');
   setLanguage('zh');
   assert.equal(t(source), source);
-  assert.equal(t('theme.toDark'), '切换至夜间模式');
   assert.equal(translate('Panorama Hills', 'en'), 'Panorama Hills');
 });
 

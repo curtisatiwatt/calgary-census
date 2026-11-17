@@ -554,7 +554,7 @@ function updateDonuts() {
   context.donutBoxes = [];
   context.donutCodes = new Set();
   const groups = selectedGroups();
-  if (!groups.length) { $('donut-status').textContent = t('未选人口群体，暂不显示构成圆'); return; }
+  if (!groups.length) return;
   const map = context.map;
   const size = mobile() ? 28 : 32;
   const hitSize = mobile() ? 44 : size;
@@ -587,7 +587,6 @@ function updateDonuts() {
     shown++;
   }
   context.donutCount = shown;
-  $('donut-status').textContent = t(`当前显示 ${shown} 个构成圈 · 放大可查看更多`);
 }
 
 function updateLabels(context) {

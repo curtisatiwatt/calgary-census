@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { colorFor, bubbleRadius, searchFeatures, hashCode, summarize, safeUrl, parseHashState, buildHashState } from '../src/map-utils.js';
+import { colorFor, searchFeatures, hashCode, summarize, safeUrl, parseHashState, buildHashState } from '../src/map-utils.js';
 
 test('income boundaries stay separate from unavailable values', () => {
   assert.equal(colorFor(null), '#d6dcd9');
@@ -12,19 +12,9 @@ test('income boundaries stay separate from unavailable values', () => {
   assert.equal(colorFor(200000), '#b83f42');
 });
 
-test('circle areas preserve population ratios in desktop and mobile modes', () => {
-  for (const mobile of [false, true]) {
-    const small = bubbleRadius(500, 4000, mobile);
-    const large = bubbleRadius(2000, 4000, mobile);
-    assert.ok(Math.abs(large ** 2 / small ** 2 - 4) < 1e-10);
-    assert.equal(bubbleRadius(0, 4000, mobile), 0);
-    assert.equal(bubbleRadius(null, 4000, mobile), 0);
-  }
-});
-
 const features = [
-  { properties: { code: 'ASP', name: 'Aspen Woods', income: 182000, chineseCount: 0, chinesePct: 0 } },
-  { properties: { code: 'TEST', name: 'Château Test', aliases: ['Former Name'], income: null, chineseCount: null, chinesePct: null } },
+  { properties: { code: 'ASP', name: 'Aspen Woods', income: 182000 } },
+  { properties: { code: 'TEST', name: 'Château Test', aliases: ['Former Name'], income: null } },
 ];
 
 test('search supports names, diacritics, renamed neighbourhoods and exact codes', () => {
@@ -35,8 +25,7 @@ test('search supports names, diacritics, renamed neighbourhoods and exact codes'
   assert.deepEqual(searchFeatures(features, ''), []);
 });
 
-test('coverage counts published zero as data; invalid deep links do not crash the app', () => {
-  assert.equal(summarize(features).chinese, 1);
+test('coverage counts only published income values; invalid deep links do not crash the app', () => {
   assert.equal(summarize(features).income, 1);
   assert.equal(hashCode('#ASP', features), 'ASP');
   assert.equal(hashCode('#%E0%A4%A', features), null);

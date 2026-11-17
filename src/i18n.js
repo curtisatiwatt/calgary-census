@@ -55,7 +55,6 @@ const translations = {
   '人口视图采用市府 2021 年普查定制汇总的 13 个 Visible Minority（Racialized Population）互斥分类，初始不选人口群体，可自行选择一个或多个人口群体。非可见少数族裔为普查分类，包含原住民等人口，不可视作白人或欧洲裔。': 'The population view uses the 13 mutually exclusive visible-minority (racialized-population) categories from the city’s custom 2021 Census tabulation. No population groups are selected initially; choose one or several groups to explore. “Not a visible minority” is a census category that includes Indigenous people and cannot be treated as White or European.',
 
   '跟随系统': 'System default', '白天': 'Light', '夜间': 'Dark', '选择语言': 'Choose language', '选择外观': 'Choose appearance',
-  'theme.toDark': 'Switch to dark mode', 'theme.toLight': 'Switch to light mode',
   '社区观察': 'Community Atlas',
   'Calgary 社区观察 · 人口构成与分布': 'Calgary Community Atlas · Population & neighbourhoods',
   'Calgary 社区观察首页': 'Calgary Community Atlas home',
@@ -81,7 +80,7 @@ const translations = {
   '查看官方社区档案 ↗': 'Official community profile ↗',
   '卡尔加里互动社区地图': 'Interactive Calgary community map', '社区构成地图，可拖动缩放，也可以搜索选择社区': 'Composition map: pan, zoom or search to choose a community',
   '正在加载社区边界…': 'Loading community boundaries…', '每个圆代表一个社区': 'One ring per community', '扇区为占比 · 灰色为未选类别': 'Slices show shares · grey shows unselected groups',
-  '放大地图可查看更多社区': 'Zoom in for more communities', '家庭年收入中位数': 'Median household income',
+  '家庭年收入中位数': 'Median household income',
   '低于 6 万': 'Under $60k', '9.8 万': '$98k', '20 万以上': '$200k+', '无数据 · 税前 CAD · 2020': 'No data · before-tax CAD · 2020',
   '同一色阶，比较集中程度': 'Compare with one colour scale', '拖动与缩放同步 · 颜色表示社区内占比': 'Pan and zoom together · colour shows local share',
   '上一组人口地图': 'Previous population maps', '当前比较的人口群体': 'Population group currently compared', '下一组人口地图': 'Next population maps',
@@ -89,7 +88,6 @@ const translations = {
   '占社区人口比例': 'Share of community population', '所有地图使用相同色阶': 'Same scale on every map', '暂无数据，不是 0%': 'No data, not 0%',
   'CTrain 线路图例': 'CTrain line legend', 'Green · 未运营': 'Green · not in service', '远期规划': 'Future plan',
   '查看整个卡尔加里': 'View all Calgary', '全市 ⤢': 'City ⤢', '放大地图': 'Zoom in', '缩小地图': 'Zoom out',
-  '专注地图': 'Focus map', '退出专注': 'Exit focus',
   '正在展开 Calgary': 'Opening Calgary', '读取官方社区边界与人口资料': 'Loading official boundaries and population data',
   '关闭数据说明': 'Close data guide', '这张地图怎样读？': 'How to read this map', '社区构成 / 分布对比': 'Composition / Compare',
   '“社区构成”用一个等大的圆展示一个社区，彩色扇区对应勾选类别，灰色是其余类别。圆的大小不代表人口多少；全市视角会避开重叠，放大可看到更多社区，未显示圆的社区仍可点击。“分布对比”用底色表示各类别在社区人口中的占比，所有地图共用固定色阶和地图位置。': 'Composition uses an equal-size ring for each community. Coloured slices show selected groups; grey shows the rest. Ring size does not represent population. Rings avoid overlap at city scale; zoom in to reveal more, or select a boundary without a ring. Compare shades each community by its local group share, with a fixed shared scale and synchronized map positions.',
@@ -115,7 +113,7 @@ const translations = {
   '占比按人数 ÷ 同表私人住户人口计算。灰色为未勾选类别，留白为原表统计差额。': 'Shares are counts divided by private-household population in the same table. Grey shows unselected groups; the unfilled segment shows the source-table discrepancy.',
   '原始人数经过统计取整。': 'Source counts are statistically rounded.',
   '点击固定社区，查看完整构成': 'Select to pin this community and see its full composition', '家庭收入': 'Household income', '人口': 'Population',
-  '人口分类暂无数据': 'Population groups unavailable', '点击查看社区详情': 'Select for community details', '未选人口群体，暂不显示构成圆': 'No groups selected; composition rings are hidden',
+  '人口分类暂无数据': 'Population groups unavailable', '点击查看社区详情': 'Select for community details',
   '没有找到社区，可输入英文名或社区代码。': 'No community found. Try its name or community code.',
   '地图暂时无法载入': 'The map could not load', '重新载入': 'Reload', '数据载入失败': 'Data failed to load',
   '道路与河流': 'roads and water', '运营 CTrain': 'operating CTrain', '铁路与地理地标': 'railways and landmarks',
@@ -135,7 +133,6 @@ const translations = {
   '远期南延线，建设资金尚未落实；线位与站点可能调整。': 'Future south extension; construction funding is not secured and the alignment and stations may change.',
   '远期站点；与现阶段线路的连接尚未确定，建设资金尚未落实。': 'Future station; its connection to the current phase remains undetermined and construction funding is not secured.',
 };
-const chineseKeys = { 'theme.toDark': '切换至夜间模式', 'theme.toLight': '切换至白天模式' };
 /** Keys whose English text was registered twice with different wording (should stay empty). */
 export const translationConflicts = [];
 export function addTranslations(entries) {
@@ -148,7 +145,7 @@ const patterns = [];
 export function addTranslationPatterns(entries) { patterns.push(...entries); }
 export function translate(value, lang = language) {
   const text = String(value ?? '');
-  if (lang !== 'en') return chineseKeys[text] || text;
+  if (lang !== 'en') return text;
   const exact = translations[text];
   if (exact !== undefined) return exact;
   const trimmed = text.trim();
@@ -188,13 +185,6 @@ export function applyStaticTranslations(root = document) {
       originalAttributes.set(node, records);
     }
   } while ((node = walker.nextNode()));
-  const languageButton = document.getElementById('language-toggle');
-  if (languageButton && root === document) {
-    languageButton.textContent = language === 'zh' ? 'EN' : '中文';
-    languageButton.setAttribute('aria-label', language === 'zh' ? 'Switch to English' : '切换为中文');
-    languageButton.title = language === 'zh' ? 'Switch to English' : '切换为中文';
-    languageButton.setAttribute('lang', language === 'zh' ? 'en' : 'zh-CN');
-  }
 }
 export function localizeHtml(html) {
   if (language !== 'en' || typeof document === 'undefined') return html;
@@ -221,7 +211,6 @@ addTranslationPatterns([
   [/^已选择 (.+)。人口构成已更新。$/, '$1 selected. Population composition updated.'],
   [/^(.+) 人口构成$/, '$1 population composition'],
   [/^(.+)，点击查看人口构成$/, '$1: select to view population composition'],
-  [/^当前显示 (\d+) 个构成圈 · 放大可查看更多$/, '$1 rings visible · zoom in for more'],
   [/^(.+)在 Calgary 各社区的占比地图$/, (_, group) => `${translate(group, 'en')} share by Calgary community`],
   [/^(.+)暂未载入，社区统计仍可使用。$/, (_, parts) => `${parts.split('、').map(p => translate(p, 'en')).join(', ')} could not load. Community statistics are still available.`],
   [/^低于 \$(.+)$/, 'Under $$$1'], [/^\$(.+) 及以上$/, '$$$1 and above'], [/^40% 及以上$/, '40% and above'],
