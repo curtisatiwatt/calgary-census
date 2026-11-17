@@ -128,6 +128,30 @@ test('groups, compare view and URL state work together', async ({ page, isMobile
   await expect(copy.locator('#community-name')).toHaveText('Aspen Woods');
 });
 
+test('both views share one camera, also when the comparison map is shown again', async ({ page, isMobile }) => {
+  await openMap(page, '?groups=chinese');
+  // Create the comparison map at the city view, then go back and zoom to a community.
+  await switchView(page, isMobile, 'distribution');
+  await switchView(page, isMobile, 'composition');
+  await page.locator('#search').fill('beltline');
+  await page.locator('#search').press('Enter');
+  await expect(page).toHaveURL(/#BLN/);
+  const place = () => page.locator('.map-view:not([hidden]) path[data-community="BLN"]').boundingBox();
+  const zoomed = await place();
+  expect(zoomed.width).toBeGreaterThan(100);
+  // Leaflet rounds each map's origin to whole pixels, so allow a pixel either way.
+  const drift = async () => {
+    const box = await place();
+    return box
+      ? Math.abs(box.x - zoomed.x) + Math.abs(box.y - zoomed.y) + Math.abs(box.width - zoomed.width)
+      : Infinity;
+  };
+  await switchView(page, isMobile, 'distribution');
+  await expect.poll(drift).toBeLessThan(4);
+  await switchView(page, isMobile, 'composition');
+  await expect.poll(drift).toBeLessThan(4);
+});
+
 test('links keep every layer toggle, and a link without a community deselects', async ({ page }) => {
   await openMap(page, 'ASP?groups=chinese&hide=roads,labels');
   await expect(page.locator('#roads-toggle')).not.toBeChecked();

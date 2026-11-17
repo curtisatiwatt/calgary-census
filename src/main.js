@@ -1144,7 +1144,7 @@ function destroyComparisonMap() {
  * One comparison map is reused for every group: switching groups only changes
  * its groupId and restyles the existing paths instead of rebuilding Leaflet.
  */
-function rebuildComparison({ preserveView = true } = {}) {
+function rebuildComparison() {
   cancelAnimationFrame(syncFrame);
   syncFrame = null;
   closeTooltips();
@@ -1185,18 +1185,17 @@ function rebuildComparison({ preserveView = true } = {}) {
   }
   renderComparisonHeadings();
   writeUrlState();
-  // The map may have been hidden (composition view) or just created: settle its size.
+  // The map may have been hidden (composition view) or just created: settle its
+  // size, then give it the shared camera. A reused map still holds the position it
+  // had when it was last shown; reading that back would undo any pan or zoom made
+  // in the composition view since.
   requestAnimationFrame(() => {
-    if (preserveView && state.view) {
-      resizeMapsKeepingView();
-      return;
-    }
+    syncing = true;
     context.map.invalidateSize({ pan: false });
+    if (state.view) context.map.setView(state.view.center, state.view.zoom, { animate: false });
+    syncing = false;
     if (state.wholeCity || !state.view) fitCity();
-    else {
-      refreshStyles();
-      updateLabels(context);
-    }
+    else renderOverlays([context]);
   });
 }
 
