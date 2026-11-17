@@ -83,6 +83,13 @@ function localize(...roots) {
   roots.filter(Boolean).forEach(root => applyStaticTranslations(root));
 }
 
+/**
+ * The community drawn as selected. Until the user picks one, state.selected only
+ * seeds the (hidden) detail panel and the keyboard tab stop, so nothing is highlighted.
+ */
+function activeCode() {
+  return state.selectionActive ? state.selected : null;
+}
 function selectedGroups() {
   return state.groups.filter(g => state.selectedGroups.includes(g.id));
 }
@@ -387,7 +394,7 @@ function styleFor(context, feature) {
 function refreshStyles() {
   for (const context of state.contexts) {
     for (const layer of context.layers.values()) layer.setStyle(styleFor(context, layer.feature));
-    context.highlights?.setSelected(state.selectionActive ? state.selected : null);
+    context.highlights?.setSelected(activeCode());
     context.highlights?.refresh();
   }
 }
@@ -454,7 +461,7 @@ function createMap(element, groupId = null) {
     isDark: isDarkTheme,
     hoverEnabled: () => !mobile() && window.matchMedia('(any-hover: hover)').matches,
   });
-  context.highlights.setSelected(state.selectionActive ? state.selected : null);
+  context.highlights.setSelected(activeCode());
   context.donuts.addTo(map);
   context.labels.addTo(map);
   context.boundaries = L.geoJSON(
@@ -507,6 +514,12 @@ function createMap(element, groupId = null) {
     renderComparisonBasemap(context);
   }
   state.contexts.push(context);
+  map.on('popupopen', () => {
+    context.popupOpen = true;
+  });
+  map.on('popupclose', () => {
+    context.popupOpen = false;
+  });
   map.on('movestart zoomstart', () => {
     context.tooltip.close();
     if (!syncing) closeTooltips(false);
@@ -809,9 +822,9 @@ function selectCommunity(code, zoom = true, expand = true) {
   if (expand) state.selectionActive = true;
   renderDetail();
   if (expand) {
-    desktopUI?.setSelection();
-    if (mobile()) communitySheet.open('half');
-    else desktopUI?.openDetails();
+    // Both layouts record the open panel, so crossing the breakpoint keeps it open.
+    communitySheet.open('half');
+    desktopUI?.openDetails();
   } else communitySheet?.refresh();
   refreshStyles();
   for (const context of state.contexts) setRovingCommunity(context, code);
@@ -826,6 +839,28 @@ function selectCommunity(code, zoom = true, expand = true) {
   }
   if (expand) $('announcer').textContent = t('announce.selected', { name: state.byCode.get(code).properties.name });
   if (expand) writeUrlState();
+}
+
+/** Keyboard focus returns to the map's community tab stop when its panel goes away. */
+function focusMapCommunity() {
+  const context = activeContexts()[0];
+  const path = context?.layers.get(context.focusCode ?? state.selected)?.getElement();
+  (path || context?.map.getContainer())?.focus({ preventScroll: true });
+}
+
+/** Closing the details (X, Escape, or a link without a community) returns to "nothing selected". */
+function clearSelection() {
+  if (!state.selectionActive) return;
+  const hadFocus = sidebar.contains(document.activeElement);
+  state.selectionActive = false;
+  closeTooltips();
+  if (communitySheet.getState() !== 'closed') communitySheet.setSnap('closed');
+  desktopUI?.clearSelection();
+  refreshStyles();
+  renderOverlays();
+  if (hadFocus) focusMapCommunity();
+  $('announcer').textContent = t('announce.cleared');
+  writeUrlState();
 }
 
 /** Rings claim their space first so every map label can avoid them. */
@@ -848,6 +883,7 @@ function updateDonuts() {
   const hitSize = mobile() ? 44 : size;
   const obstacles = mapLabelObstacles(map);
   const occupied = [];
+  const selected = activeCode();
   const candidates = state.features
     .filter(
       f =>
@@ -855,9 +891,9 @@ function updateDonuts() {
         map.getBounds().contains([f.properties.centroid[1], f.properties.centroid[0]]),
     )
     .sort((a, b) =>
-      a.properties.code === state.selected
+      a.properties.code === selected
         ? -1
-        : b.properties.code === state.selected
+        : b.properties.code === selected
           ? 1
           : (populationRecord(b.properties.code)?.population || 0) -
             (populationRecord(a.properties.code)?.population || 0),
@@ -883,7 +919,7 @@ function updateDonuts() {
       )
     )
       continue;
-    if (occupied.some(other => point.distanceTo(other) < hitSize + 14) && p.code !== state.selected) continue;
+    if (occupied.some(other => point.distanceTo(other) < hitSize + 14) && p.code !== selected) continue;
     const html = donutSvg(populationRecord(p.code), state.selectedGroups, state.colors, size);
     if (!html) continue;
     occupied.push(point);
@@ -898,7 +934,7 @@ function updateDonuts() {
     context.donutCodes.add(p.code);
     const marker = L.marker([p.centroid[1], p.centroid[0]], {
       icon: L.divIcon({
-        className: `population-donut${p.code === state.selected ? ' selected-donut' : ''}`,
+        className: `population-donut${p.code === selected ? ' selected-donut' : ''}`,
         html,
         iconSize: [hitSize, hitSize],
         iconAnchor: [hitSize / 2, hitSize / 2],
@@ -951,12 +987,13 @@ function updateLabels(context) {
     Math.min(Math.round(tier.cap / density), Math.floor((viewport.x * viewport.y) / (tier.pixels * density))),
   );
   const fontSize = (zoom < 12 ? 12 : 13) * textScale;
+  const selected = activeCode();
   const candidates = state.features
     .filter(feature => {
       const p = feature.properties;
       if (!map.getBounds().contains([p.centroid[1], p.centroid[0]])) return false;
       if (!comparison && state.landmarks && (p.code === 'CIA' || p.type === 'Major Park')) return false;
-      if (p.code === state.selected) return true;
+      if (p.code === selected) return true;
       if (/^\d/.test(p.name)) return false;
       if (zoom < 12.5 && (!isNumber(p.population) || p.population < tier.minPopulation)) return false;
       return zoom >= 13.5 || p.type === 'Residential';
@@ -971,7 +1008,7 @@ function updateLabels(context) {
     })
     .sort(
       (a, b) =>
-        Number(b.feature.properties.code === state.selected) - Number(a.feature.properties.code === state.selected) ||
+        Number(b.feature.properties.code === selected) - Number(a.feature.properties.code === selected) ||
         b.priority - a.priority ||
         a.feature.properties.code.localeCompare(b.feature.properties.code),
     );
@@ -982,7 +1019,7 @@ function updateLabels(context) {
   for (const { feature } of candidates) {
     if (shown >= cap) break;
     const p = feature.properties;
-    const prominent = p.code === state.selected;
+    const prominent = p.code === selected;
     const label = p.name.toUpperCase();
     const size = fontSize;
     const maxWidth = Math.min(210 * textScale, viewport.x * 0.65);
@@ -1348,6 +1385,8 @@ function initializeControls() {
   });
   $('search').addEventListener('keydown', event => {
     if (event.key === 'Escape') {
+      // Only leave the search box; the same press must not also close a panel or the selection.
+      event.stopPropagation();
       closeSearch();
       $('search').blur();
     }
@@ -1387,14 +1426,17 @@ function initializeControls() {
   const modalOpen = () => Boolean(document.querySelector('dialog:modal'));
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && !modalOpen()) {
+      // One layer per press: a station popup, then an open panel, then the selection.
+      const hadPopup = state.contexts.some(context => context.popupOpen);
       closeTooltips();
+      if (hadPopup) return;
       if (!$('layers-panel').hidden) {
         toggleLayers(false);
         (mobile() ? $('mobile-more') : $('layers-button')).focus();
       } else if (!$('groups-panel').hidden) {
         toggleGroups(false);
         (mobile() ? $('mobile-more') : $('groups-button')).focus({ preventScroll: true });
-      } else if (!mobile()) desktopUI?.closeDetails();
+      } else if (!mobile()) clearSelection();
     }
     if (
       event.key === '/' &&
@@ -1430,7 +1472,7 @@ function initializeControls() {
 async function init() {
   applyStaticTranslations();
   initTheme();
-  communitySheet = initCommunitySheet({ onChange: () => mobileUI?.refresh(), onClose: closeTooltips });
+  communitySheet = initCommunitySheet({ onChange: () => mobileUI?.refresh(), onClose: clearSelection });
   initializeControls();
   initLanguagePreference();
   mobileUI = initMobileUI({
@@ -1442,7 +1484,7 @@ async function init() {
       renderOverlays();
     },
   });
-  desktopUI = initDesktopUI({ onLayoutChange: () => renderOverlays() });
+  desktopUI = initDesktopUI({ onLayoutChange: () => renderOverlays(), onClose: clearSelection });
   try {
     const data = await loadCoreData();
     state.metadata = data.metadata;

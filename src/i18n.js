@@ -312,6 +312,7 @@ export const MESSAGES = Object.freeze({
     zh: '已选择 {name}。人口构成已更新。',
     en: '{name} selected. Population composition updated.',
   },
+  'announce.cleared': { zh: '已取消选择社区。', en: 'Community selection cleared.' },
   'ring.title': { zh: '{name} 人口构成', en: '{name} population composition' },
   'compare.mapLabel': { zh: '{group}在 Calgary 各社区的占比地图', en: '{group} share by Calgary community' },
   'warning.layers': {

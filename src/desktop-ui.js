@@ -30,7 +30,7 @@ const icon = name =>
 const $ = id => document.getElementById(id);
 
 /** Desktop controls float over one full-window map; mobile keeps its own sheet. */
-export function initDesktopUI({ onLayoutChange = () => {} } = {}) {
+export function initDesktopUI({ onLayoutChange = () => {}, onClose = null } = {}) {
   const desktop = matchMedia('(min-width: 761px)');
   const nav = document.querySelector('.viewbar');
   const sidebar = document.querySelector('.sidebar');
@@ -108,10 +108,12 @@ export function initDesktopUI({ onLayoutChange = () => {} } = {}) {
   footer.append(detailsButton);
   nav.append(footer);
 
+  // X ends the selection (onClose); the rail's Details button only hides the drawer.
   const closeButton = makeButton('desktop-detail-close', 'close', '关闭社区详情', event => {
     event.preventDefault();
     event.stopPropagation();
-    closeDetails();
+    if (onClose) onClose();
+    else closeDetails();
   });
   closeButton.className = 'desktop-detail-close desktop-only';
   document.querySelector('.community-sheet-header').append(closeButton);
@@ -171,8 +173,9 @@ export function initDesktopUI({ onLayoutChange = () => {} } = {}) {
     refresh();
   }
 
-  function setSelection() {
-    hasSelection = true;
+  function clearSelection() {
+    hasSelection = false;
+    detailsOpen = false;
     refresh();
   }
 
@@ -194,5 +197,5 @@ export function initDesktopUI({ onLayoutChange = () => {} } = {}) {
   window.addEventListener('atlas-languagechange', refresh);
   window.addEventListener('resize', notifyLayout);
   refresh();
-  return { openDetails, closeDetails, setSelection, refresh, getInsets };
+  return { openDetails, closeDetails, clearSelection, refresh, getInsets };
 }

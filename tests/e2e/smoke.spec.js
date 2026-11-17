@@ -139,6 +139,31 @@ test('keyboard shortcuts keep working while the desktop legend card is open', as
   await expect(page.locator('#search')).toBeFocused();
 });
 
+test('nothing is highlighted until a community is chosen, and closing the details deselects', async ({
+  page,
+  isMobile,
+}) => {
+  await openMap(page);
+  await chooseTopFive(page, isMobile);
+  const outline = page.locator('#composition-map .community-selected-outline');
+  await expect(page.locator('.population-donut').first()).toBeAttached();
+  await expect(page.locator('.selected-donut')).toHaveCount(0);
+  await expect(page.locator('.focus-label')).toHaveCount(0);
+  await expect(outline).toHaveCount(0);
+
+  await page.locator('#search').fill('aspen');
+  await page.locator('#search').press('Enter');
+  await expect(outline).not.toHaveCount(0);
+  await expect(page).toHaveURL(/#ASP\?/);
+
+  await page.locator(isMobile ? '#mobile-sheet-close' : '#desktop-detail-close').click();
+  await expect(outline).toHaveCount(0);
+  await expect(page.locator('.selected-donut')).toHaveCount(0);
+  await expect(page).not.toHaveURL(/ASP/);
+  if (isMobile) await expect(page.locator('.sidebar')).toHaveAttribute('data-sheet-snap', 'closed');
+  else await expect(page.locator('#desktop-details-toggle')).toBeDisabled();
+});
+
 test('desktop keeps a legend card; mobile opens it on demand', async ({ page, isMobile }) => {
   await openMap(page);
   await chooseTopFive(page, isMobile);
