@@ -10,7 +10,8 @@ export function resolveTheme(preference, systemDark = false) {
 }
 
 export function getTheme() {
-  return typeof document === 'undefined' ? 'light'
+  return typeof document === 'undefined'
+    ? 'light'
     : resolveTheme(document.documentElement.dataset.theme, mediaQuery?.matches);
 }
 
@@ -38,7 +39,9 @@ export function setTheme(theme) {
   try {
     if (explicitTheme) localStorage.setItem(THEME_STORAGE_KEY, explicitTheme);
     else localStorage.removeItem(THEME_STORAGE_KEY);
-  } catch { /* Private mode may disable storage. */ }
+  } catch {
+    /* Private mode may disable storage. */
+  }
   applyTheme(resolveTheme(explicitTheme, mediaQuery?.matches));
 }
 
@@ -49,10 +52,14 @@ export function initTheme() {
   try {
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
     explicitTheme = themes.has(stored) ? stored : null;
-  } catch { explicitTheme = null; }
+  } catch {
+    explicitTheme = null;
+  }
   applyTheme(resolveTheme(explicitTheme, mediaQuery.matches));
   document.getElementById('theme-preference')?.addEventListener('change', event => setTheme(event.target.value));
-  const followSystem = () => { if (!explicitTheme) applyTheme(resolveTheme(null, mediaQuery.matches)); };
+  const followSystem = () => {
+    if (!explicitTheme) applyTheme(resolveTheme(null, mediaQuery.matches));
+  };
   if (mediaQuery.addEventListener) mediaQuery.addEventListener('change', followSystem);
   else mediaQuery.addListener?.(followSystem);
   window.addEventListener('storage', event => {

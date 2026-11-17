@@ -1,8 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  POPULATION_GROUP_IDS, POPULATION_BINS, POPULATION_NO_DATA_COLOR,
-  populationShare, compositionSegments, populationColor, donutSvg,
+  POPULATION_GROUP_IDS,
+  POPULATION_BINS,
+  POPULATION_NO_DATA_COLOR,
+  populationShare,
+  compositionSegments,
+  populationColor,
+  donutSvg,
 } from '../src/population-utils.js';
 
 function record(overrides = {}, population = 1000) {
@@ -28,9 +33,14 @@ test('exact shares use the table denominator, preserve zero and distinguish miss
 test('rounding affects only the ring: selected and unselected counts remain intact', () => {
   const data = record({ chinese: 100, south_asian: 205, not_visible_minority: 700 });
   const segments = compositionSegments(data, ['chinese', 'south_asian', 'chinese']);
-  assert.deepEqual(segments.map(({ id, count }) => ({ id, count })), [
-    { id: 'chinese', count: 100 }, { id: 'south_asian', count: 205 }, { id: 'other', count: 700 },
-  ]);
+  assert.deepEqual(
+    segments.map(({ id, count }) => ({ id, count })),
+    [
+      { id: 'chinese', count: 100 },
+      { id: 'south_asian', count: 205 },
+      { id: 'other', count: 700 },
+    ],
+  );
   assert.equal(segments[0].share, 100 / 1005);
   assert.ok(Math.abs(segments.reduce((sum, segment) => sum + segment.share, 0) - 1) < 1e-12);
   assert.equal(populationShare(data, 'chinese'), 0.1);
@@ -48,7 +58,10 @@ test('under-reported categories leave an explicit gap instead of inflating known
   assert.equal(selected[0].share, populationShare(data, 'chinese'));
   assert.ok(Math.abs(selected.reduce((sum, segment) => sum + segment.share, 0) - 1) < 1e-12);
   const all = compositionSegments(data, POPULATION_GROUP_IDS);
-  assert.equal(all.some(segment => segment.id === 'other'), false);
+  assert.equal(
+    all.some(segment => segment.id === 'other'),
+    false,
+  );
   assert.deepEqual(all.at(-1), { id: 'statistical_gap', count: 40, share: 40 / 460 });
   const svg = donutSvg(data, ['chinese'], { chinese: '#C084FC' });
   // The gap is unfilled (no solid stroke) so it follows the light or dark ring background.
@@ -79,7 +92,10 @@ test('selection does not redefine percentages and empty selection draws no rings
   assert.equal(donutSvg(data, []), '');
   assert.deepEqual(compositionSegments(data, ['korean']), [{ id: 'other', count: 1000, share: 1 }]);
   const all = compositionSegments(data, POPULATION_GROUP_IDS);
-  assert.equal(all.some(segment => segment.id === 'other'), false);
+  assert.equal(
+    all.some(segment => segment.id === 'other'),
+    false,
+  );
   assert.equal(all.length, 3);
 });
 
@@ -97,8 +113,10 @@ test('all heat maps use the same absolute bins, including boundaries and unavail
     assert.equal(populationColor(invalid), POPULATION_NO_DATA_COLOR);
   }
   // Equal shares give the same shade despite different community sizes.
-  assert.equal(populationColor(populationShare(record({ chinese: 200 }), 'chinese')),
-    populationColor(populationShare(record({ chinese: 400 }, 2000), 'chinese')));
+  assert.equal(
+    populationColor(populationShare(record({ chinese: 200 }), 'chinese')),
+    populationColor(populationShare(record({ chinese: 400 }, 2000), 'chinese')),
+  );
 });
 
 test('donut SVG permits only safe colors and numeric dimensions; no source labels are inserted', () => {

@@ -11,35 +11,43 @@ export const INCOME_BINS = [
 ];
 
 export const isNumber = value => typeof value === 'number' && Number.isFinite(value);
-export const colorFor = value => isNumber(value)
-  ? INCOME_BINS.find(bin => value < bin.max).color
-  : '#d6dcd9';
+export const colorFor = value => (isNumber(value) ? INCOME_BINS.find(bin => value < bin.max).color : '#d6dcd9');
 // Missing values are spelled out in the current language so they read correctly
 // inside translated sentences ("No data", never a bare 0).
 const noData = () => t('暂无数据');
-export const number = value => isNumber(value) ? value.toLocaleString('en-CA') : noData();
-export const money = value => isNumber(value) ? `$${number(value)}` : noData();
-export const percent = value => isNumber(value)
-  ? `${(value * 100).toLocaleString('zh-CN', { maximumFractionDigits: 1 })}%`
-  : noData();
+export const number = value => (isNumber(value) ? value.toLocaleString('en-CA') : noData());
+export const money = value => (isNumber(value) ? `$${number(value)}` : noData());
+export const percent = value =>
+  isNumber(value) ? `${(value * 100).toLocaleString('zh-CN', { maximumFractionDigits: 1 })}%` : noData();
 
 export function normalize(value) {
-  return String(value ?? '').normalize('NFKD').toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]/g, '');
+  return String(value ?? '')
+    .normalize('NFKD')
+    .toLowerCase()
+    .replace(/[^a-z0-9\u4e00-\u9fff]/g, '');
 }
 
 export function searchFeatures(features, query) {
   const q = normalize(query);
   if (!q) return [];
-  return features.map(feature => {
-    const p = feature.properties;
-    const name = normalize(p.name);
-    const aliases = (p.aliases || []).map(normalize);
-    const score = name === q || normalize(p.code) === q ? 0
-      : name.startsWith(q) ? 1
-      : name.includes(q) ? 2
-      : aliases.some(alias => alias.includes(q)) ? 3 : 99;
-    return { feature, score };
-  }).filter(item => item.score < 99)
+  return features
+    .map(feature => {
+      const p = feature.properties;
+      const name = normalize(p.name);
+      const aliases = (p.aliases || []).map(normalize);
+      const score =
+        name === q || normalize(p.code) === q
+          ? 0
+          : name.startsWith(q)
+            ? 1
+            : name.includes(q)
+              ? 2
+              : aliases.some(alias => alias.includes(q))
+                ? 3
+                : 99;
+      return { feature, score };
+    })
+    .filter(item => item.score < 99)
     .sort((a, b) => a.score - b.score || a.feature.properties.name.localeCompare(b.feature.properties.name))
     .slice(0, 12)
     .map(item => item.feature);
@@ -54,9 +62,17 @@ export function summarize(features) {
 }
 
 export function escapeHtml(value) {
-  return String(value ?? '').replace(/[&<>"']/g, char => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-  }[char]));
+  return String(value ?? '').replace(
+    /[&<>"']/g,
+    char =>
+      ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      })[char],
+  );
 }
 
 export function safeUrl(value) {
@@ -82,14 +98,22 @@ export function parseHashState(hash, features, groupIds = []) {
   try {
     const decoded = decodeURIComponent(codePart);
     code = decoded && features.some(f => String(f.properties.code) === decoded) ? decoded : null;
-  } catch { code = null; }
+  } catch {
+    code = null;
+  }
   const valid = new Set(groupIds);
-  const list = key => (params.get(key) || '').split(',').map(value => value.trim()).filter(Boolean);
+  const list = key =>
+    (params.get(key) || '')
+      .split(',')
+      .map(value => value.trim())
+      .filter(Boolean);
   const groups = [...new Set(list('groups').filter(id => valid.has(id)))];
   const compare = groups.includes(params.get('compare')) ? params.get('compare') : null;
   const layers = new Set(list('layers'));
   return {
-    code, groups, compare,
+    code,
+    groups,
+    compare,
     view: params.get('view') === 'compare' ? 'distribution' : 'composition',
     income: params.get('income') === '1',
     transit: layers.has('transit'),
@@ -97,11 +121,20 @@ export function parseHashState(hash, features, groupIds = []) {
   };
 }
 
-export function buildHashState({ code = null, view = 'composition', groups = [], compare = null, income = false, transit = false, landmarks = false } = {}) {
+export function buildHashState({
+  code = null,
+  view = 'composition',
+  groups = [],
+  compare = null,
+  income = false,
+  transit = false,
+  landmarks = false,
+} = {}) {
   const params = [];
   if (view === 'distribution') params.push('view=compare');
   if (groups.length) params.push(`groups=${groups.map(encodeURIComponent).join(',')}`);
-  if (view === 'distribution' && compare && compare !== groups[0]) params.push(`compare=${encodeURIComponent(compare)}`);
+  if (view === 'distribution' && compare && compare !== groups[0])
+    params.push(`compare=${encodeURIComponent(compare)}`);
   if (income) params.push('income=1');
   const layers = [transit && 'transit', landmarks && 'landmarks'].filter(Boolean);
   if (layers.length) params.push(`layers=${layers.join(',')}`);

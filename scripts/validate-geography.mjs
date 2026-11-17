@@ -9,21 +9,29 @@ const loaded = {};
 for (const [path, expected] of Object.entries(integrity.files)) {
   const bytes = fs.readFileSync(new URL(path, root));
   assert.equal(bytes.length, expected.bytes, `${path}: audited snapshot size changed`);
-  assert.equal(createHash('sha256').update(bytes).digest('hex'), expected.sha256,
-    `${path}: audited geography snapshot changed`);
+  assert.equal(
+    createHash('sha256').update(bytes).digest('hex'),
+    expected.sha256,
+    `${path}: audited geography snapshot changed`,
+  );
   const data = JSON.parse(bytes);
   assert.equal(data.type, 'FeatureCollection');
   assert.ok(data.features.length > 0, `${path}: empty layer`);
-  assert.equal(new Set(data.features.map(f => f.properties.id)).size, data.features.length,
-    `${path}: feature IDs must be unique`);
+  assert.equal(
+    new Set(data.features.map(f => f.properties.id)).size,
+    data.features.length,
+    `${path}: feature IDs must be unique`,
+  );
   for (const feature of data.features) validateFeature(feature, path);
   loaded[path.split('/').at(-1)] = data.features;
 }
 
 function position(point, label) {
   assert.ok(Array.isArray(point) && point.length >= 2 && point.every(Number.isFinite), `${label}: invalid coordinate`);
-  assert.ok(point[0] > -117 && point[0] < -112 && point[1] > 49 && point[1] < 53,
-    `${label}: coordinate outside Calgary's regional context or wrong CRS`);
+  assert.ok(
+    point[0] > -117 && point[0] < -112 && point[1] > 49 && point[1] < 53,
+    `${label}: coordinate outside Calgary's regional context or wrong CRS`,
+  );
 }
 function line(points, label) {
   assert.ok(points.length >= 2, `${label}: line has fewer than two coordinates`);
@@ -45,10 +53,14 @@ function validateFeature(feature, path) {
   const label = `${path}/${p.id}`;
   if (type === 'Point') position(c, label);
   else if (type === 'LineString') line(c, label);
-  else if (type === 'MultiLineString') { assert.ok(c.length); c.forEach(points => line(points, label)); }
-  else if (type === 'Polygon') polygon(c, label);
-  else if (type === 'MultiPolygon') { assert.ok(c.length); c.forEach(rings => polygon(rings, label)); }
-  else assert.fail(`${label}: unsupported geometry ${type}`);
+  else if (type === 'MultiLineString') {
+    assert.ok(c.length);
+    c.forEach(points => line(points, label));
+  } else if (type === 'Polygon') polygon(c, label);
+  else if (type === 'MultiPolygon') {
+    assert.ok(c.length);
+    c.forEach(rings => polygon(rings, label));
+  } else assert.fail(`${label}: unsupported geometry ${type}`);
   if (p.labelPoint) position(p.labelPoint, label);
 }
 
@@ -67,31 +79,52 @@ assert.equal(stations.filter(f => f.properties.lineIds.length === 2).length, int
 const green = loaded['ctrain-green.geojson'];
 for (const f of green) {
   assert.ok(['construction', 'planned'].includes(f.properties.status), 'Green Line must never appear operational');
-  assert.ok(f.properties.kind === 'transit_station'
-    ? f.properties.lineIds.length === 1 && f.properties.lineIds[0] === 'green'
-    : f.properties.kind === 'transit_route' && f.properties.lineId === 'green');
+  assert.ok(
+    f.properties.kind === 'transit_station'
+      ? f.properties.lineIds.length === 1 && f.properties.lineIds[0] === 'green'
+      : f.properties.kind === 'transit_route' && f.properties.lineId === 'green',
+  );
 }
 assert.equal(green.filter(f => f.properties.kind === 'transit_station').length, integrity.expected.greenStations);
 const context = loaded['geographic-context.geojson'];
 assert.deepEqual(new Set(context.map(f => f.properties.kind)), new Set(['airport', 'park', 'reserve']));
 const railways = loaded['railways.geojson'];
-assert.deepEqual(new Set(railways.map(f => f.properties.kind)), new Set(['railway']), 'railways.geojson must contain only non-LRT railways');
-assert.ok(context.some(f => f.properties.kind === 'reserve' && /145/.test(f.properties.name)), 'Tsuut’ina 145 context is missing');
-assert.ok(context.some(f => f.properties.kind === 'airport'), 'Calgary airport context is missing');
+assert.deepEqual(
+  new Set(railways.map(f => f.properties.kind)),
+  new Set(['railway']),
+  'railways.geojson must contain only non-LRT railways',
+);
+assert.ok(
+  context.some(f => f.properties.kind === 'reserve' && /145/.test(f.properties.name)),
+  'Tsuut’ina 145 context is missing',
+);
+assert.ok(
+  context.some(f => f.properties.kind === 'airport'),
+  'Calgary airport context is missing',
+);
 // Orientation landmarks: a handful of hand-checked points with their own audit.
 const landmarkAudit = read('data/audit/orientation-landmarks.json');
 for (const [path, expected] of Object.entries(integrity.orientationLandmarks)) {
   const bytes = fs.readFileSync(new URL(path, root));
   assert.equal(bytes.length, expected.bytes, `${path}: audited snapshot size changed`);
-  assert.equal(createHash('sha256').update(bytes).digest('hex'), expected.sha256, `${path}: audited landmark snapshot changed`);
+  assert.equal(
+    createHash('sha256').update(bytes).digest('hex'),
+    expected.sha256,
+    `${path}: audited landmark snapshot changed`,
+  );
   const landmarks = JSON.parse(bytes).features;
   assert.equal(landmarks.length, landmarkAudit.featureCount, `${path}: feature count differs from its audit`);
   for (const feature of landmarks) {
     const p = feature.properties;
     assert.equal(p.kind, 'orientation_landmark');
-    assert.ok(p.name && p.sourceUrl && new URL(p.sourceUrl).protocol === 'https:', `${path}/${p.name}: missing name or https source`);
+    assert.ok(
+      p.name && p.sourceUrl && new URL(p.sourceUrl).protocol === 'https:',
+      `${path}/${p.name}: missing name or https source`,
+    );
     assert.equal(feature.geometry.type, 'Point');
     position(feature.geometry.coordinates, `${path}/${p.name}`);
   }
 }
-console.log(`PASS: audited official geography; ${stations.length} operating CTrain stations, ${integrity.expected.greenStations} non-operating Green Line stations; railways, airport, parks and reserves; valid regional coordinates and source links.`);
+console.log(
+  `PASS: audited official geography; ${stations.length} operating CTrain stations, ${integrity.expected.greenStations} non-operating Green Line stations; railways, airport, parks and reserves; valid regional coordinates and source links.`,
+);

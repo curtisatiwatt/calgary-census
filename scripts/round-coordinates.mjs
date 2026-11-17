@@ -60,15 +60,28 @@ function roundGeometry(geometry, label) {
   const rings = (polygon, optional = false) => {
     const outer = roundPositions(polygon[0], true, `${label} outer ring`, optional);
     if (!outer) return null;
-    return [outer, ...polygon.slice(1).map((ring, index) => roundPositions(ring, true, `${label} hole ${index}`, true)).filter(Boolean)];
+    return [
+      outer,
+      ...polygon
+        .slice(1)
+        .map((ring, index) => roundPositions(ring, true, `${label} hole ${index}`, true))
+        .filter(Boolean),
+    ];
   };
-  const coordinates = type === 'Point' ? [round(c[0]), round(c[1]), ...c.slice(2)]
-    : type === 'MultiPoint' ? c.map(point => [round(point[0]), round(point[1]), ...point.slice(2)])
-      : type === 'LineString' ? roundPositions(c, false, label)
-        : type === 'MultiLineString' ? parts(c.map((line, index) => roundPositions(line, false, `${label} part ${index}`, true)))
-          : type === 'Polygon' ? rings(c)
-            : type === 'MultiPolygon' ? parts(c.map(polygon => rings(polygon, true)))
-              : assert.fail(`${label}: unsupported geometry ${type}`);
+  const coordinates =
+    type === 'Point'
+      ? [round(c[0]), round(c[1]), ...c.slice(2)]
+      : type === 'MultiPoint'
+        ? c.map(point => [round(point[0]), round(point[1]), ...point.slice(2)])
+        : type === 'LineString'
+          ? roundPositions(c, false, label)
+          : type === 'MultiLineString'
+            ? parts(c.map((line, index) => roundPositions(line, false, `${label} part ${index}`, true)))
+            : type === 'Polygon'
+              ? rings(c)
+              : type === 'MultiPolygon'
+                ? parts(c.map(polygon => rings(polygon, true)))
+                : assert.fail(`${label}: unsupported geometry ${type}`);
   return { ...geometry, coordinates };
 }
 
@@ -84,7 +97,11 @@ function verify(before, after, label) {
   const result = positions(after);
   let cursor = 0;
   for (const point of result) {
-    while (cursor < source.length && (Math.abs(source[cursor][0] - point[0]) > tolerance || Math.abs(source[cursor][1] - point[1]) > tolerance)) cursor++;
+    while (
+      cursor < source.length &&
+      (Math.abs(source[cursor][0] - point[0]) > tolerance || Math.abs(source[cursor][1] - point[1]) > tolerance)
+    )
+      cursor++;
     assert.ok(cursor < source.length, `${label}: output vertex does not follow a nearby input vertex`);
   }
 }
@@ -104,5 +121,13 @@ for (const path of args) {
   data.features.forEach((feature, index) => assert.deepEqual(features[index].properties, feature.properties));
   const output = Buffer.from(JSON.stringify(result) + (input.at(-1) === 10 ? '\n' : ''));
   fs.writeFileSync(path, output);
-  console.log(JSON.stringify({ path, decimals, input: { bytes: input.length, sha256: sha(input) }, output: { bytes: output.length, sha256: sha(output) }, droppedParts }));
+  console.log(
+    JSON.stringify({
+      path,
+      decimals,
+      input: { bytes: input.length, sha256: sha(input) },
+      output: { bytes: output.length, sha256: sha(output) },
+      droppedParts,
+    }),
+  );
 }

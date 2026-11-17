@@ -1,11 +1,17 @@
 import { addTranslations, t } from './i18n.js';
 
 addTranslations({
-  '展开菜单': 'Expand menu', '收起菜单': 'Collapse menu',
-  '显示社区详情': 'Show community details', '隐藏社区详情': 'Hide community details',
-  '先在地图上选择一个社区': 'Select a community on the map first',
-  '设置': 'Settings', '详情': 'Details', '说明': 'Guide', '收入': 'Income',
-  '关闭社区详情': 'Close community details', '数据说明': 'About the data',
+  展开菜单: 'Expand menu',
+  收起菜单: 'Collapse menu',
+  显示社区详情: 'Show community details',
+  隐藏社区详情: 'Hide community details',
+  先在地图上选择一个社区: 'Select a community on the map first',
+  设置: 'Settings',
+  详情: 'Details',
+  说明: 'Guide',
+  收入: 'Income',
+  关闭社区详情: 'Close community details',
+  数据说明: 'About the data',
 });
 
 const ICONS = {
@@ -19,7 +25,8 @@ const ICONS = {
   settings: '<path d="m10 3-1 3-3 1-2 3 2 2v3l2 3 3-1 3 1 3-2v-3l2-2-1-3-3-1-1-3z"/><circle cx="11.5" cy="11" r="3"/>',
   close: '<path d="m6 6 12 12M18 6 6 18"/>',
 };
-const icon = name => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
+const icon = name =>
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
 const $ = id => document.getElementById(id);
 
 /** Desktop controls float over one full-window map; mobile keeps its own sheet. */
@@ -29,10 +36,13 @@ export function initDesktopUI({ onLayoutChange = () => {} } = {}) {
   const sidebar = document.querySelector('.sidebar');
   const content = $('detail-body');
   const railItems = [$('method-button'), $('mobile-language-slot'), $('mobile-theme-slot')];
-  const railOrigins = new Map(railItems.map(node => {
-    const marker = document.createComment('desktop preference origin');
-    node.before(marker); return [node, marker];
-  }));
+  const railOrigins = new Map(
+    railItems.map(node => {
+      const marker = document.createComment('desktop preference origin');
+      node.before(marker);
+      return [node, marker];
+    }),
+  );
   let expanded = false;
   let detailsOpen = false;
   let hasSelection = false;
@@ -64,14 +74,20 @@ export function initDesktopUI({ onLayoutChange = () => {} } = {}) {
   nav.id ||= 'desktop-navigation';
 
   // Preserve the original controls and listeners; only add desktop presentation.
-  for (const [id, name] of [['composition-tab', 'composition'], ['distribution-tab', 'compare'], ['groups-button', 'groups']]) {
+  for (const [id, name] of [
+    ['composition-tab', 'composition'],
+    ['distribution-tab', 'compare'],
+    ['groups-button', 'groups'],
+  ]) {
     const button = $(id);
     const glyph = document.createElement('span');
     glyph.className = 'desktop-nav-icon desktop-only';
     glyph.innerHTML = icon(name);
     button.prepend(glyph);
     if (id.endsWith('-tab')) {
-      const textNodes = [...button.childNodes].filter(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim());
+      const textNodes = [...button.childNodes].filter(
+        node => node.nodeType === Node.TEXT_NODE && node.textContent.trim(),
+      );
       const label = document.createElement('span');
       label.className = 'desktop-tab-label';
       for (const node of textNodes) label.append(node);

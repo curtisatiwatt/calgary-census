@@ -13,10 +13,15 @@ async function withBrowser(options, check) {
   const listeners = new Map();
   const selectListeners = new Map();
   const navigator = { language: options.systemLanguage ?? 'en-CA' };
-  const select = { value: '', addEventListener(type, listener) { selectListeners.set(type, listener); } };
+  const select = {
+    value: '',
+    addEventListener(type, listener) {
+      selectListeners.set(type, listener);
+    },
+  };
   const document = {
     documentElement: { lang: '' },
-    getElementById: id => id === 'language-preference' ? select : null,
+    getElementById: id => (id === 'language-preference' ? select : null),
   };
   const window = {
     addEventListener(type, listener) {
@@ -30,14 +35,19 @@ async function withBrowser(options, check) {
     },
   };
   const localStorage = {
-    getItem(key) { if (options.blockedStorage) throw new Error('Storage disabled'); return saved.get(key) ?? null; },
+    getItem(key) {
+      if (options.blockedStorage) throw new Error('Storage disabled');
+      return saved.get(key) ?? null;
+    },
     setItem(key, value) {
       if (options.blockedStorage) throw new Error('Storage disabled');
-      saved.set(key, value); writes.push(['set', key, value]);
+      saved.set(key, value);
+      writes.push(['set', key, value]);
     },
     removeItem(key) {
       if (options.blockedStorage) throw new Error('Storage disabled');
-      saved.delete(key); writes.push(['remove', key]);
+      saved.delete(key);
+      writes.push(['remove', key]);
     },
   };
   for (const [key, value] of Object.entries({ window, document, navigator, localStorage })) {
@@ -46,14 +56,29 @@ async function withBrowser(options, check) {
   try {
     const language = await import(`../src/i18n.js?language-preference-test=${++moduleId}`);
     await check({
-      language, saved, writes, events, select, document,
-      choose(value) { select.value = value; selectListeners.get('change')({ target: select }); },
-      changeSystem(value) { navigator.language = value; window.dispatchEvent({ type: 'languagechange' }); },
+      language,
+      saved,
+      writes,
+      events,
+      select,
+      document,
+      choose(value) {
+        select.value = value;
+        selectListeners.get('change')({ target: select });
+      },
+      changeSystem(value) {
+        navigator.language = value;
+        window.dispatchEvent({ type: 'languagechange' });
+      },
       receivePreference(value) {
-        if (value === null) saved.delete(storageKey); else saved.set(storageKey, value);
+        if (value === null) saved.delete(storageKey);
+        else saved.set(storageKey, value);
         window.dispatchEvent({ type: 'storage', key: storageKey, newValue: value });
       },
-      clearStorage() { saved.clear(); window.dispatchEvent({ type: 'storage', key: null, newValue: null }); },
+      clearStorage() {
+        saved.clear();
+        window.dispatchEvent({ type: 'storage', key: null, newValue: null });
+      },
     });
   } finally {
     for (const key of keys) {
@@ -126,24 +151,27 @@ test('changing the preference without changing the visible language emits no red
 });
 
 test('language preferences synchronize from other tabs and storage clearing resumes automatic mode', async () => {
-  await withBrowser({ preference: 'zh', systemLanguage: 'en-CA' }, ({ language, receivePreference, clearStorage, changeSystem, select, writes }) => {
-    language.initLanguagePreference();
-    receivePreference('en');
-    assert.equal(language.currentLanguage(), 'en');
-    assert.equal(select.value, 'en');
-    receivePreference('zh');
-    assert.equal(language.currentLanguage(), 'zh');
-    receivePreference(null);
-    assert.equal(language.currentLanguage(), 'en');
-    assert.equal(select.value, 'system');
-    changeSystem('zh-CN');
-    assert.equal(language.currentLanguage(), 'zh');
-    receivePreference('en');
-    clearStorage();
-    assert.equal(language.currentLanguage(), 'zh');
-    assert.equal(language.getLanguagePreference(), 'system');
-    assert.deepEqual(writes, []);
-  });
+  await withBrowser(
+    { preference: 'zh', systemLanguage: 'en-CA' },
+    ({ language, receivePreference, clearStorage, changeSystem, select, writes }) => {
+      language.initLanguagePreference();
+      receivePreference('en');
+      assert.equal(language.currentLanguage(), 'en');
+      assert.equal(select.value, 'en');
+      receivePreference('zh');
+      assert.equal(language.currentLanguage(), 'zh');
+      receivePreference(null);
+      assert.equal(language.currentLanguage(), 'en');
+      assert.equal(select.value, 'system');
+      changeSystem('zh-CN');
+      assert.equal(language.currentLanguage(), 'zh');
+      receivePreference('en');
+      clearStorage();
+      assert.equal(language.currentLanguage(), 'zh');
+      assert.equal(language.getLanguagePreference(), 'system');
+      assert.deepEqual(writes, []);
+    },
+  );
 });
 
 test('invalid saved preferences and unavailable storage retain useful automatic and manual modes', async () => {

@@ -17,7 +17,8 @@ export function createMapTooltip({ map, tooltip, enabled = () => true, hoverEnab
     if (!active) return;
     const { element, descriptionId } = active;
     if (element && descriptionId) {
-      const ids = (element.getAttribute('aria-describedby') || '').split(/\s+/)
+      const ids = (element.getAttribute('aria-describedby') || '')
+        .split(/\s+/)
         .filter(id => id && id !== descriptionId);
       if (ids.length) element.setAttribute('aria-describedby', ids.join(' '));
       else element.removeAttribute('aria-describedby');
@@ -32,9 +33,19 @@ export function createMapTooltip({ map, tooltip, enabled = () => true, hoverEnab
 
   function show(binding, event, keyboard = false) {
     const original = event?.originalEvent;
-    if (destroyed || moving || zooming || !enabled() || !map.hasLayer(binding.layer)
-      || (!keyboard && (!hoverEnabled() || original?.pointerType === 'touch'
-        || original?.sourceCapabilities?.firesTouchEvents || original?.buttons > 0))) return;
+    if (
+      destroyed ||
+      moving ||
+      zooming ||
+      !enabled() ||
+      !map.hasLayer(binding.layer) ||
+      (!keyboard &&
+        (!hoverEnabled() ||
+          original?.pointerType === 'touch' ||
+          original?.sourceCapabilities?.firesTouchEvents ||
+          original?.buttons > 0))
+    )
+      return;
     const latlng = binding.anchor(event);
     if (!latlng) return;
     if (active?.binding !== binding) {
@@ -60,7 +71,9 @@ export function createMapTooltip({ map, tooltip, enabled = () => true, hoverEnab
     const focus = () => {
       if (element?.matches(':focus-visible')) show(binding, undefined, true);
     };
-    const leave = () => { if (active?.binding === binding) close(); };
+    const leave = () => {
+      if (active?.binding === binding) close();
+    };
     const hover = event => show(binding, event);
     const detachFocus = () => {
       element?.removeEventListener('focus', focus);
@@ -86,13 +99,34 @@ export function createMapTooltip({ map, tooltip, enabled = () => true, hoverEnab
     return unbind;
   }
 
-  const startMove = () => { moving = true; close(); };
-  const endMove = () => { moving = false; };
-  const startZoom = () => { zooming = true; close(); };
-  const endZoom = () => { zooming = false; };
-  const keydown = event => { if (event.key === 'Escape') close(); };
-  const visibility = () => { if (document.hidden) close(); };
-  const mapEvents = { movestart: startMove, moveend: endMove, zoomstart: startZoom, zoomend: endZoom, preclick: close, unload: destroy };
+  const startMove = () => {
+    moving = true;
+    close();
+  };
+  const endMove = () => {
+    moving = false;
+  };
+  const startZoom = () => {
+    zooming = true;
+    close();
+  };
+  const endZoom = () => {
+    zooming = false;
+  };
+  const keydown = event => {
+    if (event.key === 'Escape') close();
+  };
+  const visibility = () => {
+    if (document.hidden) close();
+  };
+  const mapEvents = {
+    movestart: startMove,
+    moveend: endMove,
+    zoomstart: startZoom,
+    zoomend: endZoom,
+    preclick: close,
+    unload: destroy,
+  };
 
   function destroy() {
     if (destroyed) return;

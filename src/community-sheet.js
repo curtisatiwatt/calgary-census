@@ -2,11 +2,13 @@ import { addTranslations, t } from './i18n.js';
 import { clampSheetHeight, releaseSheetSnap, sheetHeights, stepSheetSnap } from './community-sheet-utils.js';
 
 addTranslations({
-  '关闭社区详情': 'Close community details',
+  关闭社区详情: 'Close community details',
   '社区详情，摘要。向上滑动展开': 'Community details, summary. Swipe up to expand',
-  '社区详情，半屏。向上滑动展开，向下滑动收起': 'Community details, half screen. Swipe up to expand or down to collapse',
+  '社区详情，半屏。向上滑动展开，向下滑动收起':
+    'Community details, half screen. Swipe up to expand or down to collapse',
   '社区详情，展开。向下滑动收起': 'Community details, expanded. Swipe down to collapse',
-  '使用上下方向键调整高度，Home 收起，End 展开，Escape 关闭。': 'Use the up and down arrow keys to resize, Home to collapse, End to expand, and Escape to close.',
+  '使用上下方向键调整高度，Home 收起，End 展开，Escape 关闭。':
+    'Use the up and down arrow keys to resize, Home to collapse, End to expand, and Escape to close.',
 });
 
 const LABELS = {
@@ -45,7 +47,8 @@ export function initCommunitySheet({ onChange = () => {}, onClose = () => {} } =
   closeButton.id = 'mobile-sheet-close';
   closeButton.type = 'button';
   closeButton.className = 'community-sheet-close';
-  closeButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m7 7 10 10M17 7 7 17"/></svg>';
+  closeButton.innerHTML =
+    '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m7 7 10 10M17 7 7 17"/></svg>';
   header.append(closeButton);
 
   let snap = 'closed';
@@ -108,7 +111,8 @@ export function initCommunitySheet({ onChange = () => {}, onClose = () => {} } =
     const previous = drag;
     drag = null;
     scrollHandoff = null;
-    if (previous?.capture && previous.target.hasPointerCapture(previous.id)) previous.target.releasePointerCapture(previous.id);
+    if (previous?.capture && previous.target.hasPointerCapture(previous.id))
+      previous.target.releasePointerCapture(previous.id);
   }
 
   function setSnap(next) {
@@ -132,7 +136,9 @@ export function initCommunitySheet({ onChange = () => {}, onClose = () => {} } =
     const hadFocus = sidebar.contains(document.activeElement);
     setSnap('closed');
     if (hadFocus) {
-      const map = document.querySelector('.map-view:not([hidden]) .map-canvas, .map-view:not([hidden]) .comparison-map');
+      const map = document.querySelector(
+        '.map-view:not([hidden]) .map-canvas, .map-view:not([hidden]) .comparison-map',
+      );
       map?.focus({ preventScroll: true });
     }
     onClose();
@@ -141,9 +147,15 @@ export function initCommunitySheet({ onChange = () => {}, onClose = () => {} } =
   function beginDrag({ id, target, y, time, capture = true }) {
     measure();
     drag = {
-      id, target, capture, startY: y,
-      startHeight: sidebar.getBoundingClientRect().height, height: sidebar.getBoundingClientRect().height,
-      snap, moved: false, samples: [{ y, time }],
+      id,
+      target,
+      capture,
+      startY: y,
+      startHeight: sidebar.getBoundingClientRect().height,
+      height: sidebar.getBoundingClientRect().height,
+      snap,
+      moved: false,
+      samples: [{ y, time }],
     };
     // Capture on the header/body rather than globally: the map remains independent.
     if (capture) target.setPointerCapture(id);
@@ -156,8 +168,10 @@ export function initCommunitySheet({ onChange = () => {}, onClose = () => {} } =
     const fromContent = content.contains(event.target);
     if (fromContent && snap !== 'half') return;
     beginDrag({
-      id: event.pointerId, target: handle.contains(event.target) ? handle : event.currentTarget,
-      y: event.clientY, time: event.timeStamp,
+      id: event.pointerId,
+      target: handle.contains(event.target) ? handle : event.currentTarget,
+      y: event.clientY,
+      time: event.timeStamp,
     });
   }
 
@@ -177,15 +191,24 @@ export function initCommunitySheet({ onChange = () => {}, onClose = () => {} } =
   function finishDrag({ y, time, cancelled = false }) {
     const finished = drag;
     drag = null;
-    if (finished.capture && finished.target.hasPointerCapture(finished.id)) finished.target.releasePointerCapture(finished.id);
+    if (finished.capture && finished.target.hasPointerCapture(finished.id))
+      finished.target.releasePointerCapture(finished.id);
     if (!finished.moved) return;
     suppressClickUntil = performance.now() + 400;
     const first = finished.samples[0];
     const elapsed = time - first.time;
     const velocity = elapsed > 0 && elapsed < 160 ? (first.y - y) / elapsed : 0;
-    setSnap(cancelled ? finished.snap : releaseSheetSnap({
-      snap: finished.snap, startHeight: finished.startHeight, height: finished.height, velocity, heights,
-    }));
+    setSnap(
+      cancelled
+        ? finished.snap
+        : releaseSheetSnap({
+            snap: finished.snap,
+            startHeight: finished.startHeight,
+            height: finished.height,
+            velocity,
+            heights,
+          }),
+    );
   }
 
   function moveDrag(event) {
@@ -193,7 +216,8 @@ export function initCommunitySheet({ onChange = () => {}, onClose = () => {} } =
   }
 
   function endDrag(event) {
-    if (drag?.id === event.pointerId) finishDrag({ y: event.clientY, time: event.timeStamp, cancelled: event.type === 'pointercancel' });
+    if (drag?.id === event.pointerId)
+      finishDrag({ y: event.clientY, time: event.timeStamp, cancelled: event.type === 'pointercancel' });
   }
 
   for (const region of [header, content]) {
@@ -208,48 +232,87 @@ export function initCommunitySheet({ onChange = () => {}, onClose = () => {} } =
   // Once expanded, the body uses native scrolling. A downward touch that starts
   // at its top transfers to the sheet; upward gestures and an already-scrolled
   // body remain native. This listener is confined to the detail body, never map.
-  content.addEventListener('touchstart', event => {
-    scrollHandoff = null;
-    if (!isVisible() || snap !== 'full' || drag || content.scrollTop > 1 || event.touches.length !== 1 || event.target.closest(INTERACTIVE)) return;
-    const touch = event.touches[0];
-    scrollHandoff = { id: touch.identifier, x: touch.clientX, y: touch.clientY, time: event.timeStamp };
-  }, { passive: true });
-  content.addEventListener('touchmove', event => {
-    if (!isVisible()) { scrollHandoff = null; return; }
-    if (!scrollHandoff || event.touches.length !== 1) return;
-    const touch = [...event.touches].find(item => item.identifier === scrollHandoff.id);
-    if (!touch) return;
-    if (drag?.id === `touch-${touch.identifier}`) {
-      if (event.cancelable) event.preventDefault();
-      updateDrag(touch.clientY, event.timeStamp);
-      return;
-    }
-    const dy = touch.clientY - scrollHandoff.y;
-    const dx = touch.clientX - scrollHandoff.x;
-    if (dy < -6 || (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy))) { scrollHandoff = null; return; }
-    if (dy < 6 || !event.cancelable || snap !== 'full' || content.scrollTop > 1) return;
-    event.preventDefault();
-    beginDrag({ id: `touch-${touch.identifier}`, target: content, y: scrollHandoff.y, time: scrollHandoff.time, capture: false });
-    updateDrag(touch.clientY, event.timeStamp);
-  }, { passive: false });
-  for (const type of ['touchend', 'touchcancel']) {
-    content.addEventListener(type, event => {
-      const touch = [...event.changedTouches].find(item => `touch-${item.identifier}` === drag?.id);
-      if (touch) finishDrag({ y: touch.clientY, time: event.timeStamp, cancelled: type === 'touchcancel' });
+  content.addEventListener(
+    'touchstart',
+    event => {
       scrollHandoff = null;
-    }, { passive: true });
-  }
-  sidebar.addEventListener('click', event => {
-    const interactive = event.target.closest(INTERACTIVE);
-    if (performance.now() < suppressClickUntil && (!interactive || interactive === handle)) {
+      if (
+        !isVisible() ||
+        snap !== 'full' ||
+        drag ||
+        content.scrollTop > 1 ||
+        event.touches.length !== 1 ||
+        event.target.closest(INTERACTIVE)
+      )
+        return;
+      const touch = event.touches[0];
+      scrollHandoff = { id: touch.identifier, x: touch.clientX, y: touch.clientY, time: event.timeStamp };
+    },
+    { passive: true },
+  );
+  content.addEventListener(
+    'touchmove',
+    event => {
+      if (!isVisible()) {
+        scrollHandoff = null;
+        return;
+      }
+      if (!scrollHandoff || event.touches.length !== 1) return;
+      const touch = [...event.touches].find(item => item.identifier === scrollHandoff.id);
+      if (!touch) return;
+      if (drag?.id === `touch-${touch.identifier}`) {
+        if (event.cancelable) event.preventDefault();
+        updateDrag(touch.clientY, event.timeStamp);
+        return;
+      }
+      const dy = touch.clientY - scrollHandoff.y;
+      const dx = touch.clientX - scrollHandoff.x;
+      if (dy < -6 || (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy))) {
+        scrollHandoff = null;
+        return;
+      }
+      if (dy < 6 || !event.cancelable || snap !== 'full' || content.scrollTop > 1) return;
       event.preventDefault();
-      event.stopPropagation();
-    }
-  }, true);
+      beginDrag({
+        id: `touch-${touch.identifier}`,
+        target: content,
+        y: scrollHandoff.y,
+        time: scrollHandoff.time,
+        capture: false,
+      });
+      updateDrag(touch.clientY, event.timeStamp);
+    },
+    { passive: false },
+  );
+  for (const type of ['touchend', 'touchcancel']) {
+    content.addEventListener(
+      type,
+      event => {
+        const touch = [...event.changedTouches].find(item => `touch-${item.identifier}` === drag?.id);
+        if (touch) finishDrag({ y: touch.clientY, time: event.timeStamp, cancelled: type === 'touchcancel' });
+        scrollHandoff = null;
+      },
+      { passive: true },
+    );
+  }
+  sidebar.addEventListener(
+    'click',
+    event => {
+      const interactive = event.target.closest(INTERACTIVE);
+      if (performance.now() < suppressClickUntil && (!interactive || interactive === handle)) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    },
+    true,
+  );
   handle.addEventListener('click', () => setSnap(snap === 'full' ? 'half' : stepSheetSnap(snap, 1)));
   handle.addEventListener('keydown', event => {
     const next = {
-      ArrowUp: stepSheetSnap(snap, 1), ArrowDown: stepSheetSnap(snap, -1), Home: 'peek', End: 'full',
+      ArrowUp: stepSheetSnap(snap, 1),
+      ArrowDown: stepSheetSnap(snap, -1),
+      Home: 'peek',
+      End: 'full',
     }[event.key];
     if (!next) return;
     event.preventDefault();
@@ -268,13 +331,20 @@ export function initCommunitySheet({ onChange = () => {}, onClose = () => {} } =
   window.addEventListener('resize', scheduleRefresh);
   window.visualViewport?.addEventListener('resize', scheduleRefresh);
   window.addEventListener('atlas-languagechange', scheduleRefresh);
-  mobile.addEventListener('change', () => { cancelGesture(); apply(); onChange(snap); });
+  mobile.addEventListener('change', () => {
+    cancelGesture();
+    apply();
+    onChange(snap);
+  });
   apply();
 
   return {
-    open, setSnap, close, refresh,
+    open,
+    setSnap,
+    close,
+    refresh,
     getState: () => snap,
-    getInset: () => isVisible() ? sidebar.getBoundingClientRect().height : 0,
-    getTargetInset: () => isVisible() ? heights[snap] : 0,
+    getInset: () => (isVisible() ? sidebar.getBoundingClientRect().height : 0),
+    getTargetInset: () => (isVisible() ? heights[snap] : 0),
   };
 }

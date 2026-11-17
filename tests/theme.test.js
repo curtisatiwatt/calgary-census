@@ -5,7 +5,9 @@ const storageKey = 'census-atlas-theme';
 let moduleId = 0;
 
 async function withBrowser(options, check) {
-  const previous = Object.fromEntries(['window', 'document', 'localStorage'].map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)]));
+  const previous = Object.fromEntries(
+    ['window', 'document', 'localStorage'].map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)]),
+  );
   const saved = new Map(options.preference === undefined ? [] : [[storageKey, options.preference]]);
   const writes = [];
   const events = [];
@@ -16,15 +18,21 @@ async function withBrowser(options, check) {
   const meta = new Map();
   const media = {
     matches: Boolean(options.systemDark),
-    addEventListener(type, listener) { if (type === 'change') mediaListeners.add(listener); },
+    addEventListener(type, listener) {
+      if (type === 'change') mediaListeners.add(listener);
+    },
   };
   const document = {
     documentElement: { dataset: {}, style: {} },
-    getElementById: id => id === 'theme-preference' ? select : null,
-    querySelector: selector => selector === 'meta[name="theme-color"]' ? { setAttribute: (key, value) => meta.set(key, value) } : null,
+    getElementById: id => (id === 'theme-preference' ? select : null),
+    querySelector: selector =>
+      selector === 'meta[name="theme-color"]' ? { setAttribute: (key, value) => meta.set(key, value) } : null,
   };
   const window = {
-    matchMedia(query) { assert.equal(query, '(prefers-color-scheme: dark)'); return media; },
+    matchMedia(query) {
+      assert.equal(query, '(prefers-color-scheme: dark)');
+      return media;
+    },
     addEventListener(type, listener) {
       if (!windowListeners.has(type)) windowListeners.set(type, new Set());
       windowListeners.get(type).add(listener);
@@ -36,7 +44,10 @@ async function withBrowser(options, check) {
     },
   };
   const localStorage = {
-    getItem(key) { if (options.blockedStorage) throw new Error('Storage is disabled'); return saved.get(key) ?? null; },
+    getItem(key) {
+      if (options.blockedStorage) throw new Error('Storage is disabled');
+      return saved.get(key) ?? null;
+    },
     removeItem(key) {
       if (options.blockedStorage) throw new Error('Storage is disabled');
       saved.delete(key);
@@ -53,11 +64,21 @@ async function withBrowser(options, check) {
   try {
     const theme = await import(`../src/theme.js?theme-test=${++moduleId}`);
     await check({
-      theme, document, saved, writes, events, meta, select,
+      theme,
+      document,
+      saved,
+      writes,
+      events,
+      meta,
+      select,
       choose: value => selectListeners.get('change')({ target: { value } }),
-      changeSystem(dark) { media.matches = dark; mediaListeners.forEach(listener => listener({ matches: dark })); },
+      changeSystem(dark) {
+        media.matches = dark;
+        mediaListeners.forEach(listener => listener({ matches: dark }));
+      },
       receivePreference(value) {
-        if (value === null) saved.delete(storageKey); else saved.set(storageKey, value);
+        if (value === null) saved.delete(storageKey);
+        else saved.set(storageKey, value);
         window.dispatchEvent({ type: 'storage', key: storageKey, newValue: value });
       },
     });
@@ -144,26 +165,28 @@ test('other-tab changes synchronize and removing the preference resumes system f
   });
 });
 
-
 test('settings can return a manual theme to the device setting without duplicate repaint events', async () => {
-  await withBrowser({ preference: 'light', systemDark: false }, ({ theme, choose, changeSystem, saved, select, events }) => {
-    theme.initTheme();
-    assert.equal(select.value, 'light');
-    const previousEvents = events.length;
-    choose('system');
-    assert.equal(theme.getThemePreference(), 'system');
-    assert.equal(select.value, 'system');
-    assert.equal(saved.has(storageKey), false);
-    assert.equal(events.length, previousEvents);
-    changeSystem(true);
-    assert.equal(theme.getTheme(), 'dark');
-    choose('light');
-    assert.equal(select.value, 'light');
-    assert.equal(saved.get(storageKey), 'light');
-    changeSystem(false);
-    changeSystem(true);
-    assert.equal(theme.getTheme(), 'light');
-  });
+  await withBrowser(
+    { preference: 'light', systemDark: false },
+    ({ theme, choose, changeSystem, saved, select, events }) => {
+      theme.initTheme();
+      assert.equal(select.value, 'light');
+      const previousEvents = events.length;
+      choose('system');
+      assert.equal(theme.getThemePreference(), 'system');
+      assert.equal(select.value, 'system');
+      assert.equal(saved.has(storageKey), false);
+      assert.equal(events.length, previousEvents);
+      changeSystem(true);
+      assert.equal(theme.getTheme(), 'dark');
+      choose('light');
+      assert.equal(select.value, 'light');
+      assert.equal(saved.get(storageKey), 'light');
+      changeSystem(false);
+      changeSystem(true);
+      assert.equal(theme.getTheme(), 'light');
+    },
+  );
 });
 
 test('returning to automatic theme still works when preference storage is blocked', async () => {

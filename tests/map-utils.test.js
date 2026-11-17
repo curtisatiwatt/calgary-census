@@ -1,6 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { colorFor, searchFeatures, hashCode, summarize, safeUrl, parseHashState, buildHashState } from '../src/map-utils.js';
+import {
+  colorFor,
+  searchFeatures,
+  hashCode,
+  summarize,
+  safeUrl,
+  parseHashState,
+  buildHashState,
+} from '../src/map-utils.js';
 
 test('income boundaries stay separate from unavailable values', () => {
   assert.equal(colorFor(null), '#d6dcd9');
@@ -41,14 +49,42 @@ test('source links cannot execute script or use insecure protocols', () => {
 test('view state round-trips through the URL hash and ignores unknown values', () => {
   const features = [{ properties: { code: 'ASP' } }, { properties: { code: 'BLN' } }];
   const ids = ['chinese', 'south_asian', 'black'];
-  const view = { code: 'ASP', view: 'distribution', groups: ['chinese', 'south_asian'], compare: 'south_asian', income: true, transit: true, landmarks: false };
+  const view = {
+    code: 'ASP',
+    view: 'distribution',
+    groups: ['chinese', 'south_asian'],
+    compare: 'south_asian',
+    income: true,
+    transit: true,
+    landmarks: false,
+  };
   const hash = buildHashState(view);
   assert.equal(hash, '#ASP?view=compare&groups=chinese,south_asian&compare=south_asian&income=1&layers=transit');
   assert.deepEqual(parseHashState(hash, features, ids), view);
   // The original bare-code links keep working, and stale or hostile values are dropped.
-  assert.deepEqual(parseHashState('#BLN', features, ids), { code: 'BLN', groups: [], compare: null, view: 'composition', income: false, transit: false, landmarks: false });
-  const messy = parseHashState('#nope?view=compare&groups=chinese,<script>,chinese&compare=black&layers=roads,landmarks', features, ids);
-  assert.deepEqual(messy, { code: null, groups: ['chinese'], compare: null, view: 'distribution', income: false, transit: false, landmarks: true });
+  assert.deepEqual(parseHashState('#BLN', features, ids), {
+    code: 'BLN',
+    groups: [],
+    compare: null,
+    view: 'composition',
+    income: false,
+    transit: false,
+    landmarks: false,
+  });
+  const messy = parseHashState(
+    '#nope?view=compare&groups=chinese,<script>,chinese&compare=black&layers=roads,landmarks',
+    features,
+    ids,
+  );
+  assert.deepEqual(messy, {
+    code: null,
+    groups: ['chinese'],
+    compare: null,
+    view: 'distribution',
+    income: false,
+    transit: false,
+    landmarks: true,
+  });
   assert.equal(hashCode('#ASP?groups=chinese', features), 'ASP');
   assert.equal(buildHashState({}), '');
   assert.equal(buildHashState({ groups: ['black'] }), '#?groups=black');

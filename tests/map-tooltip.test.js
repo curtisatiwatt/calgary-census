@@ -5,28 +5,49 @@ import { createMapTooltip } from '../src/map-tooltip.js';
 class Events {
   handlers = new Map();
   on(type, fn) {
-    if (typeof type === 'object') { for (const [event, handler] of Object.entries(type)) this.on(event, handler); return this; }
+    if (typeof type === 'object') {
+      for (const [event, handler] of Object.entries(type)) this.on(event, handler);
+      return this;
+    }
     if (!this.handlers.has(type)) this.handlers.set(type, new Set());
     this.handlers.get(type).add(fn);
     return this;
   }
   off(type, fn) {
-    if (typeof type === 'object') { for (const [event, handler] of Object.entries(type)) this.off(event, handler); return this; }
+    if (typeof type === 'object') {
+      for (const [event, handler] of Object.entries(type)) this.off(event, handler);
+      return this;
+    }
     this.handlers.get(type)?.delete(fn);
     return this;
   }
-  fire(type, event = {}) { for (const fn of [...(this.handlers.get(type) || [])]) fn(event); return this; }
-  addEventListener(type, fn) { this.on(type, fn); }
-  removeEventListener(type, fn) { this.off(type, fn); }
+  fire(type, event = {}) {
+    for (const fn of [...(this.handlers.get(type) || [])]) fn(event);
+    return this;
+  }
+  addEventListener(type, fn) {
+    this.on(type, fn);
+  }
+  removeEventListener(type, fn) {
+    this.off(type, fn);
+  }
 }
 
 class Element extends Events {
   attributes = new Map();
   focusVisible = false;
-  getAttribute(name) { return this.attributes.get(name) ?? null; }
-  setAttribute(name, value) { this.attributes.set(name, value); }
-  removeAttribute(name) { this.attributes.delete(name); }
-  matches(selector) { return selector === ':focus-visible' && this.focusVisible; }
+  getAttribute(name) {
+    return this.attributes.get(name) ?? null;
+  }
+  setAttribute(name, value) {
+    this.attributes.set(name, value);
+  }
+  removeAttribute(name) {
+    this.attributes.delete(name);
+  }
+  matches(selector) {
+    return selector === ':focus-visible' && this.focusVisible;
+  }
 }
 
 function setup() {
@@ -38,11 +59,26 @@ function setup() {
   const map = Object.assign(new Events(), { getContainer: () => container, hasLayer: layer => layers.has(layer) });
   let openings = 0;
   const tooltip = Object.assign(new Events(), {
-    options: {}, content: null, latlng: null,
-    setContent(value) { this.content = value; return this; },
-    setLatLng(value) { this.latlng = value; return this; },
-    openOn() { if (!visible.has(this)) openings += 1; visible.add(this); return this; },
-    close() { if (visible.delete(this)) this.fire('remove'); return this; },
+    options: {},
+    content: null,
+    latlng: null,
+    setContent(value) {
+      this.content = value;
+      return this;
+    },
+    setLatLng(value) {
+      this.latlng = value;
+      return this;
+    },
+    openOn() {
+      if (!visible.has(this)) openings += 1;
+      visible.add(this);
+      return this;
+    },
+    close() {
+      if (visible.delete(this)) this.fire('remove');
+      return this;
+    },
     getElement: () => ({ id: 'shared-tooltip' }),
   });
   let enabled = true;
@@ -55,8 +91,23 @@ function setup() {
     controller.bind(layer, { content: name, anchor: event => event?.latlng || [0, 0] });
     return { layer, element };
   };
-  return { controller, map, tooltip, visible, container, document, window, add,
-    openings: () => openings, setEnabled: value => { enabled = value; }, setHoverEnabled: value => { hoverEnabled = value; } };
+  return {
+    controller,
+    map,
+    tooltip,
+    visible,
+    container,
+    document,
+    window,
+    add,
+    openings: () => openings,
+    setEnabled: value => {
+      enabled = value;
+    },
+    setHoverEnabled: value => {
+      hoverEnabled = value;
+    },
+  };
 }
 
 test('dragging across many communities cannot reopen departed tooltips at moveend', () => {
@@ -119,7 +170,11 @@ test('touch/mobile input does not create hover cards; keyboard focus retains an 
   layer.fire('mouseover');
   assert.equal(s.visible.size, 0);
   s.setEnabled(true);
-  for (const originalEvent of [{ pointerType: 'touch' }, { sourceCapabilities: { firesTouchEvents: true } }, { buttons: 1 }]) {
+  for (const originalEvent of [
+    { pointerType: 'touch' },
+    { sourceCapabilities: { firesTouchEvents: true } },
+    { buttons: 1 },
+  ]) {
     layer.fire('mouseover', { originalEvent });
     assert.equal(s.visible.size, 0);
   }
@@ -144,7 +199,11 @@ test('leaving, Escape, backgrounding, removal and destruction clean up the overl
     () => s.document.fire('keydown', { key: 'Escape' }),
     () => s.window.fire('blur'),
     () => s.window.fire('resize'),
-    () => { s.document.hidden = true; s.document.fire('visibilitychange'); s.document.hidden = false; },
+    () => {
+      s.document.hidden = true;
+      s.document.fire('visibilitychange');
+      s.document.hidden = false;
+    },
     () => s.map.fire('preclick'),
     () => s.tooltip.close(),
   ];

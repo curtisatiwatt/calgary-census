@@ -6,7 +6,9 @@ const HAN = /[一-鿿]/;
 async function openMap(page, hash = '') {
   const errors = [];
   page.on('pageerror', error => errors.push(String(error)));
-  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  page.on('console', message => {
+    if (message.type() === 'error') errors.push(message.text());
+  });
   await page.goto(`./${hash ? `#${hash}` : ''}`);
   await expect(page.locator('#loading-overlay')).toBeHidden();
   await expect(page.locator('#composition-map path[data-community]')).toHaveCount(313);
@@ -22,8 +24,10 @@ async function untranslatedText(page) {
     for (let node = walker.nextNode(); node; node = walker.nextNode()) {
       const element = node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
       if (!element || element.closest('script, style, noscript, [lang^="zh"], #language-preference')) continue;
-      const values = node.nodeType === Node.TEXT_NODE ? [node.nodeValue]
-        : ['aria-label', 'title', 'placeholder', 'alt'].map(name => node.getAttribute(name)).filter(Boolean);
+      const values =
+        node.nodeType === Node.TEXT_NODE
+          ? [node.nodeValue]
+          : ['aria-label', 'title', 'placeholder', 'alt'].map(name => node.getAttribute(name)).filter(Boolean);
       for (const value of values) if (han.test(value) || /\{\w+\}/.test(value)) found.push(value.trim().slice(0, 80));
     }
     return found;
@@ -94,10 +98,18 @@ test('groups, compare view and URL state work together', async ({ page, isMobile
 test('switching language updates the interface and returns cleanly', async ({ page }) => {
   await openMap(page, 'ASP');
   const select = page.locator('#language-preference');
-  await page.evaluate(() => { const s = document.getElementById('language-preference'); s.value = 'zh'; s.dispatchEvent(new Event('change')); });
+  await page.evaluate(() => {
+    const s = document.getElementById('language-preference');
+    s.value = 'zh';
+    s.dispatchEvent(new Event('change'));
+  });
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
   await expect(page.locator('#search')).toHaveAttribute('placeholder', '搜索 Calgary 社区');
-  await page.evaluate(() => { const s = document.getElementById('language-preference'); s.value = 'en'; s.dispatchEvent(new Event('change')); });
+  await page.evaluate(() => {
+    const s = document.getElementById('language-preference');
+    s.value = 'en';
+    s.dispatchEvent(new Event('change'));
+  });
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await expect(select).toHaveValue('en');
   expect(await untranslatedText(page)).toEqual([]);

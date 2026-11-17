@@ -31,20 +31,30 @@ export function createCommunityHighlight({ L, map, features, isDark = () => fals
     if (!feature) return [];
     const dark = isDark();
     const common = {
-      pane: paneName, interactive: false, bubblingMouseEvents: false,
-      fill: false, opacity: 1, lineCap: 'round', lineJoin: 'round',
+      pane: paneName,
+      interactive: false,
+      bubblingMouseEvents: false,
+      fill: false,
+      opacity: 1,
+      lineCap: 'round',
+      lineJoin: 'round',
       // Keep every source ring and vertex. Clipping a polygon at the viewport
       // can invent a straight edge; simplification can eat narrow boundary turns.
-      noClip: true, smoothFactor: 0, dashArray: null,
+      noClip: true,
+      smoothFactor: 0,
+      dashArray: null,
     };
     const name = selected ? 'selected' : 'hover';
     return [
       L.geoJSON(feature, {
-        ...common, color: dark ? '#0f252e' : '#ffffff', weight: selected ? 7 : 5.5,
+        ...common,
+        color: dark ? '#0f252e' : '#ffffff',
+        weight: selected ? 7 : 5.5,
         className: `community-${name}-halo`,
       }).addTo(map),
       L.geoJSON(feature, {
-        ...common, color: selected ? (dark ? '#9bdcf4' : '#075d83') : (dark ? '#ecf4f7' : '#334d5c'),
+        ...common,
+        color: selected ? (dark ? '#9bdcf4' : '#075d83') : dark ? '#ecf4f7' : '#334d5c',
         weight: selected ? 3.5 : 2.25,
         className: `community-${name}-outline`,
       }).addTo(map),
@@ -65,9 +75,18 @@ export function createCommunityHighlight({ L, map, features, isDark = () => fals
 
   function show(binding, event, keyboard = false) {
     const original = event?.originalEvent;
-    if (destroyed || moving || zooming || !map.hasLayer(binding.layer)
-      || (!keyboard && (!hoverEnabled() || original?.pointerType === 'touch'
-        || original?.sourceCapabilities?.firesTouchEvents || original?.buttons > 0))) return;
+    if (
+      destroyed ||
+      moving ||
+      zooming ||
+      !map.hasLayer(binding.layer) ||
+      (!keyboard &&
+        (!hoverEnabled() ||
+          original?.pointerType === 'touch' ||
+          original?.sourceCapabilities?.firesTouchEvents ||
+          original?.buttons > 0))
+    )
+      return;
     if (active?.binding === binding) return;
     active = { binding, code: binding.code };
     drawHover();
@@ -79,8 +98,12 @@ export function createCommunityHighlight({ L, map, features, isDark = () => fals
     bindings.add(binding);
     let element;
     const hover = event => show(binding, event);
-    const leave = () => { if (active?.binding === binding) clearHover(); };
-    const focus = () => { if (element?.matches(':focus-visible')) show(binding, undefined, true); };
+    const leave = () => {
+      if (active?.binding === binding) clearHover();
+    };
+    const focus = () => {
+      if (element?.matches(':focus-visible')) show(binding, undefined, true);
+    };
     const detach = () => {
       element?.removeEventListener('focus', focus);
       element?.removeEventListener('blur', leave);
@@ -94,7 +117,10 @@ export function createCommunityHighlight({ L, map, features, isDark = () => fals
     };
     const handlers = { mouseover: hover, mousemove: hover, mouseout: leave, add: attach, remove: unbind };
     function unbind() {
-      leave(); detach(); layer.off(handlers); bindings.delete(binding);
+      leave();
+      detach();
+      layer.off(handlers);
+      bindings.delete(binding);
     }
     binding.unbind = unbind;
     layer.on(handlers);
@@ -119,18 +145,40 @@ export function createCommunityHighlight({ L, map, features, isDark = () => fals
     else drawHover();
   }
 
-  const startMove = () => { moving = true; clearHover(); };
-  const endMove = () => { moving = false; };
-  const startZoom = () => { zooming = true; clearHover(); };
-  const endZoom = () => { zooming = false; };
-  const visibility = () => { if (document.hidden) clearHover(); };
-  const keydown = event => { if (event.key === 'Escape') clearHover(); };
-  const mapEvents = { movestart: startMove, moveend: endMove, zoomstart: startZoom, zoomend: endZoom, preclick: clearHover, unload: destroy };
+  const startMove = () => {
+    moving = true;
+    clearHover();
+  };
+  const endMove = () => {
+    moving = false;
+  };
+  const startZoom = () => {
+    zooming = true;
+    clearHover();
+  };
+  const endZoom = () => {
+    zooming = false;
+  };
+  const visibility = () => {
+    if (document.hidden) clearHover();
+  };
+  const keydown = event => {
+    if (event.key === 'Escape') clearHover();
+  };
+  const mapEvents = {
+    movestart: startMove,
+    moveend: endMove,
+    zoomstart: startZoom,
+    zoomend: endZoom,
+    preclick: clearHover,
+    unload: destroy,
+  };
 
   function destroy() {
     if (destroyed) return;
     destroyed = true;
-    clearHover(); remove(selectedPaths);
+    clearHover();
+    remove(selectedPaths);
     for (const binding of [...bindings]) binding.unbind();
     map.off(mapEvents);
     container.removeEventListener('mouseleave', clearHover);

@@ -9,8 +9,11 @@ const integrity = read('data/audit/data-integrity.json');
 for (const [path, expected] of Object.entries(integrity.files)) {
   const bytes = fs.readFileSync(new URL(path, root));
   assert.equal(bytes.length, expected.bytes, `${path}: published data file size changed`);
-  assert.equal(createHash('sha256').update(bytes).digest('hex'), expected.sha256,
-    `${path}: differs from the published Calgary data snapshot`);
+  assert.equal(
+    createHash('sha256').update(bytes).digest('hex'),
+    expected.sha256,
+    `${path}: differs from the published Calgary data snapshot`,
+  );
 }
 
 const communities = read('public/data/communities.geojson');
@@ -34,16 +37,18 @@ function inRing([x, y], ring) {
   for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
     const [xi, yi] = ring[i];
     const [xj, yj] = ring[j];
-    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
   }
   return inside;
 }
 
 function containsAnchor(feature) {
-  const polygons = feature.geometry.type === 'MultiPolygon'
-    ? feature.geometry.coordinates : [feature.geometry.coordinates];
-  return polygons.some(([outer, ...holes]) => inRing(feature.properties.centroid, outer)
-    && !holes.some(hole => inRing(feature.properties.centroid, hole)));
+  const polygons =
+    feature.geometry.type === 'MultiPolygon' ? feature.geometry.coordinates : [feature.geometry.coordinates];
+  return polygons.some(
+    ([outer, ...holes]) =>
+      inRing(feature.properties.centroid, outer) && !holes.some(hole => inRing(feature.properties.centroid, hole)),
+  );
 }
 
 const counts = { income: 0, chinese: 0, chineseZero: 0, chineseSum: 0 };
@@ -53,8 +58,13 @@ for (const feature of communities.features) {
   assert.ok(p.name && p.code, 'Every area needs its original identity');
   assert.ok(!Object.hasOwn(p, 'note'), 'Public areas must not contain editorial selection advice');
   assert.ok(['Polygon', 'MultiPolygon'].includes(feature.geometry.type));
-  assert.ok(Array.isArray(p.centroid) && p.centroid[0] > -115 && p.centroid[0] < -113
-    && p.centroid[1] > 50 && p.centroid[1] < 52);
+  assert.ok(
+    Array.isArray(p.centroid) &&
+      p.centroid[0] > -115 &&
+      p.centroid[0] < -113 &&
+      p.centroid[1] > 50 &&
+      p.centroid[1] < 52,
+  );
   assert.ok(containsAnchor(feature), `${p.name}: display anchor must be inside the community`);
   types[p.type] = (types[p.type] || 0) + 1;
   if (p.income !== null) {
@@ -87,4 +97,6 @@ assert.equal(basemap.features.filter(f => f.properties.kind === 'water').length,
 assert.equal(searchFeatures(communities.features, 'aspen woods')[0].properties.code, 'ASP');
 assert.equal(searchFeatures(communities.features, 'AUB')[0].properties.code, 'AUB');
 
-console.log(`PASS: published data SHA-256 matches; 313 unique Calgary areas; ${counts.income} income and ${counts.chinese} Chinese values; 7 published zeros; all anchors inside boundaries; metadata, sources and basemap valid.`);
+console.log(
+  `PASS: published data SHA-256 matches; 313 unique Calgary areas; ${counts.income} income and ${counts.chinese} Chinese values; 7 published zeros; all anchors inside boundaries; metadata, sources and basemap valid.`,
+);

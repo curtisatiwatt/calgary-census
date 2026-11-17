@@ -5,25 +5,68 @@ import { createCommunityHighlight } from '../src/community-highlight.js';
 class Events {
   handlers = new Map();
   on(type, fn) {
-    if (typeof type === 'object') { for (const [name, handler] of Object.entries(type)) this.on(name, handler); return this; }
+    if (typeof type === 'object') {
+      for (const [name, handler] of Object.entries(type)) this.on(name, handler);
+      return this;
+    }
     if (!this.handlers.has(type)) this.handlers.set(type, new Set());
-    this.handlers.get(type).add(fn); return this;
+    this.handlers.get(type).add(fn);
+    return this;
   }
   off(type, fn) {
-    if (typeof type === 'object') { for (const [name, handler] of Object.entries(type)) this.off(name, handler); return this; }
-    this.handlers.get(type)?.delete(fn); return this;
+    if (typeof type === 'object') {
+      for (const [name, handler] of Object.entries(type)) this.off(name, handler);
+      return this;
+    }
+    this.handlers.get(type)?.delete(fn);
+    return this;
   }
-  fire(type, event = {}) { for (const handler of [...(this.handlers.get(type) || [])]) handler(event); return this; }
-  addEventListener(type, fn) { this.on(type, fn); }
-  removeEventListener(type, fn) { this.off(type, fn); }
+  fire(type, event = {}) {
+    for (const handler of [...(this.handlers.get(type) || [])]) handler(event);
+    return this;
+  }
+  addEventListener(type, fn) {
+    this.on(type, fn);
+  }
+  removeEventListener(type, fn) {
+    this.off(type, fn);
+  }
 }
 
-const feature = code => ({ type: 'Feature', properties: { code }, geometry: {
-  type: 'MultiPolygon', coordinates: [
-    [[[0, 0], [0, 8], [8, 8], [8, 0], [0, 0]], [[2, 2], [2, 4], [4, 4], [4, 2], [2, 2]]],
-    [[[10, 0], [10, 3], [13, 3], [13, 0], [10, 0]]],
-  ],
-} });
+const feature = code => ({
+  type: 'Feature',
+  properties: { code },
+  geometry: {
+    type: 'MultiPolygon',
+    coordinates: [
+      [
+        [
+          [0, 0],
+          [0, 8],
+          [8, 8],
+          [8, 0],
+          [0, 0],
+        ],
+        [
+          [2, 2],
+          [2, 4],
+          [4, 4],
+          [4, 2],
+          [2, 2],
+        ],
+      ],
+      [
+        [
+          [10, 0],
+          [10, 3],
+          [13, 3],
+          [13, 0],
+          [10, 0],
+        ],
+      ],
+    ],
+  },
+});
 
 function setup() {
   const window = new Events();
@@ -38,29 +81,66 @@ function setup() {
   const map = Object.assign(new Events(), {
     getContainer: () => container,
     getPane: name => panes.get(name),
-    createPane(name) { const pane = { style: {} }; panes.set(name, pane); return pane; },
+    createPane(name) {
+      const pane = { style: {} };
+      panes.set(name, pane);
+      return pane;
+    },
     hasLayer: layer => layers.has(layer),
     removeLayer: layer => layers.delete(layer),
   });
-  const L = { geoJSON(data, options) {
-    const layer = {
-      data, options, front: 0,
-      addTo() { layers.add(this); paths.push(this); return this; },
-      bringToFront() { this.front = ++front; return this; },
-    };
-    return layer;
-  } };
+  const L = {
+    geoJSON(data, options) {
+      const layer = {
+        data,
+        options,
+        front: 0,
+        addTo() {
+          layers.add(this);
+          paths.push(this);
+          return this;
+        },
+        bringToFront() {
+          this.front = ++front;
+          return this;
+        },
+      };
+      return layer;
+    },
+  };
   const features = [feature('A'), feature('B'), feature('C')];
-  const controller = createCommunityHighlight({ L, map, features, isDark: () => dark, hoverEnabled: () => hoverEnabled });
+  const controller = createCommunityHighlight({
+    L,
+    map,
+    features,
+    isDark: () => dark,
+    hoverEnabled: () => hoverEnabled,
+  });
   const add = code => {
     const element = Object.assign(new Events(), { focusVisible: false, matches: () => element.focusVisible });
     const layer = Object.assign(new Events(), { getElement: () => element });
-    layers.add(layer); controller.bind(layer, code);
+    layers.add(layer);
+    controller.bind(layer, code);
     return { layer, element };
   };
   const visible = type => paths.filter(path => layers.has(path) && (!type || path.options.className.includes(type)));
-  return { map, controller, container, window, document, panes, features, add, visible,
-    dark: value => { dark = value; }, hover: value => { hoverEnabled = value; } };
+  return {
+    map,
+    controller,
+    container,
+    window,
+    document,
+    panes,
+    features,
+    add,
+    visible,
+    dark: value => {
+      dark = value;
+    },
+    hover: value => {
+      hoverEnabled = value;
+    },
+  };
 }
 
 test('selection uses the complete multipart boundary above roads and transit, without covering hit targets', () => {
@@ -87,16 +167,24 @@ test('selection uses the complete multipart boundary above roads and transit, wi
 
 test('hovering another community preserves selection; a late mouseout cannot erase the new hover', () => {
   const s = setup();
-  const a = s.add('A'), b = s.add('B'), c = s.add('C');
+  const a = s.add('A'),
+    b = s.add('B'),
+    c = s.add('C');
   s.controller.setSelected('A');
   a.layer.fire('mouseover');
   assert.equal(s.visible().length, 2, 'selected community does not need a second hover outline');
   b.layer.fire('mouseover');
   c.layer.fire('mouseover');
   b.layer.fire('mouseout');
-  assert.deepEqual(s.visible('hover').map(path => path.data.properties.code), ['C', 'C']);
+  assert.deepEqual(
+    s.visible('hover').map(path => path.data.properties.code),
+    ['C', 'C'],
+  );
   assert.equal(s.visible('selected').length, 2);
-  assert.ok(Math.min(...s.visible('selected').map(path => path.front)) > Math.max(...s.visible('hover').map(path => path.front)));
+  assert.ok(
+    Math.min(...s.visible('selected').map(path => path.front)) >
+      Math.max(...s.visible('hover').map(path => path.front)),
+  );
   c.layer.fire('mouseout');
   assert.equal(s.visible('hover').length, 0);
   assert.equal(s.visible('selected').length, 2);
@@ -127,7 +215,12 @@ test('dragging, zooming and resizing clear hover but keep the selected boundary'
 test('touch and pressed-pointer movement never create hover, while keyboard focus can reveal a boundary', () => {
   const s = setup();
   const a = s.add('A');
-  for (const originalEvent of [{ pointerType: 'touch' }, { sourceCapabilities: { firesTouchEvents: true } }, { buttons: 1 }]) a.layer.fire('mouseover', { originalEvent });
+  for (const originalEvent of [
+    { pointerType: 'touch' },
+    { sourceCapabilities: { firesTouchEvents: true } },
+    { buttons: 1 },
+  ])
+    a.layer.fire('mouseover', { originalEvent });
   assert.equal(s.visible().length, 0);
   s.hover(false);
   a.layer.fire('mousemove');
@@ -146,7 +239,8 @@ test('theme refresh, unbinding and disposal do not leave old paths or handlers b
   b.layer.fire('mouseover');
   const old = s.visible();
   const light = s.visible('selected-outline')[0].options.color;
-  s.dark(true); s.controller.refresh();
+  s.dark(true);
+  s.controller.refresh();
   assert.equal(s.visible().length, 4);
   assert.ok(old.every(path => !s.map.hasLayer(path)));
   assert.notEqual(s.visible('selected-outline')[0].options.color, light);
@@ -154,7 +248,8 @@ test('theme refresh, unbinding and disposal do not leave old paths or handlers b
   assert.equal(s.visible('hover').length, 0);
   s.controller.destroy();
   s.controller.destroy();
-  b.layer.fire('mouseover'); s.map.fire('moveend');
+  b.layer.fire('mouseover');
+  s.map.fire('moveend');
   assert.equal(s.visible().length, 0);
   assert.equal(s.window.handlers.get('resize').size, 0);
 });

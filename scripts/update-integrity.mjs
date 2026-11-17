@@ -23,7 +23,9 @@ if (!reason?.trim() || !args.length) {
 
 const root = new URL('../', import.meta.url);
 const INTEGRITY_FILES = ['data/audit/data-integrity.json', 'data/audit/geography-integrity.json'];
-const integrity = Object.fromEntries(INTEGRITY_FILES.map(path => [path, JSON.parse(fs.readFileSync(new URL(path, root), 'utf8'))]));
+const integrity = Object.fromEntries(
+  INTEGRITY_FILES.map(path => [path, JSON.parse(fs.readFileSync(new URL(path, root), 'utf8'))]),
+);
 const changes = Object.fromEntries(INTEGRITY_FILES.map(path => [path, {}]));
 const sections = record => [record.files, record.orientationLandmarks].filter(Boolean);
 
@@ -41,14 +43,22 @@ for (const file of args) {
     console.log(`${file}: unchanged`);
     continue;
   }
-  changes[owner][file] = { inputSha256: previous.sha256, inputBytes: previous.bytes, outputSha256: next.sha256, outputBytes: next.bytes };
+  changes[owner][file] = {
+    inputSha256: previous.sha256,
+    inputBytes: previous.bytes,
+    outputSha256: next.sha256,
+    outputBytes: next.bytes,
+  };
   section[file] = { ...previous, ...next };
 }
 
 for (const path of INTEGRITY_FILES) {
   if (!Object.keys(changes[path]).length) continue;
   const record = integrity[path];
-  record.transformations = [...(record.transformations || []), { date: new Date().toISOString().slice(0, 10), operation: reason.trim(), files: changes[path] }];
+  record.transformations = [
+    ...(record.transformations || []),
+    { date: new Date().toISOString().slice(0, 10), operation: reason.trim(), files: changes[path] },
+  ];
   fs.writeFileSync(new URL(path, root), `${JSON.stringify(record, null, 2)}\n`);
   console.log(`${path}: recorded ${Object.keys(changes[path]).join(', ')}`);
 }

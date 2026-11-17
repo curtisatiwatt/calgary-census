@@ -1,15 +1,26 @@
 import { addTranslations, t } from './i18n.js';
 
 addTranslations({
-  '返回菜单': 'Back to menu', '菜单': 'Menu', '关闭菜单': 'Close menu',
-  '返回地图设置': 'Back to menu', '数据说明': 'About the data',
+  返回菜单: 'Back to menu',
+  菜单: 'Menu',
+  关闭菜单: 'Close menu',
+  返回地图设置: 'Back to menu',
+  数据说明: 'About the data',
   '道路、轻轨与地标': 'Roads, transit and landmarks',
-  '统计口径与官方来源': 'Definitions and official sources',
-  '显示偏好': 'Display preferences', '地图与资料': 'Map and data',
-  '地图视图': 'Map view', '数据与图层': 'Data and layers',
-  '更多': 'More', '地图设置': 'Map menu', '关闭设置': 'Close menu',
-  '图例': 'Legend', '关闭图例': 'Close legend', '查看详情': 'Details', '收起': 'Collapse',
-  '语言': 'Language', '外观': 'Appearance',
+  统计口径与官方来源: 'Definitions and official sources',
+  显示偏好: 'Display preferences',
+  地图与资料: 'Map and data',
+  地图视图: 'Map view',
+  数据与图层: 'Data and layers',
+  更多: 'More',
+  地图设置: 'Map menu',
+  关闭设置: 'Close menu',
+  图例: 'Legend',
+  关闭图例: 'Close legend',
+  查看详情: 'Details',
+  收起: 'Collapse',
+  语言: 'Language',
+  外观: 'Appearance',
   '搜索 Calgary 社区': 'Search Calgary communities',
 });
 
@@ -45,18 +56,27 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
     if (!node || !destination) return;
     if (!portals.has(node)) {
       const marker = document.createComment('mobile control origin');
-      node.before(marker); portals.set(node, marker);
+      node.before(marker);
+      portals.set(node, marker);
     }
     destination.append(node);
   }
-  function restore() { for (const [node, marker] of portals) marker.after(node); }
-  function closeDialog(dialog) { if (dialog.open) dialog.close(); }
+  function restore() {
+    for (const [node, marker] of portals) marker.after(node);
+  }
+  function closeDialog(dialog) {
+    if (dialog.open) dialog.close();
+  }
   function closeFilters() {
     if (!$('groups-panel').hidden) $('close-groups').click();
     if (!$('layers-panel').hidden) $('close-layers').click();
     closeDialog(filters);
   }
-  function closeTransient() { closeDialog(more); closeDialog(legend); closeFilters(); }
+  function closeTransient() {
+    closeDialog(more);
+    closeDialog(legend);
+    closeFilters();
+  }
   function openDialog(dialog) {
     closeTransient();
     if (!dialog.open) dialog.showModal();
@@ -67,7 +87,8 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
     if (!media.matches) return;
     const panel = !$('groups-panel').hidden ? $('groups-panel') : !$('layers-panel').hidden ? $('layers-panel') : null;
     if (!panel) return closeDialog(filters);
-    closeDialog(more); closeDialog(legend);
+    closeDialog(more);
+    closeDialog(legend);
     filters.setAttribute('aria-label', panel.getAttribute('aria-label') || '');
     if (!filters.open) {
       filters.showModal();
@@ -77,21 +98,38 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
   function readInsets() {
     if (!media.matches) return { top: 0, right: 0, bottom: 0, left: 0 };
     const picker = $('mobile-map-switcher');
-    const top = Math.ceil(Math.max(header.getBoundingClientRect().bottom, picker.hidden ? 0 : picker.getBoundingClientRect().bottom)) + 12;
+    const top =
+      Math.ceil(
+        Math.max(header.getBoundingClientRect().bottom, picker.hidden ? 0 : picker.getBoundingClientRect().bottom),
+      ) + 12;
     const bottom = sidebar.dataset.sheetSnap === 'closed' ? 0 : Math.ceil(sidebar.getBoundingClientRect().height);
     return { top, bottom: bottom + 14, left: 12, right: 12 };
   }
   function measure() {
     scheduled = 0;
-    if (!media.matches) { measured = { top: 0, right: 0, bottom: 0, left: 0 }; return; }
-    document.body.classList.toggle('mobile-extra-large', parseFloat(getComputedStyle(document.documentElement).fontSize) >= 28);
-    document.documentElement.style.setProperty('--mobile-header-bottom', `${Math.ceil(header.getBoundingClientRect().bottom)}px`);
+    if (!media.matches) {
+      measured = { top: 0, right: 0, bottom: 0, left: 0 };
+      return;
+    }
+    document.body.classList.toggle(
+      'mobile-extra-large',
+      parseFloat(getComputedStyle(document.documentElement).fontSize) >= 28,
+    );
+    document.documentElement.style.setProperty(
+      '--mobile-header-bottom',
+      `${Math.ceil(header.getBoundingClientRect().bottom)}px`,
+    );
     const next = readInsets();
     document.documentElement.style.setProperty('--mobile-ui-top', `${next.top}px`);
     document.documentElement.style.setProperty('--mobile-sheet-height', `${next.bottom - 14}px`);
-    if (Object.keys(next).some(key => next[key] !== measured[key])) { measured = next; onLayoutChange(next); }
+    if (Object.keys(next).some(key => next[key] !== measured[key])) {
+      measured = next;
+      onLayoutChange(next);
+    }
   }
-  function scheduleMeasure() { if (!scheduled) scheduled = requestAnimationFrame(measure); }
+  function scheduleMeasure() {
+    if (!scheduled) scheduled = requestAnimationFrame(measure);
+  }
   function refresh() {
     const mobile = media.matches;
     const comparing = document.querySelector('.map-workspace').classList.contains('comparing');
@@ -105,7 +143,11 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
       move(pager, $('mobile-map-switcher'));
       move($('groups-panel'), filters);
       move($('layers-panel'), filters);
-    } else if (!mobile && moved) { closeTransient(); restore(); moved = false; }
+    } else if (!mobile && moved) {
+      closeTransient();
+      restore();
+      moved = false;
+    }
     $('mobile-map-switcher').hidden = !mobile || !comparing || !groups;
     pager.hidden = mobile && (!comparing || !groups);
     $('mobile-composition-legend').hidden = comparing;
@@ -122,18 +164,33 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
     $('mobile-more').title = t('菜单');
     $('mobile-more').setAttribute('aria-expanded', String(more.open));
     $('mobile-legend-button').setAttribute('aria-expanded', String(legend.open));
-    syncFilterDialog(); scheduleMeasure();
+    syncFilterDialog();
+    scheduleMeasure();
   }
 
   $('mobile-more').addEventListener('click', () => openDialog(more));
-  $('back-layers')?.addEventListener('click', () => { closeFilters(); openDialog(more); });
-  $('back-groups')?.addEventListener('click', () => { closeFilters(); openDialog(more); });
-  $('back-method')?.addEventListener('click', () => { $('method-dialog').close(); openDialog(more); });
+  $('back-layers')?.addEventListener('click', () => {
+    closeFilters();
+    openDialog(more);
+  });
+  $('back-groups')?.addEventListener('click', () => {
+    closeFilters();
+    openDialog(more);
+  });
+  $('back-method')?.addEventListener('click', () => {
+    $('method-dialog').close();
+    openDialog(more);
+  });
   $('layers-button').addEventListener('click', () => closeDialog(more), true);
-  tabs.addEventListener('click', () => { if (media.matches) closeDialog(more); });
+  tabs.addEventListener('click', () => {
+    if (media.matches) closeDialog(more);
+  });
   $('mobile-legend-button').addEventListener('click', () => {
     if (media.matches) openDialog(legend);
-    else { desktopLegendCollapsed = false; refresh(); }
+    else {
+      desktopLegendCollapsed = false;
+      refresh();
+    }
   });
   $('close-mobile-more').addEventListener('click', () => closeDialog(more));
   $('close-mobile-legend').addEventListener('click', () => {
@@ -146,16 +203,28 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
   });
   $('method-button').addEventListener('click', () => closeDialog(more), true);
   for (const dialog of [more, legend, filters]) {
-    dialog.addEventListener('close', () => { if (dialog === filters) closeFilters(); refresh(); });
+    dialog.addEventListener('close', () => {
+      if (dialog === filters) closeFilters();
+      refresh();
+    });
     dialog.addEventListener('click', event => {
       if (event.target !== dialog) return;
       const box = dialog.getBoundingClientRect();
-      if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) {
-        if (dialog === filters) closeFilters(); else closeDialog(dialog);
+      if (
+        event.clientX < box.left ||
+        event.clientX > box.right ||
+        event.clientY < box.top ||
+        event.clientY > box.bottom
+      ) {
+        if (dialog === filters) closeFilters();
+        else closeDialog(dialog);
       }
     });
   }
-  filters.addEventListener('cancel', event => { event.preventDefault(); closeFilters(); });
+  filters.addEventListener('cancel', event => {
+    event.preventDefault();
+    closeFilters();
+  });
   const layoutObserver = new ResizeObserver(scheduleMeasure);
   for (const node of [header, sidebar, $('mobile-map-switcher')]) layoutObserver.observe(node);
   // State changes are announced explicitly by main.js and the community sheet

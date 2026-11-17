@@ -31,15 +31,25 @@ test('every keyed message has Chinese and English text with the same placeholder
 
 test('every static page string and displayed metadata field has English text', () => {
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8')
-    .replace(/<script[\s\S]*?<\/script>/g, '').replace(/<style[\s\S]*?<\/style>/g, '');
+    .replace(/<script[\s\S]*?<\/script>/g, '')
+    .replace(/<style[\s\S]*?<\/style>/g, '');
   const strings = new Set();
   // Text between tags, and the attributes the page translates.
   for (const [, text] of html.matchAll(/>([^<>]+)</g)) if (hasHan(text)) strings.add(text);
-  for (const [, , value] of html.matchAll(/\s(aria-label|placeholder|title|alt|content|data-mobile-text)="([^"]*)"/g)) if (hasHan(value)) strings.add(value);
+  for (const [, , value] of html.matchAll(/\s(aria-label|placeholder|title|alt|content|data-mobile-text)="([^"]*)"/g))
+    if (hasHan(value)) strings.add(value);
   // Chinese-only spans marked lang="zh-CN" (e.g. the language option) are intentionally untranslated.
   for (const [, text] of html.matchAll(/lang="zh-CN"[^>]*>([^<]+)</g)) strings.delete(text);
   const metadata = read('metadata.json');
-  for (const field of ['incomeDefinition', 'latestCensusNote', 'boundaryNote', 'populationGroupsDefinition', 'populationDefinition', 'childrenDefinition', 'householdSizeDefinition']) {
+  for (const field of [
+    'incomeDefinition',
+    'latestCensusNote',
+    'boundaryNote',
+    'populationGroupsDefinition',
+    'populationDefinition',
+    'childrenDefinition',
+    'householdSizeDefinition',
+  ]) {
     assert.ok(metadata[field], `metadata.json is missing ${field}`);
     strings.add(metadata[field]);
   }
@@ -55,25 +65,34 @@ test('every published community label and caveat has an English equivalent', () 
       if (!source) continue;
       const english = translate(source, 'en');
       assert.equal(hasHan(english), false, `${feature.properties.code}.${field}: ${english}`);
-      assert.deepEqual(english.match(/\d+(?:\.\d+)?/g), source.match(/\d+(?:\.\d+)?/g), `${feature.properties.code}.${field} must retain numbers`);
+      assert.deepEqual(
+        english.match(/\d+(?:\.\d+)?/g),
+        source.match(/\d+(?:\.\d+)?/g),
+        `${feature.properties.code}.${field} must retain numbers`,
+      );
     }
   }
 });
 
 test('all population groups and displayed transit explanations are translated', () => {
-  for (const group of read('population-groups.json').groups) assert.equal(hasHan(translate(group.label, 'en')), false, group.id);
-  for (const file of ['ctrain-operating.geojson', 'ctrain-green.geojson']) for (const feature of read(file).features) {
-    for (const field of ['phaseLabel', 'locationNote', 'note']) {
-      const value = feature.properties[field];
-      if (value) assert.equal(hasHan(translate(value, 'en')), false, `${file}.${field}: ${value}`);
+  for (const group of read('population-groups.json').groups)
+    assert.equal(hasHan(translate(group.label, 'en')), false, group.id);
+  for (const file of ['ctrain-operating.geojson', 'ctrain-green.geojson'])
+    for (const feature of read(file).features) {
+      for (const field of ['phaseLabel', 'locationNote', 'note']) {
+        const value = feature.properties[field];
+        if (value) assert.equal(hasHan(translate(value, 'en')), false, `${file}.${field}: ${value}`);
+      }
     }
-  }
 });
 
 test('missing data and published zeros keep distinct translated meanings', () => {
   setLanguage('en');
   assert.equal(t('unit.people', { count: 0 }), '0 people');
-  assert.equal(t('error.load', { path: 'communities.geojson', status: 404 }), 'Could not load communities.geojson (404)');
+  assert.equal(
+    t('error.load', { path: 'communities.geojson', status: 404 }),
+    'Could not load communities.geojson (404)',
+  );
   setLanguage('zh');
   assert.equal(translate('暂无数据', 'en'), 'No data');
   assert.equal(translate('暂无数据，不是 0%', 'en'), 'No data, not 0%');

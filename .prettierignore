@@ -1,0 +1,11 @@
+# Published data and generated files keep their own formatting.
+public/data/
+data/
+dist/
+package-lock.json
+test-results/
+playwright-report/
+# Page text is matched exactly by the translation table; reflowing it would break that.
+index.html
+# Prose with tables; formatted by hand.
+README.md
