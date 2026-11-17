@@ -634,6 +634,8 @@ test('an untouched city view is fitted again when the desktop window is resized'
   const fitted = await scale();
   await page.locator('#zoom-in').click();
   await expect.poll(scale).toBeGreaterThan(fitted * 1.3);
+  // Measure only once the zoom animation has finished.
+  await expect(page.locator('#composition-map .leaflet-zoom-anim')).toHaveCount(0);
   const zoomed = await scale();
   await page.setViewportSize({ width: 1500, height: 950 });
   await page.waitForTimeout(500);
