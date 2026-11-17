@@ -270,7 +270,16 @@ function createMap(element, groupId = null) {
     onEachFeature(feature, layer) {
       const code = feature.properties.code;
       context.layers.set(code, layer);
-      layer.on('add', () => { const path = layer.getElement(); path?.setAttribute('data-community', code); path?.setAttribute('aria-label', feature.properties.name); });
+      layer.on('add', () => {
+        const path = layer.getElement();
+        if (!path) return;
+        path.setAttribute('data-community', code);
+        path.setAttribute('aria-label', feature.properties.name);
+        path.setAttribute('role', 'button');
+        // Roving tab stop: one community per map is tabbable; arrows move between them.
+        path.setAttribute('tabindex', code === (context.focusCode ?? state.selected) ? '0' : '-1');
+        path.addEventListener('keydown', event => communityKeydown(context, code, event));
+      });
       layer.on('click', () => { selectCommunity(code, false); toggleGroups(false); });
       context.highlights.bind(layer, code);
       context.tooltip.bind(layer, { content: () => tooltipContent(feature, context), anchor: event => event?.latlng || layer.getBounds().getCenter() });
@@ -342,6 +351,49 @@ function ensureVisibleLayers() {
   if (state.roads) ensureLayer('railways');
   if (state.transit) ensureLayer('transit');
   if (state.landmarks) ensureLayer('landmarks');
+}
+
+const ARROWS = { ArrowRight: [1, 0], ArrowLeft: [-1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1] };
+function setRovingCommunity(context, code) {
+  if (!context.layers.has(code)) return;
+  if (context.focusCode && context.focusCode !== code) context.layers.get(context.focusCode)?.getElement()?.setAttribute('tabindex', '-1');
+  context.focusCode = code;
+  context.layers.get(code).getElement()?.setAttribute('tabindex', '0');
+}
+/** Nearest community centre in the arrow's direction, favouring ones straight ahead. */
+function neighbourInDirection(map, code, [dx, dy]) {
+  const point = feature => map.latLngToContainerPoint([feature.properties.centroid[1], feature.properties.centroid[0]]);
+  const from = point(state.byCode.get(code));
+  let best = null;
+  let bestScore = Infinity;
+  for (const feature of state.features) {
+    if (feature.properties.code === code) continue;
+    const p = point(feature);
+    const along = (p.x - from.x) * dx + (p.y - from.y) * dy;
+    if (along <= 2) continue;
+    const score = along + Math.abs((p.x - from.x) * dy - (p.y - from.y) * dx) * 2;
+    if (score < bestScore) { bestScore = score; best = feature; }
+  }
+  return best;
+}
+function communityKeydown(context, code, event) {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    selectCommunity(code, false);
+    toggleGroups(false);
+    return;
+  }
+  const direction = ARROWS[event.key];
+  if (!direction) return;
+  // Arrows move between communities instead of panning the map.
+  event.preventDefault();
+  event.stopPropagation();
+  const next = neighbourInDirection(context.map, code, direction);
+  if (!next) return;
+  const nextCode = next.properties.code;
+  setRovingCommunity(context, nextCode);
+  context.map.panInside([next.properties.centroid[1], next.properties.centroid[0]], { ...fitPadding(context.map), animate: false });
+  context.layers.get(nextCode).getElement()?.focus({ preventScroll: true });
 }
 
 function renderComparisonBasemap(context) {
@@ -447,6 +499,7 @@ function selectCommunity(code, zoom = true, expand = true) {
     else desktopUI?.openDetails();
   } else communitySheet?.refresh();
   refreshStyles();
+  for (const context of state.contexts) setRovingCommunity(context, code);
   renderOverlays();
   renderComparisonHeadings();
   if (zoom) fitCommunity(code, false);
@@ -495,10 +548,11 @@ function updateDonuts() {
     context.donutCodes.add(p.code);
     const marker = L.marker([p.centroid[1], p.centroid[0]], {
       icon: L.divIcon({ className: `population-donut${p.code === state.selected ? ' selected-donut' : ''}`, html, iconSize: [hitSize, hitSize], iconAnchor: [hitSize / 2, hitSize / 2] }),
-      pane: 'donuts', keyboard: true, title: t(`${p.name} 人口构成`), alt: t(`${p.name} 人口构成`), riseOnHover: false,
+      // Communities are reached by keyboard through their polygons; rings would duplicate every stop.
+      pane: 'donuts', keyboard: false, title: t(`${p.name} 人口构成`), alt: t(`${p.name} 人口构成`), riseOnHover: false,
     }).addTo(context.donuts);
     marker.getElement()?.setAttribute('data-population-code', p.code);
-    marker.getElement()?.setAttribute('aria-label', t(`${p.name}，点击查看人口构成`));
+    marker.getElement()?.setAttribute('aria-hidden', 'true');
     marker.on('click', () => { selectCommunity(p.code, false); toggleGroups(false); });
     context.highlights.bind(marker, p.code);
     context.tooltip.bind(marker, { content: () => tooltipContent(feature, context), anchor: () => marker.getLatLng(), offset: [0, -size / 2] });

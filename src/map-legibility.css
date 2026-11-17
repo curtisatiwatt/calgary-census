@@ -94,3 +94,6 @@ html[data-theme=dark] .donut-key i.gap-swatch { border-color: #a6b4ac; }
 html[data-theme=dark] .population-ramp > span { background: var(--bin-dark); }
 .population-bin-labels > span { --bin-color: var(--bin-light); }
 html[data-theme=dark] .population-bin-labels > span { --bin-color: var(--bin-dark); }
+
+/* Community polygons show keyboard focus with the highlight outline, not a bounding box. */
+.leaflet-interactive[data-community]:focus-visible { outline: none; }
