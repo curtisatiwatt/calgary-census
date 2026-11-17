@@ -212,6 +212,25 @@ test('both views share one camera, also when the comparison map is shown again',
   await expect.poll(drift).toBeLessThan(4);
 });
 
+test('the compare switcher hides while empty and shows a long group name in full', async ({ page, isMobile }) => {
+  await openMap(page, '?view=compare');
+  await expect(page.locator('#comparison-empty')).toBeVisible();
+  await expect(page.locator('.comparison-pager')).toBeHidden();
+  test.skip(isMobile, 'the phone switcher is a full-width row of its own');
+  await page.evaluate(() => {
+    location.hash = '#?view=compare&groups=not_visible_minority';
+  });
+  const select = page.locator('#comparison-select');
+  await expect(select.locator('option:checked')).toHaveText('Not a visible minority (Census category)');
+  const { text, room } = await select.evaluate(node => {
+    const canvas = document.createElement('canvas').getContext('2d');
+    canvas.font = getComputedStyle(node).font;
+    return { text: canvas.measureText(node.selectedOptions[0].textContent).width, room: node.clientWidth };
+  });
+  // Room for the name plus the control's own padding and arrow.
+  expect(room).toBeGreaterThan(text + 24);
+});
+
 test('links keep every layer toggle, and a link without a community deselects', async ({ page }) => {
   await openMap(page, 'ASP?groups=chinese&hide=roads,labels');
   await expect(page.locator('#roads-toggle')).not.toBeChecked();

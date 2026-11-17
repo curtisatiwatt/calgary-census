@@ -145,7 +145,8 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
       moved = false;
     }
     $('mobile-map-switcher').hidden = !mobile || !comparing || !groups;
-    pager.hidden = mobile && (!comparing || !groups);
+    // Nothing to switch between until a group is selected (the empty state says so).
+    pager.hidden = !groups || (mobile && !comparing);
     $('mobile-composition-legend').hidden = comparing;
     $('mobile-distribution-legend').hidden = !comparing;
     const hasLegend = comparing ? groups > 0 : groups > 0 || $('income-toggle').checked || $('transit-toggle').checked;

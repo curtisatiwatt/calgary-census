@@ -233,6 +233,11 @@
     padding-top: 12px;
     border-top: 1px solid var(--desktop-border);
   }
+  /* The narrow rail gives its buttons the full width: the bold label of the
+     active English tab ("Composition") is wider than a tighter pill. */
+  body:not(.desktop-menu-expanded) .viewbar {
+    padding-inline: 4px;
+  }
   .viewbar .view-tabs button,
   .viewbar .view-controls > #groups-button,
   .viewbar .view-controls > #layers-button,
@@ -747,10 +752,12 @@
     box-shadow: var(--desktop-shadow);
     pointer-events: auto;
   }
+  /* As wide as the longest selected group name, within the room left beside the
+     search box for the arrows, the counter and the city share. */
   .comparison-pager select {
     display: block;
-    width: 200px;
-    max-width: calc(100vw - var(--desktop-rail-width) - var(--desktop-drawer-width) - 142px);
+    width: auto;
+    max-width: min(340px, calc(100vw - var(--desktop-rail-width) - var(--desktop-drawer-width) - 262px));
     min-width: 105px;
     height: 44px;
     padding: 8px 10px;
@@ -819,9 +826,8 @@
     right: 12px;
   }
   .comparison-pager select {
-    width: 145px;
     min-width: 90px;
-    max-width: calc(100vw - var(--desktop-rail-width) - var(--desktop-drawer-width) - 132px);
+    max-width: calc(100vw - var(--desktop-rail-width) - var(--desktop-drawer-width) - 252px);
     font-size: 13px;
   }
   .comparison-pager button {
@@ -949,6 +955,7 @@
   body.desktop-menu-expanded .comparison-pager select {
     flex: 1 1 auto;
     min-width: 0;
+    max-width: calc(100vw - var(--desktop-rail-width) - var(--desktop-drawer-width) - 132px);
   }
 }
 
