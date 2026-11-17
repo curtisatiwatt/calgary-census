@@ -101,6 +101,9 @@ function renderMetadata() {
   $('coverage-text').textContent = t('meta.coverageShort', { areas: state.counts.total, year: m.populationYear });
   $('year-definition').textContent = t('meta.years', { population: m.populationYear, income: m.incomeYear });
   $('income-definition').textContent = m.incomeDefinition || '';
+  $('population-definition').textContent = m.populationDefinition || '';
+  $('children-definition').textContent = m.childrenDefinition || '';
+  $('household-definition').textContent = m.householdSizeDefinition || '';
   $('latest-census-note').textContent = m.latestCensusNote || '';
   if (m.populationGroupsDefinition) $('population-groups-definition').textContent = m.populationGroupsDefinition;
   $('coverage-definition').textContent = t('meta.coverage', { areas: state.counts.total, groups: Object.keys(state.data.communities).length, income: state.counts.income });

@@ -39,7 +39,10 @@ test('every static page string and displayed metadata field has English text', (
   // Chinese-only spans marked lang="zh-CN" (e.g. the language option) are intentionally untranslated.
   for (const [, text] of html.matchAll(/lang="zh-CN"[^>]*>([^<]+)</g)) strings.delete(text);
   const metadata = read('metadata.json');
-  for (const field of ['incomeDefinition', 'latestCensusNote', 'boundaryNote', 'populationGroupsDefinition']) strings.add(metadata[field]);
+  for (const field of ['incomeDefinition', 'latestCensusNote', 'boundaryNote', 'populationGroupsDefinition', 'populationDefinition', 'childrenDefinition', 'householdSizeDefinition']) {
+    assert.ok(metadata[field], `metadata.json is missing ${field}`);
+    strings.add(metadata[field]);
+  }
   for (const source of metadata.sources) strings.add(source.label);
   const missing = [...strings].filter(text => hasHan(translate(text, 'en')));
   assert.deepEqual(missing, []);

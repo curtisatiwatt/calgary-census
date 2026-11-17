@@ -221,6 +221,11 @@ export function localizeHtml(html) {
 }
 
 addTranslations({
+  '采用市府 2021 年社区普查档案中的私人住户人口，不包含护理机构、收容所等集体住所居民。': 'Population is the private-household population in the City of Calgary’s 2021 Census community profiles. It excludes people living in collective dwellings such as care facilities and shelters.',
+  '0–14 岁人口占比采用市府社区档案概览直接公布的 2021 年比例，保留原始取整值，未使用其他人口指标重新计算。': 'The share of people aged 0–14 is the 2021 percentage published in the community profile summaries, kept with its original rounding rather than recalculated from other population figures.',
+  '平均私人住户人数采用市府 2021 年社区档案直接公布的数值。': 'Average people per private household is the value published in the City’s 2021 community profiles.',
+});
+addTranslations({
   // Fixed legend and placeholder labels shown before data loads.
   '2021 年人口普查': '2021 Census', '家庭税前年收入中位数 · 2020': 'Median before-tax household income · 2020', '私人住户人口 · 2021': 'Private-household population · 2021', '全市 $98,000': 'City $98,000',
   '低于 $60,000': 'Under $60,000', '$200,000 及以上': '$200,000 and above', '40% 及以上': '40% and above',
