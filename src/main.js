@@ -346,9 +346,11 @@ function ensureVisibleLayers() {
 
 function renderComparisonBasemap(context) {
   if (!state.basemap?.features) return;
-  const water = L.geoJSON(state.basemap, { filter: f => f.properties.kind === 'water', pane: 'water', interactive: false }).addTo(context.map);
-  const roadEdges = L.geoJSON(state.basemap, { filter: f => f.properties.kind === 'road', pane: 'roads', interactive: false }).addTo(context.map);
-  const roads = L.geoJSON(state.basemap, { filter: f => f.properties.kind === 'road', pane: 'roads', interactive: false }).addTo(context.map);
+  // Light, non-interactive basemap on canvas; communities above stay SVG.
+  const water = L.geoJSON(state.basemap, { filter: f => f.properties.kind === 'water', pane: 'water', renderer: L.canvas({ pane: 'water' }), interactive: false }).addTo(context.map);
+  const roadRenderer = L.canvas({ pane: 'roads' });
+  const roadEdges = L.geoJSON(state.basemap, { filter: f => f.properties.kind === 'road', pane: 'roads', renderer: roadRenderer, interactive: false }).addTo(context.map);
+  const roads = L.geoJSON(state.basemap, { filter: f => f.properties.kind === 'road', pane: 'roads', renderer: roadRenderer, interactive: false }).addTo(context.map);
   context.refreshBasemap = () => {
     const dark = isDarkTheme();
     water.setStyle({ color: dark ? '#3e6976' : '#8bb8c1', weight: .55, fillColor: dark ? '#234958' : '#b5d3d8', fillOpacity: .75 });

@@ -56,6 +56,13 @@ export function createContextLayers({ context, visible, onStationOpen, getLabelO
   const collection = items => ({ type: 'FeatureCollection', features: items });
   const textMeasure = document.createElement('canvas').getContext('2d');
   const loaded = { basemap: false, railways: false, landmarks: false, transit: false };
+  // Decorative, non-interactive geometry is drawn on one canvas per pane rather
+  // than as thousands of SVG nodes. Communities and stations stay SVG for
+  // pointer, keyboard and screen-reader access.
+  const renderers = {};
+  const canvas = pane => (renderers[pane] ||= L.canvas({ pane, padding: 0.5 }));
+  // Hidden layer groups are removed from the map so they are not redrawn on zoom.
+  const groups = { roads: L.layerGroup(), transit: L.layerGroup(), landmarks: L.layerGroup() };
 
   function roadStyle(feature, casing, zoomBucket, dark) {
     const priority = roadPriority(feature.properties);
@@ -81,9 +88,9 @@ export function createContextLayers({ context, visible, onStationOpen, getLabelO
     roadLabelGroups = groupRoadLabels(roadFeatures);
     waterFeatures = features(basemap).filter(f => f.properties.kind === 'water' && f.properties.name && !/facility|storm.?water|management|industrial|energy park|pond [0-9]/i.test(f.properties.name))
       .sort((a, b) => waterPriority(b.properties.name) - waterPriority(a.properties.name));
-    waterLayer = L.geoJSON(basemap, { filter: f => f.properties.kind === 'water', pane: 'water', interactive: false, style: { color: '#75a7b5', weight: .85, fillColor: '#a5cad4', fillOpacity: .9 } }).addTo(map);
+    waterLayer = L.geoJSON(basemap, { filter: f => f.properties.kind === 'water', pane: 'water', renderer: canvas('water'), interactive: false, style: { color: '#75a7b5', weight: .85, fillColor: '#a5cad4', fillOpacity: .9 } }).addTo(map);
     for (const casing of [true, false]) {
-      const layer = L.geoJSON(collection(roadFeatures), { pane: 'roads', interactive: false, style: feature => roadStyle(feature, casing, 0, isDarkTheme()) }).addTo(map);
+      const layer = L.geoJSON(collection(roadFeatures), { pane: 'roads', renderer: canvas('roads'), interactive: false, style: feature => roadStyle(feature, casing, 0, isDarkTheme()) }).addTo(groups.roads);
       roads.push({ layer, casing });
     }
     attached();
@@ -94,7 +101,7 @@ export function createContextLayers({ context, visible, onStationOpen, getLabelO
     if (loaded.railways || !tracks.length) return;
     loaded.railways = true;
     for (const casing of [true, false]) {
-      const layer = L.geoJSON(collection(tracks), { pane: 'roads', interactive: false, style: { color: casing ? '#65716e' : '#f5f6ed', weight: casing ? 2.1 : 1.2, opacity: .85, dashArray: casing ? null : '7 5' } }).addTo(map);
+      const layer = L.geoJSON(collection(tracks), { pane: 'roads', renderer: canvas('roads'), interactive: false, style: { color: casing ? '#65716e' : '#f5f6ed', weight: casing ? 2.1 : 1.2, opacity: .85, dashArray: casing ? null : '7 5' } }).addTo(groups.roads);
       railways.push({ layer, casing });
     }
     attached();
@@ -118,14 +125,14 @@ export function createContextLayers({ context, visible, onStationOpen, getLabelO
     }
     parkLabelCandidates = [...parkLabelsByName.values()].sort((a, b) => Number(b.iconic) - Number(a.iconic) || (b.feature.properties.areaHa || 0) - (a.feature.properties.areaHa || 0));
     areasLayer = L.geoJSON(collection(areaFeatures), {
-      pane: 'geography', interactive: false,
+      pane: 'geography', renderer: canvas('geography'), interactive: false,
       style: feature => {
         const kind = feature.properties.kind;
         return kind === 'airport' ? { color: '#9585ad', weight: .8, opacity: .55, fillColor: '#c3b9da', fillOpacity: .42 }
           : kind === 'reserve' ? { color: '#af926b', weight: 1, dashArray: '5 4', opacity: .6, fillColor: '#ded0b7', fillOpacity: .35 }
             : { color: '#80a777', weight: .4, opacity: .4, fillColor: '#a5c898', fillOpacity: .42 };
       },
-    }).addTo(map);
+    }).addTo(groups.landmarks);
     attached();
   }
 
@@ -137,13 +144,13 @@ export function createContextLayers({ context, visible, onStationOpen, getLabelO
     stations = transitFeatures.filter(f => f.properties.kind === 'transit_station' && f.geometry?.type === 'Point');
     // All casings are painted first so shared Red / Blue track retains both colours.
     for (const feature of routes) {
-      const layer = L.geoJSON(feature, { pane: 'transit', interactive: false, style: { color: '#fffef7', weight: 4, opacity: .8 } }).addTo(map);
+      const layer = L.geoJSON(feature, { pane: 'transit', renderer: canvas('transit'), interactive: false, style: { color: '#fffef7', weight: 4, opacity: .8 } }).addTo(groups.transit);
       routeCasings.push({ layer, lineId: feature.properties.lineId, future: feature.properties.funding === 'unfunded' });
     }
     for (const lineId of ['red', 'blue', 'green']) {
       for (const feature of routes.filter(f => f.properties.lineId === lineId)) {
         const future = feature.properties.funding === 'unfunded';
-        const layer = L.geoJSON(feature, { pane: 'transit', interactive: false, style: { color: future ? '#65a17b' : LINE_COLORS[lineId], weight: future ? 2.2 : lineId === 'red' ? 5.2 : 3.1, opacity: future ? .82 : .94, dashArray: future ? '3 6' : lineId === 'green' ? '7 6' : null, lineCap: 'round', lineJoin: 'round' } }).addTo(map);
+        const layer = L.geoJSON(feature, { pane: 'transit', renderer: canvas('transit'), interactive: false, style: { color: future ? '#65a17b' : LINE_COLORS[lineId], weight: future ? 2.2 : lineId === 'red' ? 5.2 : 3.1, opacity: future ? .82 : .94, dashArray: future ? '3 6' : lineId === 'green' ? '7 6' : null, lineCap: 'round', lineJoin: 'round' } }).addTo(groups.transit);
         routeLayers.push({ layer, lineId, future });
       }
     }
@@ -187,6 +194,10 @@ export function createContextLayers({ context, visible, onStationOpen, getLabelO
     for (const name of ['roads', 'roadLabels']) map.getPane(name).style.display = visible.roads ? '' : 'none';
     for (const name of ['transit', 'stations', 'stationLabels']) map.getPane(name).style.display = visible.transit ? '' : 'none';
     for (const name of ['geography', 'landmarkLabels']) map.getPane(name).style.display = visible.landmarks ? '' : 'none';
+    for (const [name, group] of Object.entries(groups)) {
+      if (visible[name] && !map.hasLayer(group)) group.addTo(map);
+      else if (!visible[name] && map.hasLayer(group)) map.removeLayer(group);
+    }
     if (!visible.transit) { context.tooltip.close(); map.closePopup(); }
   }
 
