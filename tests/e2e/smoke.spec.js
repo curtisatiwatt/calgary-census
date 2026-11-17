@@ -665,7 +665,10 @@ test('a community tapped low on a phone stays visible above the details sheet', 
   await page.touchscreen.tap(before.x + before.width / 2, before.y + before.height / 2);
   await expect(page.locator('.sidebar')).toHaveAttribute('data-sheet-snap', 'half');
   await expect(page).toHaveURL(/#CRA$/);
-  const sheetTop = (await page.locator('.sidebar').boundingBox()).y;
+  // The sheet grows to half height with a short transition: wait for it to settle.
+  const top = async () => (await page.locator('.sidebar').boundingBox()).y;
+  await expect.poll(top).toBeLessThan(page.viewportSize().height * 0.55);
+  const sheetTop = await top();
   expect(before.y + before.height / 2).toBeGreaterThan(sheetTop);
   await expect
     .poll(async () => {
