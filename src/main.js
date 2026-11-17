@@ -242,7 +242,11 @@ function tooltipContent(feature, context) {
   const record = populationRecord(p.code);
   if (context.groupId) {
     const group = state.groupById.get(context.groupId);
-    return localizeHtml(`<strong>${esc(p.name)}</strong>${esc(group.label)} ${percent(populationShare(record, group.id))}<br>${number(record?.counts[group.id])} 人 · 全市 ${percent(populationShare(state.data.city, group.id))}<span class="tip-note">点击固定社区，查看完整构成</span>`);
+    const count = record?.counts[group.id];
+    const city = `全市 ${percent(populationShare(state.data.city, group.id))}`;
+    // Without a published count, show only the city reference rather than "No data people".
+    const detail = isNumber(count) ? `${number(count)} 人 · ${city}` : city;
+    return localizeHtml(`<strong>${esc(p.name)}</strong>${esc(group.label)} ${percent(populationShare(record, group.id))}<br>${detail}<span class="tip-note">点击固定社区，查看完整构成</span>`);
   }
   return localizeHtml(`<strong>${esc(p.name)}</strong>家庭收入 ${money(p.income)}<br>人口 ${number(record?.population ?? p.population)}${record ? selectedGroups().slice(0, 5).map(g => `<br>${esc(g.label)} ${percent(populationShare(record, g.id))}`).join('') : '<br>人口分类暂无数据'}<span class="tip-note">点击查看社区详情</span>`);
 }
@@ -514,7 +518,7 @@ function renderMobileSummary() {
   if (!p) return;
   if (state.mode === 'distribution') {
     const group = selectedGroups()[state.compareStart];
-    $('collapsed-summary').textContent = group ? `${t(group.label)} ${percent(populationShare(populationRecord(p.code), group.id))} · ${t('全市占比')} ${percent(populationShare(state.data.city, group.id))}` : t('选择人口群体');
+    $('collapsed-summary').textContent = group ? `${t(group.label)} ${t(percent(populationShare(populationRecord(p.code), group.id)))} · ${t('全市占比')} ${t(percent(populationShare(state.data.city, group.id)))}` : t('选择人口群体');
   }
   mobileUI?.refresh();
 }
