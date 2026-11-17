@@ -213,9 +213,6 @@ function renderMetadata() {
   $('income-ramp').innerHTML = INCOME_BINS.map(
     bin => `<span style="${swatch('income', bin.color, bin.color)}" title="${esc(bin.label)}"></span>`,
   ).join('');
-  $('population-ramp').innerHTML = POPULATION_BINS.map(
-    bin => `<span style="${swatch('population', bin.color, bin.dark)}" title="${esc(bin.label)}"></span>`,
-  ).join('');
   document.querySelectorAll('.population-bin-labels>span').forEach((node, index) => {
     const bin = POPULATION_BINS[index];
     if (bin) node.style.cssText = swatch('population', bin.color, bin.dark);
@@ -1091,7 +1088,7 @@ function updateLabels(context) {
     occupied.push(box);
     L.marker([p.centroid[1], p.centroid[0]], {
       icon: L.divIcon({
-        className: `community-label hierarchy-community-label ink-${labelInk(shownFill(context, feature))}${prominent ? ' focus-label' : ''}`,
+        className: `community-label ink-${labelInk(shownFill(context, feature))}${prominent ? ' focus-label' : ''}`,
         html: `<span style="font-size:${size}px;line-height:1.22;font-weight:600">${lines.map(esc).join('<br>')}</span>`,
         iconSize: [width, height],
         iconAnchor: [width / 2, -offset],

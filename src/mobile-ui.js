@@ -48,10 +48,6 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
   // Desktop shows the legend as a persistent, non-modal card that can be collapsed.
   let desktopLegendCollapsed = false;
 
-  // Legends belong to one on-demand dialog on every screen size.
-  for (const id of ['composition-key', 'income-legend', 'transit-legend']) $('mobile-composition-legend').append($(id));
-  $('mobile-distribution-legend').append($('population-legend'));
-
   function move(node, destination) {
     if (!node || !destination) return;
     if (!portals.has(node)) {
