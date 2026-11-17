@@ -69,7 +69,8 @@
   ],
   "coordinatePrecision": 6,
   "simplification": "Ramer-Douglas-Peucker, 3m tolerance for road lines and 1m tolerance for water rings in local equirectangular coordinates at 51 degrees latitude. Road endpoints, polygon closure, and MultiPolygon parts retained. Coordinates then rounded to six decimal places. Cartographic display only. Raw source files retained separately.",
-  "license": "Contains information licensed under the Open Government Licence \u2013 City of Calgary.",
+  "license": "Contains information licensed under the Open Government Licence – City of Calgary.",
   "waterDescription": "Official generalized cartographic hydrology, showing actual waterbody boundaries, not flood hazard extents.",
-  "runtimeNetwork": "None: serve this GeoJSON with the site; no tile API required."
+  "runtimeNetwork": "None: serve this GeoJSON with the site; no tile API required.",
+  "postProcessing": "2026-11-17: geometry coordinates rounded to 5 decimals with scripts/round-coordinates.mjs after this build. The output fingerprints above describe the build script output; the published fingerprints and transformation record are in data-integrity.json."
 }

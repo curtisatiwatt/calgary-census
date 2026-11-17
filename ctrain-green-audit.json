@@ -112,5 +112,6 @@
     "North and south extensions are unfunded. Locations and sequencing may change.",
     "Eau Claire is retained as an official future station point; no speculative connection to the current 2 Street SW terminus is drawn.",
     "Snapshot checked on 2026-11-03, not a live construction or service feed."
-  ]
+  ],
+  "postProcessing": "2026-11-17: geometry coordinates rounded to 5 decimals with scripts/round-coordinates.mjs after this build. The output fingerprints above describe the build script output; the published fingerprints and transformation record are in geography-integrity.json."
 }

@@ -5,13 +5,13 @@
   "files": {
     "public/data/communities.geojson": {
       "originalPath": "dist/communities.geojson",
-      "bytes": 2303326,
-      "sha256": "3e1d8238caf7a4d2117322c8d06a73fb8254d9fd3577cc33f66991a5918cef85"
+      "bytes": 1869464,
+      "sha256": "034929bd499a49424ea6f71bf291366327d21da9980aff9d122b070ef48e5f12"
     },
     "public/data/basemap.geojson": {
       "originalPath": "dist/basemap.geojson",
-      "bytes": 1620525,
-      "sha256": "8e4061339be0275e9ebe2c125ef5ad4fceef3318a7012e340cde39688aa0f5ca"
+      "bytes": 1484991,
+      "sha256": "e007ef48bb97c1552c488a3665b46148210c257937d9bcf1b631af8c052aac3a"
     }
   },
   "transformations": [
@@ -27,6 +27,25 @@
       "outputSha256": "3e1d8238caf7a4d2117322c8d06a73fb8254d9fd3577cc33f66991a5918cef85",
       "outputBytes": 2303326,
       "validation": "Parsed output was deeply compared to the previous published collection after deleting only properties.note. Every geometry, official statistic, source, identifier and data caveat is unchanged."
+    },
+    {
+      "date": "2026-11-17",
+      "operation": "Round geometry coordinates to 5 decimal places (about 1 m; under one pixel at maximum zoom 17) with scripts/round-coordinates.mjs to cut download size. Properties, identifiers, statistics, centroid and labelPoint anchors are unchanged; consecutive vertices that became identical were merged and rings stay closed.",
+      "files": {
+        "public/data/communities.geojson": {
+          "inputSha256": "3e1d8238caf7a4d2117322c8d06a73fb8254d9fd3577cc33f66991a5918cef85",
+          "inputBytes": 2303326,
+          "outputSha256": "034929bd499a49424ea6f71bf291366327d21da9980aff9d122b070ef48e5f12",
+          "outputBytes": 1869464
+        },
+        "public/data/basemap.geojson": {
+          "inputSha256": "8e4061339be0275e9ebe2c125ef5ad4fceef3318a7012e340cde39688aa0f5ca",
+          "inputBytes": 1620525,
+          "outputSha256": "e007ef48bb97c1552c488a3665b46148210c257937d9bcf1b631af8c052aac3a",
+          "outputBytes": 1484991
+        }
+      },
+      "validation": "The script checked every output vertex is an input vertex rounded, in order, and deep-compared every feature's properties; npm run check then re-verified counts, coordinate ranges and that every community display anchor is still inside its boundary."
     }
   ]
 }

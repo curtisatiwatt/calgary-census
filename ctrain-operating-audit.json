@@ -1069,5 +1069,6 @@
         }
       ]
     }
-  ]
+  ],
+  "postProcessing": "2026-11-17: geometry coordinates rounded to 5 decimals with scripts/round-coordinates.mjs after this build. The output fingerprints above describe the build script output; the published fingerprints and transformation record are in geography-integrity.json."
 }

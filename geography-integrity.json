@@ -3,20 +3,20 @@
   "asOf": "2026-11-03",
   "files": {
     "public/data/ctrain-operating.geojson": {
-      "bytes": 79874,
-      "sha256": "3f0479faede092c99a0da3a087e1ad9c44aae9005178be6523fd31e58ed3ca7f"
+      "bytes": 70643,
+      "sha256": "18f6b29804fc3652ae3476229564bc6e34f9565541e61a694c85d6079073e737"
     },
     "public/data/ctrain-green.geojson": {
-      "bytes": 98304,
-      "sha256": "59e7ff7a0851366667ce9b53cf91fa29f21de01be8ad60747e09bc9ee9adf7d8"
+      "bytes": 88441,
+      "sha256": "574789b5cd2eb48bf23b5bb250b9ea2eb576161fa95c43ff836d46b0614f8103"
     },
     "public/data/geographic-context.geojson": {
-      "bytes": 775641,
-      "sha256": "9008e42e7bcc741251a74c90796075c89a372dcd92f624d4593a25dc3a5f6b52"
+      "bytes": 716769,
+      "sha256": "4e2465f6b5d51a686edd238a36769ee0572df007db39bf3f7479471187840dbf"
     },
     "public/data/railways.geojson": {
-      "bytes": 182734,
-      "sha256": "53fe73e44ddf909d2ca6bef59114e8c11b3d15a72eef54558eafd1217167f0cd"
+      "bytes": 167789,
+      "sha256": "6737a23286f626ebfe8efeaa8579f7f2a8adc9845366e533a01069079f9bb353"
     }
   },
   "expected": {
@@ -42,6 +42,45 @@
         }
       },
       "validation": "The union of both outputs was deeply compared with the input features: every feature, property and coordinate is unchanged; only the file each feature lives in changed."
+    },
+    {
+      "date": "2026-11-17",
+      "operation": "Round geometry coordinates to 5 decimal places (about 1 m; under one pixel at maximum zoom 17) with scripts/round-coordinates.mjs to cut download size. Properties, identifiers, statistics, centroid and labelPoint anchors are unchanged; consecutive vertices that became identical were merged and rings stay closed. Three sub-metre fragments of Green Line route parts and one of a railway part collapsed to a single point and were dropped.",
+      "files": {
+        "public/data/ctrain-operating.geojson": {
+          "inputSha256": "3f0479faede092c99a0da3a087e1ad9c44aae9005178be6523fd31e58ed3ca7f",
+          "inputBytes": 79874,
+          "outputSha256": "18f6b29804fc3652ae3476229564bc6e34f9565541e61a694c85d6079073e737",
+          "outputBytes": 70643
+        },
+        "public/data/ctrain-green.geojson": {
+          "inputSha256": "59e7ff7a0851366667ce9b53cf91fa29f21de01be8ad60747e09bc9ee9adf7d8",
+          "inputBytes": 98304,
+          "outputSha256": "574789b5cd2eb48bf23b5bb250b9ea2eb576161fa95c43ff836d46b0614f8103",
+          "outputBytes": 88441
+        },
+        "public/data/geographic-context.geojson": {
+          "inputSha256": "9008e42e7bcc741251a74c90796075c89a372dcd92f624d4593a25dc3a5f6b52",
+          "inputBytes": 775641,
+          "outputSha256": "4e2465f6b5d51a686edd238a36769ee0572df007db39bf3f7479471187840dbf",
+          "outputBytes": 716769,
+          "droppedSubMetreParts": 3
+        },
+        "public/data/railways.geojson": {
+          "inputSha256": "53fe73e44ddf909d2ca6bef59114e8c11b3d15a72eef54558eafd1217167f0cd",
+          "inputBytes": 182734,
+          "outputSha256": "6737a23286f626ebfe8efeaa8579f7f2a8adc9845366e533a01069079f9bb353",
+          "outputBytes": 167789,
+          "droppedSubMetreParts": 1
+        },
+        "public/data/orientation-landmarks.geojson": {
+          "inputSha256": "ae1d95d314b0dec14075e48231d2f8b0e0ba3ad3fa365eb240408d3dfd6ace9a",
+          "inputBytes": 2235,
+          "outputSha256": "683dca32e5397bb512efd20c55375025915aa5cb07ddf606e59f7023ed4d5b77",
+          "outputBytes": 2211
+        }
+      },
+      "validation": "The script checked every output vertex is an input vertex rounded, in order, and deep-compared every feature's properties; npm run check then re-verified counts, coordinate ranges and that every community display anchor is still inside its boundary."
     }
   ]
 }
