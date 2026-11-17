@@ -368,6 +368,25 @@ test('ring segments follow the legend order, whatever order the groups were tick
   await expect.poll(ringColours).toEqual(expected);
 });
 
+test('a chosen community is framed clear of the desktop legend card', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'the persistent legend card is a desktop feature');
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await openMap(page, '?groups=south_asian,chinese,black,filipino,latin_american&income=1&layers=transit');
+  const legend = page.locator('#mobile-legend-dialog');
+  await expect(legend).toBeVisible();
+  for (const name of ['aspen woods', 'beltline', 'cranston']) {
+    await page.locator('#search').fill(name);
+    await page.locator('#search').press('Enter');
+    // Its ring and its name are drawn, which they are not when the card covers them.
+    await expect(page.locator('.selected-donut')).toHaveCount(1);
+    await expect(page.locator('.focus-label')).toHaveCount(1);
+    const card = await legend.boundingBox();
+    const ring = await page.locator('.selected-donut').boundingBox();
+    const centre = { x: ring.x + ring.width / 2, y: ring.y + ring.height / 2 };
+    expect(centre.x > card.x + card.width || centre.y < card.y).toBe(true);
+  }
+});
+
 test('desktop keeps a legend card; mobile opens it on demand', async ({ page, isMobile }) => {
   await openMap(page);
   await chooseTopFive(page, isMobile);

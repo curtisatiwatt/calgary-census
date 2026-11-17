@@ -763,13 +763,28 @@ function mapLabelObstacles(map) {
   return [...bands, ...controls];
 }
 
-function fitPadding(map, community = false) {
+function fitPadding(map) {
   if (!mobile()) {
     const inset = desktopUI?.getInsets() || { top: 24, right: 24, bottom: 24, left: 24 };
-    return {
-      paddingTopLeft: [inset.left + 24, inset.top + 24],
-      paddingBottomRight: [inset.right + 24, Math.max(100, inset.bottom + 24)],
-    };
+    const top = inset.top + 24;
+    const right = inset.right + 24;
+    let left = inset.left + 24;
+    let bottom = Math.max(100, inset.bottom + 24);
+    // The legend card covers the map's bottom-left corner. Leaflet pads whole
+    // edges only, so stay clear of it by giving up either the strip beside it or
+    // the strip above it, whichever leaves more of the map.
+    const legend = $('mobile-legend-dialog');
+    if (legend.open) {
+      const size = map.getSize();
+      const frame = map.getContainer().getBoundingClientRect();
+      const card = legend.getBoundingClientRect();
+      const beside = Math.max(left, card.right - frame.left + 16);
+      const above = Math.max(bottom, frame.bottom - card.top + 16);
+      const area = (l, b) => Math.max(0, size.x - l - right) * Math.max(0, size.y - top - b);
+      if (area(beside, bottom) >= area(left, above)) left = beside;
+      else bottom = above;
+    }
+    return { paddingTopLeft: [left, top], paddingBottomRight: [right, bottom] };
   }
   const { top, left, right } = getMobileMapInsets();
   // Fit to the destination stop, rather than the old height during its animation.
@@ -803,7 +818,7 @@ function fitCommunity(code, collapse = true) {
   if (!layer) return;
   if (mobile() && collapse) setCollapsed(true);
   syncing = true;
-  contexts[0].map.fitBounds(layer.getBounds(), { ...fitPadding(contexts[0].map, true), maxZoom: 14, animate: false });
+  contexts[0].map.fitBounds(layer.getBounds(), { ...fitPadding(contexts[0].map), maxZoom: 14, animate: false });
   syncing = false;
   state.wholeCity = false;
   syncMaps(contexts[0]);
@@ -886,7 +901,7 @@ function selectCommunity(code, zoom = true, expand = true) {
     const centroid = state.byCode.get(code).properties.centroid;
     const context = activeContexts()[0];
     if (centroid && context)
-      context.map.panInside([centroid[1], centroid[0]], { ...fitPadding(context.map, true), animate: false });
+      context.map.panInside([centroid[1], centroid[0]], { ...fitPadding(context.map), animate: false });
   }
   if (expand) $('announcer').textContent = t('announce.selected', { name: state.byCode.get(code).properties.name });
   if (expand) writeUrlState();
