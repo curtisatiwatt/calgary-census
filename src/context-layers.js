@@ -7,6 +7,7 @@ import { displayMapName, groupRoadLabels, roadPriority, visibleLineAnchors, visi
 export const LINE_COLORS = Object.freeze({ red: '#ca3544', blue: '#2879bd', green: '#22834b' });
 const lineName = id => ({ red: 'Red Line', blue: 'Blue Line', green: 'Green Line' }[id] || id);
 const statusName = status => ({ operating: '运营中', construction: '建设中 · 未运营', planned: '规划中 · 未运营' }[status] || '未运营');
+const stationLabel = p => `${p.name} · ${(p.lineIds || []).map(lineName).join(' / ')} · ${t(statusName(p.status))}`;
 const features = data => data?.type === 'FeatureCollection' && Array.isArray(data.features) ? data.features : [];
 
 export function stationContent(properties) {
@@ -129,7 +130,7 @@ export function createContextLayers({ context, basemap, geography, operatingTran
       detachElement();
       element = marker.getElement();
       element?.setAttribute('data-station-id', p.id);
-      element?.setAttribute('aria-label', `${p.name} · ${ids.map(lineName).join(' / ')} · ${statusName(p.status)}`);
+      element?.setAttribute('aria-label', stationLabel(p));
       element?.setAttribute('tabindex', '0');
       element?.setAttribute('role', 'button');
       element?.addEventListener('keydown', keydown);
@@ -201,7 +202,7 @@ export function createContextLayers({ context, basemap, geography, operatingTran
       if (element) {
         element.style.display = shown ? '' : 'none';
         element.setAttribute('tabindex', shown ? '0' : '-1');
-        element.setAttribute('aria-label', `${properties.name} · ${(properties.lineIds || []).map(lineName).join(' / ')} · ${t(statusName(properties.status))}`);
+        element.setAttribute('aria-label', stationLabel(properties));
       }
     }
     roadLabels.clearLayers();
