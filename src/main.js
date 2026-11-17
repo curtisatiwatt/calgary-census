@@ -34,7 +34,6 @@ const state = {
 let syncing = false;
 let syncFrame = null;
 let lastMobile = mobile();
-let lastComparisonPageSize = null;
 let mobileUI;
 let communitySheet;
 let desktopUI;
@@ -585,7 +584,6 @@ function updateLabels(context) {
   }
 }
 
-function comparisonPageSize() { return 1; }
 function renderMobileSummary() {
   const p = state.byCode.get(state.selected)?.properties;
   if (!p) return;
@@ -601,46 +599,62 @@ function renderComparisonHeadings() {
     const group = state.groupById.get(context.groupId);
     const value = populationShare(populationRecord(state.selected), group.id);
     const name = state.byCode.get(state.selected)?.properties.name || '';
-    const node = document.querySelector(`[data-map-heading="${group.id}"]`);
+    const node = $('comparison-heading');
     if (node) node.innerHTML = `<div><h2>${esc(group.label)}</h2><span>全市 ${percent(populationShare(state.data.city, group.id))}</span></div>${state.selectionActive ? `<p title="${esc(name)}">${esc(name)} <strong>${percent(value)}</strong></p>` : ''}`;
   }
   localize($('comparison-maps'), $('comparison-select'));
   renderMobileSummary();
 }
 
-function rebuildComparison({ preserveView = true } = {}) {
-  cancelAnimationFrame(syncFrame); syncFrame = null;
-  closeTooltips();
+function destroyComparisonMap() {
   for (const context of state.comparisonContexts) {
     context.highlights.destroy(); context.tooltip.destroy(); context.map.remove();
     state.contexts = state.contexts.filter(c => c !== context);
   }
   state.comparisonContexts = [];
+  $('comparison-maps').replaceChildren();
+}
+
+/**
+ * One comparison map is reused for every group: switching groups only changes
+ * its groupId and restyles the existing paths instead of rebuilding Leaflet.
+ */
+function rebuildComparison({ preserveView = true } = {}) {
+  cancelAnimationFrame(syncFrame); syncFrame = null;
+  closeTooltips();
   const groups = selectedGroups();
-  const size = comparisonPageSize();
-  lastComparisonPageSize = size;
-  state.compareStart = Math.floor(Math.min(state.compareStart, Math.max(0, groups.length - 1)) / size) * size;
-  const shown = groups.slice(state.compareStart, state.compareStart + size);
-  $('comparison-empty').hidden = groups.length !== 0;
-  $('population-legend').hidden = groups.length === 0;
+  state.compareStart = Math.max(0, Math.min(state.compareStart, groups.length - 1));
+  const group = groups[state.compareStart];
+  $('comparison-empty').hidden = Boolean(group);
+  $('population-legend').hidden = !group;
   $('comparison-select').innerHTML = groups.map((g, index) => `<option value="${index}" ${index === state.compareStart ? 'selected' : ''}>${esc(g.label)}</option>`).join('');
   $('comparison-select').disabled = !groups.length;
   $('comparison-page').textContent = groups.length ? `${state.compareStart + 1} / ${groups.length}` : '0 / 0';
   $('previous-groups').disabled = state.compareStart === 0;
-  $('next-groups').disabled = state.compareStart + size >= groups.length;
-  $('comparison-maps').style.setProperty('--map-columns', String(Math.max(1, shown.length)));
-  $('comparison-maps').innerHTML = shown.map(g => `<section class="comparison-card"><header class="comparison-card-heading" data-map-heading="${g.id}"></header><div id="compare-${g.id}" class="comparison-map" role="region" aria-label="${esc(g.label)}在 Calgary 各社区的占比地图"></div></section>`).join('');
-  if (!groups.length) { renderMobileSummary(); return; }
-  syncing = true;
-  state.comparisonContexts = shown.map(g => createMap(`compare-${g.id}`, g.id));
-  for (const context of state.comparisonContexts) if (state.view) context.map.setView(state.view.center, state.view.zoom, { animate: false });
-  syncing = false;
+  $('next-groups').disabled = state.compareStart + 1 >= groups.length;
+  localize($('comparison-select'));
+  if (!group) { destroyComparisonMap(); renderMobileSummary(); return; }
+  let context = state.comparisonContexts[0];
+  const created = !context;
+  if (created) {
+    $('comparison-maps').innerHTML = '<section class="comparison-card"><header class="comparison-card-heading" id="comparison-heading"></header><div id="comparison-map" class="comparison-map" role="region"></div></section>';
+    syncing = true;
+    context = createMap('comparison-map', group.id);
+    state.comparisonContexts = [context];
+    if (state.view) context.map.setView(state.view.center, state.view.zoom, { animate: false });
+    syncing = false;
+  } else if (context.groupId !== group.id) {
+    context.groupId = group.id;
+    for (const layer of context.layers.values()) layer.setStyle(styleFor(context, layer.feature));
+  }
+  $('comparison-map').setAttribute('aria-label', `${group.label}在 Calgary 各社区的占比地图`);
   renderComparisonHeadings();
+  // The map may have been hidden (composition view) or just created: settle its size.
   requestAnimationFrame(() => {
     if (preserveView && state.view) { resizeMapsKeepingView(); return; }
-    for (const context of state.comparisonContexts) context.map.invalidateSize({ pan: false });
+    context.map.invalidateSize({ pan: false });
     if (state.wholeCity || !state.view) fitCity();
-    else { refreshStyles(); state.comparisonContexts.forEach(updateLabels); }
+    else { refreshStyles(); updateLabels(context); }
   });
 }
 
@@ -739,8 +753,8 @@ function initializeControls() {
   $('all-groups').addEventListener('click', () => updateGroupSelection(state.groups.map(g => g.id)));
   $('clear-groups').addEventListener('click', () => updateGroupSelection([]));
   $('income-toggle').addEventListener('change', event => { state.income = event.target.checked; $('income-legend').hidden = !state.income; refreshStyles(); mobileUI?.refresh(); });
-  $('previous-groups').addEventListener('click', () => { state.compareStart -= comparisonPageSize(); rebuildComparison(); });
-  $('next-groups').addEventListener('click', () => { state.compareStart += comparisonPageSize(); rebuildComparison(); });
+  $('previous-groups').addEventListener('click', () => { state.compareStart -= 1; rebuildComparison(); });
+  $('next-groups').addEventListener('click', () => { state.compareStart += 1; rebuildComparison(); });
   $('comparison-select').addEventListener('change', event => { state.compareStart = Number(event.target.value); rebuildComparison(); });
   $('fit-city').addEventListener('click', fitCity);
   $('zoom-in').addEventListener('click', () => activeContexts()[0]?.map.zoomIn(0.5));
@@ -790,11 +804,8 @@ function initializeControls() {
       const changed = lastMobile !== mobile(); lastMobile = mobile();
       // Keyboard and browser chrome resize the viewport. Preserve the user's camera.
       mobileUI?.refresh();
-      if (state.mode === 'distribution' && (changed || lastComparisonPageSize !== comparisonPageSize())) rebuildComparison({ preserveView: true });
-      else {
-        resizeMapsKeepingView();
-        if (changed && state.wholeCity) fitCity();
-      }
+      resizeMapsKeepingView();
+      if (changed && state.wholeCity) fitCity();
     }, 150);
   });
 }
