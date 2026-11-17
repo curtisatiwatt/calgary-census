@@ -9,11 +9,10 @@
   "outputCounts": {
     "airport": 1,
     "park": 472,
-    "railway": 2,
     "reserve": 2
   },
-  "outputBytes": 958271,
-  "outputSha256": "ac537f8272cb04fc979bb351a345f44d056b63144447d7db0c3b23ab34b4613f",
+  "outputBytes": 775641,
+  "outputSha256": "9008e42e7bcc741251a74c90796075c89a372dcd92f624d4593a25dc3a5f6b52",
   "communityBoundarySha256": "9729c2830d269c8ca04474f98efa860e1ba1bf55dc5ef5bdc522756d7f062c75",
   "parkSelection": "Active park/open-space sites >= 5 hectares, plus all named regional-park sites; NON-PARK and PARKS DEPOT excluded. Fish Creek and Canada Olympic Park use community-boundary proxies.",
   "selectedParkAssetCodes": [
@@ -560,5 +559,11 @@
       "url": "https://data.calgary.ca/api/views/kami-qbfh.json",
       "sha256": "f6f80c5c8c6827d8e5d9c8a8404b2dd6aae9789f06fb1f756d1fee2e5011c133"
     }
-  ]
+  ],
+  "railwayOutput": {
+    "file": "public/data/railways.geojson",
+    "features": 2,
+    "bytes": 182734,
+    "sha256": "53fe73e44ddf909d2ca6bef59114e8c11b3d15a72eef54558eafd1217167f0cd"
+  }
 }

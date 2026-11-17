@@ -189,6 +189,13 @@ def main():
     ids = [f['properties']['id'] for f in features]
     if len(ids) != len(set(ids)):
         raise ValueError('Duplicate feature IDs')
+    # Railways are drawn with the default road layer; parks, airport and reserves
+    # only when landmarks are switched on, so they are published separately.
+    railway_features = [f for f in features if f['properties']['kind'] == 'railway']
+    features = [f for f in features if f['properties']['kind'] != 'railway']
+    railway_output = ROOT / 'public/data/railways.geojson'
+    railway_output.write_text(json.dumps({'type': 'FeatureCollection', 'name': 'Calgary non-LRT railways', 'snapshotDate': args.snapshot_date,
+                                          'features': railway_features}, ensure_ascii=False, separators=(',', ':')) + '\n')
     collection = {'type': 'FeatureCollection', 'name': 'Calgary geographic context', 'snapshotDate': args.snapshot_date,
                   'features': features}
     output = ROOT / 'public/data/geographic-context.geojson'
@@ -197,6 +204,8 @@ def main():
              'sourceCounts': {'railSegments': len(rails), 'parkSites': len(parks), 'reserveAreas': len(reserves)},
              'outputCounts': dict(collections.Counter(f['properties']['kind'] for f in features)),
              'outputBytes': output.stat().st_size, 'outputSha256': sha(output), 'communityBoundarySha256': sha(communities_path),
+             'railwayOutput': {'file': 'public/data/railways.geojson', 'features': len(railway_features),
+                               'bytes': railway_output.stat().st_size, 'sha256': sha(railway_output)},
              'parkSelection': 'Active park/open-space sites >= 5 hectares, plus all named regional-park sites; NON-PARK and PARKS DEPOT excluded. Fish Creek and Canada Olympic Park use community-boundary proxies.',
              'selectedParkAssetCodes': sorted(selected_parks),
              'reserveSelection': {'intersectsWgs84Bounds': QUERY_BOUNDS, 'fullPolygonsRetained': True, 'reserveIds': sorted(f['properties']['reserveId'] for f in features if f['properties']['kind'] == 'reserve')},

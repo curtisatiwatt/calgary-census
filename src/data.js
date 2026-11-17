@@ -30,7 +30,7 @@ export async function loadCoreData() {
 /** Optional context layers, fetched after first paint or when switched on. */
 const LAYER_FILES = {
   basemap: ['basemap.geojson'],
-  railways: ['geographic-context.geojson'],
+  railways: ['railways.geojson'],
   transit: ['ctrain-operating.geojson', 'ctrain-green.geojson'],
   landmarks: ['geographic-context.geojson', 'orientation-landmarks.geojson'],
 };

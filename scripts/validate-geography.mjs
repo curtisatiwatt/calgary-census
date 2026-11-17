@@ -73,7 +73,9 @@ for (const f of green) {
 }
 assert.equal(green.filter(f => f.properties.kind === 'transit_station').length, integrity.expected.greenStations);
 const context = loaded['geographic-context.geojson'];
-assert.deepEqual(new Set(context.map(f => f.properties.kind)), new Set(['railway', 'airport', 'park', 'reserve']));
+assert.deepEqual(new Set(context.map(f => f.properties.kind)), new Set(['airport', 'park', 'reserve']));
+const railways = loaded['railways.geojson'];
+assert.deepEqual(new Set(railways.map(f => f.properties.kind)), new Set(['railway']), 'railways.geojson must contain only non-LRT railways');
 assert.ok(context.some(f => f.properties.kind === 'reserve' && /145/.test(f.properties.name)), 'Tsuut’ina 145 context is missing');
 assert.ok(context.some(f => f.properties.kind === 'airport'), 'Calgary airport context is missing');
 console.log(`PASS: audited official geography; ${stations.length} operating CTrain stations, ${integrity.expected.greenStations} non-operating Green Line stations; railways, airport, parks and reserves; valid regional coordinates and source links.`);
