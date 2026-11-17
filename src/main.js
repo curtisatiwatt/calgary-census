@@ -1584,6 +1584,12 @@ function initializeControls() {
 }
 
 async function init() {
+  // English visitors were already shown English loading text by the page's inline
+  // script; give the translator back the Chinese source it works from.
+  for (const node of document.querySelectorAll('[data-zh]')) {
+    node.textContent = node.dataset.zh;
+    delete node.dataset.zh;
+  }
   applyStaticTranslations();
   initTheme();
   communitySheet = initCommunitySheet({ onChange: () => mobileUI?.refresh(), onClose: clearSelection });

@@ -118,6 +118,24 @@ test('a layer that fails to load is named in a readable warning until it is swit
   await expect(warning).toBeHidden();
 });
 
+test('English visitors get English loading text before the application script runs', async ({ page }) => {
+  let release;
+  const held = new Promise(resolve => {
+    release = resolve;
+  });
+  await page.route(/\/assets\/index-[^/]+\.js$/, async route => {
+    await held;
+    await route.continue();
+  });
+  await page.goto('./', { waitUntil: 'commit' });
+  await expect(page.locator('#loading-overlay strong')).toHaveText('Opening Calgary');
+  await expect(page.locator('#loading-overlay span')).toHaveText('Loading official boundaries and population data');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  release();
+  await expect(page.locator('#loading-overlay')).toBeHidden();
+  expect(await untranslatedText(page)).toEqual([]);
+});
+
 test('a failed data request is explained in the current language', async ({ page, isMobile }) => {
   await page.route('**/communities.geojson', route => route.abort());
   await page.goto('./');

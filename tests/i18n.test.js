@@ -58,6 +58,15 @@ test('every static page string and displayed metadata field has English text', (
   assert.deepEqual(missing, []);
 });
 
+test('the English loading text shown before the script runs matches the translation table', () => {
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const early = [...html.matchAll(/data-en="([^"]+)">([^<]+)</g)];
+  assert.equal(early.length, 2);
+  for (const [, english, chinese] of early) assert.equal(translate(chinese, 'en'), english);
+  // The same inline script picks the language the application will pick.
+  assert.match(html, /localStorage\.getItem\('census-atlas-language'\)/);
+});
+
 test('every published community label and caveat has an English equivalent', () => {
   for (const feature of read('communities.geojson').features) {
     for (const field of ['caveat', 'sectorLabel', 'typeLabel']) {

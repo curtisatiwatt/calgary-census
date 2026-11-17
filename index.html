@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="referrer" content="strict-origin-when-cross-origin">
+  <script>try{const l=localStorage.getItem('census-atlas-language');document.documentElement.lang=(l==='en'||l==='zh'?l:/^zh\b/i.test(navigator.language||'zh')?'zh':'en')==='en'?'en':'zh-CN'}catch{document.documentElement.lang=/^zh\b/i.test(navigator.language||'zh')?'zh-CN':'en'}</script>
   <script>try{const saved=localStorage.getItem('census-atlas-theme');document.documentElement.dataset.theme=saved==='light'||saved==='dark'?saved:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}catch{document.documentElement.dataset.theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}</script>
   <meta name="theme-color" content="#f7f8f3">
   <meta name="description" content="探索 Calgary 社区的人口构成、不同人口群体的分布和家庭收入。基于官方 2021 年人口普查社区资料。">
@@ -94,7 +95,8 @@
       <div class="map-tools"><button id="fit-city" class="map-button" aria-label="查看整个卡尔加里">全市 ⤢</button><button id="zoom-in" class="map-button square" aria-label="放大地图">+</button><button id="zoom-out" class="map-button square" aria-label="缩小地图">−</button></div>
       <div id="mobile-map-switcher" hidden></div>
       <div id="map-warning" class="map-warning" hidden role="status"></div>
-      <div id="loading-overlay" class="loading-overlay"><div class="loader"></div><strong>正在展开 Calgary</strong><span>读取官方社区边界与人口资料</span></div>
+      <div id="loading-overlay" class="loading-overlay"><div class="loader"></div><strong data-en="Opening Calgary">正在展开 Calgary</strong><span data-en="Loading official boundaries and population data">读取官方社区边界与人口资料</span></div>
+      <script>if(document.documentElement.lang==='en')for(const n of document.querySelectorAll('#loading-overlay [data-en]')){n.dataset.zh=n.textContent;n.textContent=n.dataset.en}</script>
     </section>
   </main>
   <div id="announcer" class="sr-only" aria-live="polite"></div>
