@@ -16,7 +16,7 @@ import { initTheme, refreshThemeControl, isDarkTheme } from './theme.js';
 import { createMapTooltip } from './map-tooltip.js';
 import { createCommunityHighlight } from './community-highlight.js';
 import { createContextLayers } from './context-layers.js';
-import { INCOME_BINS, isNumber, colorFor, money, number, percent, searchFeatures, summarize, escapeHtml as esc, safeUrl, hashCode } from './map-utils.js';
+import { INCOME_BINS, isNumber, colorFor, money, number, percent, searchFeatures, summarize, escapeHtml as esc, safeUrl, parseHashState, buildHashState } from './map-utils.js';
 import { POPULATION_BINS, COMPOSITION_OTHER_COLOR, populationShare, populationColor, donutSvg } from './population-utils.js';
 
 const $ = id => document.getElementById(id);
@@ -151,6 +151,7 @@ function updateGroupSelection(ids, rerender = true) {
   renderDetail();
   renderOverlays();
   if (state.mode === 'distribution') rebuildComparison();
+  writeUrlState();
 }
 
 function renderDonutKey() {
@@ -487,6 +488,33 @@ function fitCommunity(code, collapse = true) {
   renderOverlays(contexts);
 }
 
+/** Keep the shareable URL in step with the view (community, view, groups, layers). */
+function writeUrlState() {
+  if (!state.data) return;
+  const hash = buildHashState({
+    // Canonical (display) order, so the first listed group is the compare view's default.
+    code: state.selectionActive ? state.selected : null, view: state.mode, groups: selectedGroups().map(g => g.id),
+    compare: selectedGroups()[state.compareStart]?.id, income: state.income, transit: state.transit, landmarks: state.landmarks,
+  });
+  try { history.replaceState(null, '', hash || `${location.pathname}${location.search}`); } catch { /* embedded preview */ }
+}
+function readUrlState() { return parseHashState(location.hash, state.features, state.groups.map(g => g.id)); }
+function applyUrlState(link) {
+  state.income = link.income;
+  $('income-toggle').checked = link.income;
+  $('income-legend').hidden = !link.income;
+  for (const layer of ['transit', 'landmarks']) { state[layer] = link[layer]; $(`${layer}-toggle`).checked = link[layer]; }
+  updateLayerVisibility();
+  ensureVisibleLayers();
+  updateGroupSelection(link.groups);
+  state.compareStart = Math.max(0, selectedGroups().findIndex(g => g.id === link.compare));
+  if (link.view !== state.mode) selectView(link.view);
+  else if (state.mode === 'distribution') rebuildComparison();
+  refreshStyles();
+  if (link.code && (!state.selectionActive || link.code !== state.selected)) selectCommunity(link.code);
+  writeUrlState();
+}
+
 function selectCommunity(code, zoom = true, expand = true) {
   if (!state.byCode.has(code)) return;
   closeTooltips();
@@ -509,7 +537,7 @@ function selectCommunity(code, zoom = true, expand = true) {
     if (centroid && context) context.map.panInside([centroid[1], centroid[0]], { ...fitPadding(context.map, true), animate: false });
   }
   if (expand) $('announcer').textContent = t(`已选择 ${state.byCode.get(code).properties.name}。人口构成已更新。`);
-  try { if (expand) history.replaceState(null, '', `#${encodeURIComponent(code)}`); } catch { /* embedded preview */ }
+  if (expand) writeUrlState();
 }
 
 /** Rings claim their space first so every map label can avoid them. */
@@ -705,6 +733,7 @@ function rebuildComparison({ preserveView = true } = {}) {
   }
   $('comparison-map').setAttribute('aria-label', `${group.label}在 Calgary 各社区的占比地图`);
   renderComparisonHeadings();
+  writeUrlState();
   // The map may have been hidden (composition view) or just created: settle its size.
   requestAnimationFrame(() => {
     if (preserveView && state.view) { resizeMapsKeepingView(); return; }
@@ -736,6 +765,7 @@ function selectView(mode) {
   $('mode-description').textContent = t(mode === 'composition' ? '一个社区，一张构成图' : '同一色阶，查看聚居分布');
   document.querySelector('.map-workspace').classList.toggle('comparing', mode === 'distribution');
   mobileUI?.refresh();
+  writeUrlState();
   if (mode === 'distribution') rebuildComparison();
   else requestAnimationFrame(() => {
     syncing = true;
@@ -795,7 +825,7 @@ function initializeControls() {
   });
   $('layers-button').addEventListener('click', () => toggleLayers($('layers-panel').hidden));
   $('close-layers').addEventListener('click', () => { toggleLayers(false); (mobile() ? $('mobile-more') : $('layers-button')).focus(); });
-  for (const layer of ['roads', 'labels', 'transit', 'landmarks']) $(`${layer}-toggle`).addEventListener('change', event => { state[layer] = event.target.checked; ensureVisibleLayers(); updateLayerVisibility(); });
+  for (const layer of ['roads', 'labels', 'transit', 'landmarks']) $(`${layer}-toggle`).addEventListener('change', event => { state[layer] = event.target.checked; ensureVisibleLayers(); updateLayerVisibility(); writeUrlState(); });
   $('groups-button').addEventListener('click', () => toggleGroups($('groups-panel').hidden));
   $('close-groups').addEventListener('click', () => { toggleGroups(false); (mobile() ? $('mobile-more') : $('groups-button')).focus({ preventScroll: true }); });
   $('empty-choose-groups').addEventListener('click', () => { toggleGroups(true); });
@@ -808,7 +838,7 @@ function initializeControls() {
   $('default-groups').addEventListener('click', () => updateGroupSelection(state.data.defaultGroupIds));
   $('all-groups').addEventListener('click', () => updateGroupSelection(state.groups.map(g => g.id)));
   $('clear-groups').addEventListener('click', () => updateGroupSelection([]));
-  $('income-toggle').addEventListener('change', event => { state.income = event.target.checked; $('income-legend').hidden = !state.income; refreshStyles(); mobileUI?.refresh(); });
+  $('income-toggle').addEventListener('change', event => { state.income = event.target.checked; $('income-legend').hidden = !state.income; refreshStyles(); mobileUI?.refresh(); writeUrlState(); });
   $('previous-groups').addEventListener('click', () => { state.compareStart -= 1; rebuildComparison(); });
   $('next-groups').addEventListener('click', () => { state.compareStart += 1; rebuildComparison(); });
   $('comparison-select').addEventListener('change', event => { state.compareStart = Number(event.target.value); rebuildComparison(); });
@@ -852,7 +882,7 @@ function initializeControls() {
       event.preventDefault(); $('search').focus();
     }
   });
-  window.addEventListener('hashchange', () => { const code = hashCode(location.hash, state.features); if (code && (!state.selectionActive || code !== state.selected)) selectCommunity(code); });
+  window.addEventListener('hashchange', () => { if (state.data) applyUrlState(readUrlState()); });
   let resizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
@@ -887,15 +917,15 @@ async function init() {
     state.groups = data.populationData.groups; state.groupById = new Map(state.groups.map(g => [g.id, g]));
     state.colors = Object.fromEntries(state.groups.map((g, i) => [g.id, PALETTE[i % PALETTE.length]]));
     state.selectedGroups = [];
-    const linkedCode = hashCode(location.hash, state.features);
-    state.selected = linkedCode || (state.byCode.has('PAN') ? 'PAN' : data.features[0].properties.code);
+    const link = readUrlState();
+    state.selected = link.code || (state.byCode.has('PAN') ? 'PAN' : data.features[0].properties.code);
     renderMetadata(); renderGroupList(); renderDonutKey(); renderDetail();
     $('group-count').textContent = state.selectedGroups.length;
     state.composition = createMap('composition-map');
     $('loading-overlay').hidden = true;
     mobileUI.refresh();
     fitCity(); selectCommunity(state.selected, false, false);
-    if (linkedCode) selectCommunity(linkedCode, true, true);
+    applyUrlState(link);
     setReady(true);
     ensureVisibleLayers();
   } catch (error) {

@@ -72,11 +72,47 @@ export function safeUrl(value) {
   }
 }
 
-export function hashCode(hash, features) {
+/**
+ * Shareable view state in the URL hash, e.g.
+ * `#ASP?view=compare&groups=chinese,south_asian&compare=south_asian&income=1&layers=transit`.
+ * A bare `#ASP` (the original deep-link format) still selects a community.
+ */
+export function parseHashState(hash, features, groupIds = []) {
+  const raw = String(hash ?? '').replace(/^#/, '');
+  const split = raw.indexOf('?');
+  const codePart = split < 0 ? raw : raw.slice(0, split);
+  const params = new URLSearchParams(split < 0 ? '' : raw.slice(split + 1));
+  let code = null;
   try {
-    const code = decodeURIComponent(hash.replace(/^#/, ''));
-    return features.some(f => String(f.properties.code) === code) ? code : null;
-  } catch {
-    return null;
-  }
+    const decoded = decodeURIComponent(codePart);
+    code = decoded && features.some(f => String(f.properties.code) === decoded) ? decoded : null;
+  } catch { code = null; }
+  const valid = new Set(groupIds);
+  const list = key => (params.get(key) || '').split(',').map(value => value.trim()).filter(Boolean);
+  const groups = [...new Set(list('groups').filter(id => valid.has(id)))];
+  const compare = groups.includes(params.get('compare')) ? params.get('compare') : null;
+  const layers = new Set(list('layers'));
+  return {
+    code, groups, compare,
+    view: params.get('view') === 'compare' ? 'distribution' : 'composition',
+    income: params.get('income') === '1',
+    transit: layers.has('transit'),
+    landmarks: layers.has('landmarks'),
+  };
+}
+
+export function buildHashState({ code = null, view = 'composition', groups = [], compare = null, income = false, transit = false, landmarks = false } = {}) {
+  const params = [];
+  if (view === 'distribution') params.push('view=compare');
+  if (groups.length) params.push(`groups=${groups.map(encodeURIComponent).join(',')}`);
+  if (view === 'distribution' && compare && compare !== groups[0]) params.push(`compare=${encodeURIComponent(compare)}`);
+  if (income) params.push('income=1');
+  const layers = [transit && 'transit', landmarks && 'landmarks'].filter(Boolean);
+  if (layers.length) params.push(`layers=${layers.join(',')}`);
+  const head = code ? encodeURIComponent(code) : '';
+  return head || params.length ? `#${head}${params.length ? `?${params.join('&')}` : ''}` : '';
+}
+
+export function hashCode(hash, features) {
+  return parseHashState(hash, features).code;
 }
