@@ -118,6 +118,19 @@ test('a layer that fails to load is named in a readable warning until it is swit
   await expect(warning).toBeHidden();
 });
 
+test('a failed data request is explained in the current language', async ({ page, isMobile }) => {
+  await page.route('**/communities.geojson', route => route.abort());
+  await page.goto('./');
+  const overlay = page.locator('#loading-overlay');
+  await expect(page.locator('#retry')).toBeVisible();
+  // Not the browser's raw "Failed to fetch".
+  await expect(overlay).toContainText('Could not load communities.geojson (network connection failed)');
+  await expect(overlay).toContainText('The map could not load');
+  await setPreference(page, isMobile, 'language-preference', 'zh');
+  await expect(overlay).toContainText('无法载入 communities.geojson（网络连接失败）');
+  await expect(overlay).toContainText('地图暂时无法载入');
+});
+
 test('search selects a community and records it in the URL', async ({ page }) => {
   await openMap(page);
   await page.locator('#search').fill('aspen');

@@ -76,6 +76,7 @@ const state = {
   compareStart: 0,
   searchMatches: [],
   activeSearch: -1,
+  loadError: null,
 };
 let syncing = false;
 let syncFrame = null;
@@ -1358,6 +1359,7 @@ function initializeControls() {
     applyStaticTranslations();
     refreshThemeControl();
     mobileUI?.refresh();
+    if (state.loadError) renderLoadError();
     if (state.data) {
       renderMetadata();
       renderGroupList();
@@ -1624,13 +1626,21 @@ async function init() {
     setReady(true);
     ensureVisibleLayers();
   } catch (error) {
-    $('loading-overlay').hidden = false;
-    $('loading-overlay').innerHTML =
-      `<strong>地图暂时无法载入</strong><span>${esc(error.message)}</span><button class="map-button" id="retry">重新载入</button>`;
-    $('retry').addEventListener('click', () => location.reload());
-    $('coverage-text').textContent = '数据载入失败';
-    localize($('loading-overlay'), $('coverage-text'));
+    state.loadError = error;
+    renderLoadError();
   }
+}
+
+/** The map could not start: say why, in the current language, and offer a reload. */
+function renderLoadError() {
+  const error = state.loadError;
+  const message = error.i18n ? t(error.i18n.key, error.i18n.params) : error.message;
+  $('loading-overlay').hidden = false;
+  $('loading-overlay').innerHTML =
+    `<strong>地图暂时无法载入</strong><span>${esc(message)}</span><button class="map-button" id="retry">重新载入</button>`;
+  $('retry').addEventListener('click', () => location.reload());
+  $('coverage-text').textContent = '数据载入失败';
+  localize($('loading-overlay'), $('coverage-text'));
 }
 
 init();

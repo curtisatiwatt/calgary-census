@@ -321,6 +321,10 @@ export const MESSAGES = Object.freeze({
     en: '{layers} could not load. Community statistics are still available.',
   },
   'error.load': { zh: '无法载入 {path}（{status}）', en: 'Could not load {path} ({status})' },
+  'error.network': {
+    zh: '无法载入 {path}（网络连接失败）',
+    en: 'Could not load {path} (network connection failed)',
+  },
   'station.unfunded': {
     zh: '{phase} · 远期规划 / 未获建设资金',
     en: '{phase} · Future plan / construction funding not secured',

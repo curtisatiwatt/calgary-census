@@ -1,8 +1,19 @@
 import { t } from './i18n.js';
 
+/** An error that can be shown again in another language: it carries its message key. */
+function loadError(key, params) {
+  return Object.assign(new Error(t(key, params)), { i18n: { key, params } });
+}
+
 async function readJson(path) {
-  const response = await fetch(`${import.meta.env.BASE_URL}data/${path}`);
-  if (!response.ok) throw new Error(t('error.load', { path, status: response.status }));
+  let response;
+  try {
+    response = await fetch(`${import.meta.env.BASE_URL}data/${path}`);
+  } catch {
+    // Offline or blocked: the browser's own text ("Failed to fetch") says nothing useful.
+    throw loadError('error.network', { path });
+  }
+  if (!response.ok) throw loadError('error.load', { path, status: response.status });
   return response.json();
 }
 
