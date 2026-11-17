@@ -15,6 +15,8 @@ import {
   displayedFill,
   contrastRatio,
   labelInk,
+  ARROW_DIRECTIONS,
+  nearestInDirection,
 } from '../src/map-utils.js';
 import { POPULATION_BINS } from '../src/population-utils.js';
 
@@ -164,4 +166,21 @@ test('the map ground in the stylesheets matches the one legends and labels are c
     base,
     new RegExp(`html\\[data-theme='dark'\\] \\.leaflet-container,[^}]*\\{\\s*background: ${MAP_GROUND.dark};`),
   );
+});
+
+test('arrow keys move to the nearest feature in that direction, favouring ones straight ahead', () => {
+  const from = { x: 100, y: 100 };
+  const points = [
+    { x: 160, y: 100 }, // 0: straight right, farther
+    { x: 130, y: 140 }, // 1: right but well off-axis
+    { x: 100, y: 60 }, // 2: straight up
+    { x: 40, y: 104 }, // 3: left
+    { x: 101, y: 100 }, // 4: within the 2px dead zone to the right
+  ];
+  assert.equal(nearestInDirection(from, points, ARROW_DIRECTIONS.ArrowRight), 0);
+  assert.equal(nearestInDirection(from, points, ARROW_DIRECTIONS.ArrowUp), 2);
+  assert.equal(nearestInDirection(from, points, ARROW_DIRECTIONS.ArrowLeft), 3);
+  assert.equal(nearestInDirection(from, points, ARROW_DIRECTIONS.ArrowDown), 1);
+  assert.equal(nearestInDirection(from, [{ x: 100, y: 60 }], ARROW_DIRECTIONS.ArrowDown), -1);
+  assert.equal(nearestInDirection(from, [], ARROW_DIRECTIONS.ArrowRight), -1);
 });

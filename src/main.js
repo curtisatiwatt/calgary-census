@@ -33,6 +33,8 @@ import {
   blendColor,
   displayedFill,
   labelInk,
+  ARROW_DIRECTIONS,
+  nearestInDirection,
 } from './map-utils.js';
 import {
   POPULATION_BINS,
@@ -511,7 +513,6 @@ function createMap(element, groupId = null) {
           path.setAttribute('role', 'button');
           // Roving tab stop: one community per map is tabbable; arrows move between them.
           path.setAttribute('tabindex', code === (context.focusCode ?? state.selected) ? '0' : '-1');
-          path.addEventListener('keydown', event => communityKeydown(context, code, event));
         });
         layer.on('click', () => {
           selectCommunity(code, false);
@@ -525,6 +526,11 @@ function createMap(element, groupId = null) {
       },
     },
   ).addTo(map);
+  // One listener per map handles the keys for all of its community paths.
+  map.getContainer().addEventListener('keydown', event => {
+    const code = event.target.closest?.('path[data-community]')?.dataset.community;
+    if (code) communityKeydown(context, code, event);
+  });
   if (!groupId) {
     context.contextLayers = createContextLayers({
       context,
@@ -535,6 +541,7 @@ function createMap(element, groupId = null) {
         communityLabels: state.labels,
       },
       getLabelObstacles: () => [...mapLabelObstacles(map), ...(context.donutBoxes || [])],
+      getFocusPadding: () => fitPadding(map),
       onStationOpen: () => {
         closeTooltips();
         toggleGroups(false);
@@ -628,7 +635,6 @@ function ensureVisibleLayers() {
 }
 
 const LAYER_TOGGLES = ['roads', 'labels', 'transit', 'landmarks'];
-const ARROWS = { ArrowRight: [1, 0], ArrowLeft: [-1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1] };
 function setRovingCommunity(context, code) {
   if (!context.layers.has(code)) return;
   if (context.focusCode && context.focusCode !== code)
@@ -637,23 +643,10 @@ function setRovingCommunity(context, code) {
   context.layers.get(code).getElement()?.setAttribute('tabindex', '0');
 }
 /** Nearest community centre in the arrow's direction, favouring ones straight ahead. */
-function neighbourInDirection(map, code, [dx, dy]) {
+function neighbourInDirection(map, code, direction) {
   const point = feature => map.latLngToContainerPoint([feature.properties.centroid[1], feature.properties.centroid[0]]);
-  const from = point(state.byCode.get(code));
-  let best = null;
-  let bestScore = Infinity;
-  for (const feature of state.features) {
-    if (feature.properties.code === code) continue;
-    const p = point(feature);
-    const along = (p.x - from.x) * dx + (p.y - from.y) * dy;
-    if (along <= 2) continue;
-    const score = along + Math.abs((p.x - from.x) * dy - (p.y - from.y) * dx) * 2;
-    if (score < bestScore) {
-      bestScore = score;
-      best = feature;
-    }
-  }
-  return best;
+  const others = state.features.filter(feature => feature.properties.code !== code);
+  return others[nearestInDirection(point(state.byCode.get(code)), others.map(point), direction)] || null;
 }
 function communityKeydown(context, code, event) {
   if (event.key === 'Enter' || event.key === ' ') {
@@ -662,7 +655,7 @@ function communityKeydown(context, code, event) {
     toggleGroups(false);
     return;
   }
-  const direction = ARROWS[event.key];
+  const direction = ARROW_DIRECTIONS[event.key];
   if (!direction) return;
   // Arrows move between communities instead of panning the map.
   event.preventDefault();

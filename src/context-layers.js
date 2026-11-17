@@ -1,7 +1,7 @@
 import L from 'leaflet';
 import { t, currentLanguage, localizeHtml } from './i18n.js';
 import { isDarkTheme } from './theme.js';
-import { escapeHtml as esc, safeUrl } from './map-utils.js';
+import { escapeHtml as esc, safeUrl, ARROW_DIRECTIONS, nearestInDirection } from './map-utils.js';
 import {
   displayMapName,
   groupRoadLabels,
@@ -31,7 +31,7 @@ export function stationContent(properties) {
  * Each dataset is attached when it arrives (setBasemap, setRailways,
  * setLandmarks, setTransit), so the census map never waits for context layers.
  */
-export function createContextLayers({ context, visible, onStationOpen, getLabelObstacles }) {
+export function createContextLayers({ context, visible, onStationOpen, getLabelObstacles, getFocusPadding }) {
   const map = context.map;
   const definitions = [
     ['geography', 405],
@@ -83,6 +83,8 @@ export function createContextLayers({ context, visible, onStationOpen, getLabelO
   const routeLayers = [];
   const routeCasings = [];
   const stationLayers = [];
+  // All stations share one tab stop; arrow keys move it from station to station.
+  let focusStationId = null;
   const labelBoxes = [];
   const collection = items => ({ type: 'FeatureCollection', features: items });
   const textMeasure = document.createElement('canvas').getContext('2d');
@@ -293,37 +295,89 @@ export function createContextLayers({ context, visible, onStationOpen, getLabelO
           .openOn(map);
       };
       marker.on('click', open);
-      const keydown = event => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          open();
-        }
-      };
-      let element = null;
-      const detachElement = () => {
-        element?.removeEventListener('keydown', keydown);
-        element = null;
-      };
-      const attachElement = () => {
-        detachElement();
-        element = marker.getElement();
+      // Keys are handled once for the whole pane (below); updateStations() decides the tab stop.
+      const describe = () => {
+        const element = marker.getElement();
         element?.setAttribute('data-station-id', p.id);
         element?.setAttribute('aria-label', stationLabel(p));
-        element?.setAttribute('tabindex', '0');
+        element?.setAttribute('tabindex', '-1');
         element?.setAttribute('role', 'button');
-        element?.addEventListener('keydown', keydown);
       };
-      marker.on('add', attachElement);
-      marker.on('remove', detachElement);
-      attachElement();
+      marker.on('add', describe);
+      describe();
       context.tooltip.bind(marker, {
         content: () => stationContent(p),
         anchor: () => marker.getLatLng(),
         offset: [0, -8],
       });
-      stationLayers.push({ marker, shared, properties: p });
+      stationLayers.push({ marker, shared, properties: p, open, shown: false });
     }
     attached();
+  }
+
+  const stationFor = event => {
+    const id = event.target.closest?.('[data-station-id]')?.dataset.stationId;
+    return stationLayers.find(entry => String(entry.properties.id) === id);
+  };
+  const stationsPane = map.getPane('stations');
+  stationsPane.addEventListener('focusin', event => {
+    const entry = stationFor(event);
+    if (entry) focusStationId = entry.properties.id;
+  });
+  stationsPane.addEventListener('keydown', event => {
+    const entry = stationFor(event);
+    if (!entry) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      entry.open();
+      return;
+    }
+    const direction = ARROW_DIRECTIONS[event.key];
+    if (!direction) return;
+    // Arrows move between stations instead of panning the map.
+    event.preventDefault();
+    event.stopPropagation();
+    const point = station => map.latLngToContainerPoint(station.marker.getLatLng());
+    const others = stationLayers.filter(station => station !== entry);
+    const next = others[nearestInDirection(point(entry), others.map(point), direction)];
+    if (!next) return;
+    focusStationId = next.properties.id;
+    map.panInside(next.marker.getLatLng(), { ...(getFocusPadding?.() || {}), animate: false });
+    updateStations();
+    next.marker.getElement()?.focus({ preventScroll: true });
+  });
+
+  /**
+   * At overview scales, neighbouring downtown dots merge visually: reveal them
+   * progressively instead of drawing a dense string of overlapping targets.
+   * Exactly one visible station is the tab stop (the one last focused, if shown).
+   */
+  function updateStations() {
+    const zoom = map.getZoom();
+    const bounds = map.getBounds();
+    const minGap = zoom < 11.5 ? 13 : zoom < 13 ? 8 : 0;
+    const placed = [];
+    // The station holding keyboard focus is placed first, so decluttering never hides it.
+    const ordered = [...stationLayers].sort(
+      (a, b) => Number(b.properties.id === focusStationId) - Number(a.properties.id === focusStationId),
+    );
+    for (const entry of ordered) {
+      const point = map.latLngToContainerPoint(entry.marker.getLatLng());
+      entry.shown =
+        bounds.contains(entry.marker.getLatLng()) &&
+        !placed.some(other => Math.hypot(other.x - point.x, other.y - point.y) < minGap);
+      if (entry.shown) placed.push(point);
+    }
+    const stop =
+      stationLayers.find(entry => entry.shown && entry.properties.id === focusStationId) ||
+      stationLayers.find(entry => entry.shown);
+    for (const entry of stationLayers) {
+      const element = entry.marker.getElement();
+      if (!element) continue;
+      element.style.display = entry.shown ? '' : 'none';
+      element.setAttribute('tabindex', entry === stop ? '0' : '-1');
+      element.setAttribute('aria-label', stationLabel(entry.properties));
+    }
   }
 
   function setVisible(next) {
@@ -418,23 +472,7 @@ export function createContextLayers({ context, visible, onStationOpen, getLabelO
         });
       });
     }
-    // At overview scales, neighbouring downtown dots merge visually. Reveal them
-    // progressively instead of drawing a dense string of overlapping targets.
-    const stationPoints = [];
-    for (const { marker, properties } of stationLayers) {
-      const point = map.latLngToContainerPoint(marker.getLatLng());
-      const minGap = zoom < 11.5 ? 13 : zoom < 13 ? 8 : 0;
-      const shown =
-        bounds.contains(marker.getLatLng()) &&
-        !stationPoints.some(p => Math.hypot(p.x - point.x, p.y - point.y) < minGap);
-      if (shown) stationPoints.push(point);
-      const element = marker.getElement();
-      if (element) {
-        element.style.display = shown ? '' : 'none';
-        element.setAttribute('tabindex', shown ? '0' : '-1');
-        element.setAttribute('aria-label', stationLabel(properties));
-      }
-    }
+    updateStations();
     roadLabels.clearLayers();
     waterLabels.clearLayers();
     stationLabels.clearLayers();

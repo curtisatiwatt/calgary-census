@@ -217,6 +217,29 @@ test('communities are reachable from the keyboard', async ({ page, isMobile }) =
   await expect(page).toHaveURL(new RegExp(`#${focused}$`));
 });
 
+test('CTrain stations share one tab stop and are reached with arrow keys', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'keyboard navigation is a desktop interaction');
+  await openMap(page, '?layers=transit');
+  const stop = page.locator('#composition-map [data-station-id][tabindex="0"]');
+  await expect(stop).toHaveCount(1);
+  // Tab from the community stop lands on the single station stop, then leaves the map.
+  await page.locator('#composition-map path[data-community][tabindex="0"]').focus();
+  await page.keyboard.press('Tab');
+  const first = await page.evaluate(() => document.activeElement.dataset.stationId);
+  expect(first).toBeTruthy();
+  await page.keyboard.press('ArrowDown');
+  const second = await page.evaluate(() => document.activeElement.dataset.stationId);
+  expect(second).toBeTruthy();
+  expect(second).not.toBe(first);
+  await expect(stop).toHaveCount(1);
+  await expect(stop).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.station-popup')).toBeVisible();
+  await page.keyboard.press('Tab');
+  // The popup's own controls come next; no other station is in the tab order.
+  expect(await page.evaluate(() => document.activeElement.dataset.stationId)).toBeUndefined();
+});
+
 test('keyboard shortcuts keep working while the desktop legend card is open', async ({ page, isMobile }) => {
   test.skip(isMobile, 'keyboard shortcuts are a desktop interaction');
   await openMap(page);

@@ -64,6 +64,32 @@ export function labelInk(fill) {
   return contrastRatio(fill, LABEL_INK.dark) >= contrastRatio(fill, LABEL_INK.light) ? 'dark' : 'light';
 }
 
+export const ARROW_DIRECTIONS = Object.freeze({
+  ArrowRight: [1, 0],
+  ArrowLeft: [-1, 0],
+  ArrowDown: [0, 1],
+  ArrowUp: [0, -1],
+});
+/**
+ * Arrow-key movement between features on a map: the index of the screen point
+ * nearest to `from` in the arrow's direction, favouring points straight ahead;
+ * -1 when nothing lies that way.
+ */
+export function nearestInDirection(from, points, [dx, dy]) {
+  let best = -1;
+  let bestScore = Infinity;
+  points.forEach((point, index) => {
+    const along = (point.x - from.x) * dx + (point.y - from.y) * dy;
+    if (along <= 2) return;
+    const score = along + Math.abs((point.x - from.x) * dy - (point.y - from.y) * dx) * 2;
+    if (score < bestScore) {
+      bestScore = score;
+      best = index;
+    }
+  });
+  return best;
+}
+
 export function normalize(value) {
   return String(value ?? '')
     .normalize('NFKD')
