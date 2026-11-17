@@ -173,8 +173,8 @@ const translations = {
   '人数、占比与取整': 'Counts, shares and rounding',
   '详情与热度图的占比由公布人数除以同表的私人住户人口计算，保留一位小数；这与原 PDF 中已取整的整数百分比可能略有不同。官方人数通常按 5 人取整，各类别人数之和可能略偏离总人口。分类合计少于人口总数时，差额在圆环中单独留白；超过人口总数时，圆环按分类合计缩放。详情数值仍使用表中人口基数。':
     'Detail and heat-map shares divide published counts by the private-household population in the same table, rounded to one decimal. They may differ slightly from whole percentages in the source PDF. Counts are generally rounded to multiples of five, so categories may not sum to population. A shortfall appears as a separate unfilled ring segment; if category totals exceed population, only the ring is scaled to close the circle. Detail shares keep the source population denominator.',
-  '“其余类别”只包含未勾选的人口类别，不包含缺失数据。带点线的留白表示原表统计差额，不是一个人口类别。公布的 0 不代表可以确认绝对没有居民；灰色虚线边界和“暂无数据”表示资料缺失，不当作 0。':
-    '“Other groups” contains unselected categories only, not missing data. The dotted unfilled segment represents a source-table discrepancy, not another population category. A published zero does not confirm that no residents are present. Dashed grey boundaries and “No data” mean missing information, not zero.',
+  '“其余类别”只包含未勾选的人口类别，不包含缺失数据。带点线的留白表示原表统计差额，不是一个人口类别。公布的 0 不代表可以确认绝对没有居民；斜纹填充、虚线边界和“暂无数据”表示资料缺失，不当作 0。':
+    '“Other groups” contains unselected categories only, not missing data. The dotted unfilled segment represents a source-table discrepancy, not another population category. A published zero does not confirm that no residents are present. Diagonal hatching, dashed boundaries and “No data” mean missing information, not zero.',
   年份与收入: 'Years and income',
   '收入底色蓝色较低、黄色居中、红色较高，使用固定区间；收入不是财富、房价或个人工资。“住户”也包括单人和合住者。':
     'Income uses fixed bins: blue is lower, yellow is mid-range and red is higher. Income is not wealth, house price or individual salary. Households include people living alone and shared households.',

@@ -696,12 +696,29 @@ strong {
   background: #90a97e;
   border-radius: 50%;
 }
+/* "No data" is a diagonal hatch on the map (the SVG pattern in index.html) and
+   in the legends: a texture, never a colour that could pass for a scale step. */
+html {
+  --no-data-line: #98a69f;
+}
+html[data-theme='dark'] {
+  --no-data-line: #64797f;
+}
+.map-patterns {
+  position: absolute;
+  overflow: hidden;
+}
+.no-data-hatch-line {
+  stroke: var(--no-data-line);
+}
 .missing-swatch {
-  width: 9px;
-  height: 9px;
+  width: 14px;
+  height: 12px;
+  flex: none;
   display: inline-block;
-  background: #d6dcd9;
-  border: 1px dashed #9aa6a3;
+  border-radius: 2px;
+  background: repeating-linear-gradient(135deg, var(--no-data-line) 0 1.3px, transparent 1.3px 4.3px);
+  border: 1px dashed var(--no-data-line);
 }
 .comparison-toolbar {
   height: 69px;
@@ -1070,10 +1087,6 @@ html[data-theme='dark'] .leaflet-container,
 html[data-theme='dark'] .comparison-card {
   background: #14272e;
 }
-html[data-theme='dark'] .missing-swatch {
-  background: #263b42;
-  border-color: #71888c;
-}
 html[data-theme='dark'] .airport-swatch {
   background: #3d3c57;
   border-color: #a79bc3;
@@ -1414,10 +1427,12 @@ html[data-theme='dark'] #income-control:has(input:checked) {
 /* A thin halo in the basemap colour keeps labels readable over any fill,
 including every bin of the light and dark population scales. */
 html {
-  --map-label-halo: 0 0 1px #fff, 0 0 2px #fff, 0 0 3px rgba(255, 255, 255, 0.85);
+  --map-label-halo-light: 0 0 1px #fff, 0 0 2px #fff, 0 0 3px rgba(255, 255, 255, 0.85);
+  --map-label-halo-dark: 0 0 1px #0d1f25, 0 0 2px #0d1f25, 0 0 3px rgba(13, 31, 37, 0.9);
+  --map-label-halo: var(--map-label-halo-light);
 }
 html[data-theme='dark'] {
-  --map-label-halo: 0 0 1px #0d1f25, 0 0 2px #0d1f25, 0 0 3px rgba(13, 31, 37, 0.9);
+  --map-label-halo: var(--map-label-halo-dark);
 }
 /* One map fills the browser. Desktop navigation and details float above it. */
 .desktop-only {

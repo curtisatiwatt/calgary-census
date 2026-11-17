@@ -20,6 +20,50 @@ export const money = value => (isNumber(value) ? `$${number(value)}` : noData())
 export const percent = value =>
   isNumber(value) ? `${(value * 100).toLocaleString('zh-CN', { maximumFractionDigits: 1 })}%` : noData();
 
+/** Map background behind every community fill; the stylesheets use the same two colours (checked by a unit test). */
+export const MAP_GROUND = Object.freeze({ light: '#edf1e9', dark: '#14272e' });
+/** Community fills are translucent, so what is seen is the bin colour blended with the ground. */
+export const FILL_OPACITY = Object.freeze({
+  population: Object.freeze({ light: 0.64, dark: 0.92 }),
+  income: Object.freeze({ light: 0.67, dark: 0.7 }),
+});
+/** Community names are drawn in whichever of these two inks contrasts more with the fill beneath. */
+export const LABEL_INK = Object.freeze({ dark: '#171a1d', light: '#f5f7fa' });
+
+const channels = color => [1, 3, 5].map(index => parseInt(color.slice(index, index + 2), 16));
+/** `color` painted at `opacity` over an opaque `ground`, as #rrggbb. */
+export function blendColor(color, ground, opacity) {
+  const under = channels(ground);
+  return `#${channels(color)
+    .map((value, index) =>
+      Math.round(value * opacity + under[index] * (1 - opacity))
+        .toString(16)
+        .padStart(2, '0'),
+    )
+    .join('')}`;
+}
+/** The colour a bin really has on the map; legends show this, not the raw bin colour. */
+export function displayedFill(kind, color, dark = false) {
+  const theme = dark ? 'dark' : 'light';
+  return blendColor(color, MAP_GROUND[theme], FILL_OPACITY[kind][theme]);
+}
+export function relativeLuminance(color) {
+  const [r, g, b] = channels(color).map(value => {
+    const c = value / 255;
+    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+/** WCAG contrast ratio between two opaque colours. */
+export function contrastRatio(first, second) {
+  const [high, low] = [relativeLuminance(first), relativeLuminance(second)].sort((a, b) => b - a);
+  return (high + 0.05) / (low + 0.05);
+}
+/** 'dark' or 'light': the label ink that reads better on an opaque fill. */
+export function labelInk(fill) {
+  return contrastRatio(fill, LABEL_INK.dark) >= contrastRatio(fill, LABEL_INK.light) ? 'dark' : 'light';
+}
+
 export function normalize(value) {
   return String(value ?? '')
     .normalize('NFKD')

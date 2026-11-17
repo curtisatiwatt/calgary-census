@@ -28,6 +28,11 @@ import {
   safeUrl,
   parseHashState,
   buildHashState,
+  MAP_GROUND,
+  FILL_OPACITY,
+  blendColor,
+  displayedFill,
+  labelInk,
 } from './map-utils.js';
 import {
   POPULATION_BINS,
@@ -199,15 +204,19 @@ function renderMetadata() {
     });
     $('source-list').append(link);
   }
+  // Legend swatches carry the colours as drawn (bin colour over the map ground at
+  // the fill's opacity) for each theme, so the legend matches the map exactly.
+  const swatch = (kind, light, dark) =>
+    `--bin-light:${displayedFill(kind, light, false)};--bin-dark:${displayedFill(kind, dark, true)}`;
   $('income-ramp').innerHTML = INCOME_BINS.map(
-    bin => `<span style="background:${bin.color}" title="${esc(bin.label)}"></span>`,
+    bin => `<span style="${swatch('income', bin.color, bin.color)}" title="${esc(bin.label)}"></span>`,
   ).join('');
-  const binColors = bin => `--bin-light:${bin.color};--bin-dark:${bin.dark}`;
   $('population-ramp').innerHTML = POPULATION_BINS.map(
-    bin => `<span style="${binColors(bin)}" title="${esc(bin.label)}"></span>`,
+    bin => `<span style="${swatch('population', bin.color, bin.dark)}" title="${esc(bin.label)}"></span>`,
   ).join('');
   document.querySelectorAll('.population-bin-labels>span').forEach((node, index) => {
-    if (POPULATION_BINS[index]) node.style.cssText += binColors(POPULATION_BINS[index]);
+    const bin = POPULATION_BINS[index];
+    if (bin) node.style.cssText = swatch('population', bin.color, bin.dark);
   });
   localize(
     document.querySelector('.app-header'),
@@ -366,29 +375,42 @@ function renderDetail() {
   localize(sidebar);
 }
 
-function styleFor(context, feature) {
+/** What a community is filled with: its statistic's colour, or nothing where the source has no value. */
+function fillFor(context, feature, dark) {
   const p = feature.properties;
-  const value = context.groupId ? populationShare(populationRecord(p.code), context.groupId) : p.income;
-  const missing = context.groupId ? value === null : state.income && !isNumber(value);
+  const theme = dark ? 'dark' : 'light';
+  if (context.groupId) {
+    const share = populationShare(populationRecord(p.code), context.groupId);
+    return share === null
+      ? { missing: true }
+      : { color: populationColor(share, dark), opacity: FILL_OPACITY.population[theme] };
+  }
+  if (state.income)
+    return isNumber(p.income) ? { color: colorFor(p.income), opacity: FILL_OPACITY.income[theme] } : { missing: true };
+  return { color: dark ? '#263b42' : '#e0e8dc', opacity: 0.72 };
+}
+
+function styleFor(context, feature) {
   const dark = isDarkTheme();
+  const fill = fillFor(context, feature, dark);
+  // "No data" is a diagonal hatch (the pattern in index.html) with a dashed edge:
+  // a texture cannot be mistaken for the lowest step of a colour scale.
   return {
-    color: missing ? (dark ? '#5a7075' : '#a7b3ac') : dark ? '#5a7075' : '#fafbf5',
+    color: fill.missing ? (dark ? '#6f868c' : '#a7b3ac') : dark ? '#5a7075' : '#fafbf5',
     weight: 0.75,
     opacity: 1,
-    fillColor: missing
-      ? dark
-        ? '#263b42'
-        : '#d6dcd9'
-      : context.groupId
-        ? populationColor(value, dark)
-        : state.income
-          ? colorFor(value)
-          : dark
-            ? '#263b42'
-            : '#e0e8dc',
-    fillOpacity: missing ? 0.35 : context.groupId ? (dark ? 0.92 : 0.64) : state.income ? (dark ? 0.62 : 0.67) : 0.72,
-    dashArray: missing ? '3 3' : null,
+    fillColor: fill.missing ? 'url(#no-data-hatch)' : fill.color,
+    fillOpacity: fill.missing ? 1 : fill.opacity,
+    dashArray: fill.missing ? '3 3' : null,
   };
+}
+
+/** The opaque colour a community appears in, used to pick a readable label ink. */
+function shownFill(context, feature) {
+  const dark = isDarkTheme();
+  const ground = MAP_GROUND[dark ? 'dark' : 'light'];
+  const fill = fillFor(context, feature, dark);
+  return fill.missing ? ground : blendColor(fill.color, ground, fill.opacity);
 }
 
 function refreshStyles() {
@@ -1059,7 +1081,7 @@ function updateLabels(context) {
     occupied.push(box);
     L.marker([p.centroid[1], p.centroid[0]], {
       icon: L.divIcon({
-        className: `community-label hierarchy-community-label${prominent ? ' focus-label' : ''}`,
+        className: `community-label hierarchy-community-label ink-${labelInk(shownFill(context, feature))}${prominent ? ' focus-label' : ''}`,
         html: `<span style="font-size:${size}px;line-height:1.22;font-weight:600">${lines.map(esc).join('<br>')}</span>`,
         iconSize: [width, height],
         iconAnchor: [width / 2, -offset],

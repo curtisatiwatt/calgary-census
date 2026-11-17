@@ -8,7 +8,15 @@ import {
   safeUrl,
   parseHashState,
   buildHashState,
+  INCOME_BINS,
+  MAP_GROUND,
+  LABEL_INK,
+  blendColor,
+  displayedFill,
+  contrastRatio,
+  labelInk,
 } from '../src/map-utils.js';
+import { POPULATION_BINS } from '../src/population-utils.js';
 
 test('income boundaries stay separate from unavailable values', () => {
   assert.equal(colorFor(null), '#d6dcd9');
@@ -88,4 +96,51 @@ test('view state round-trips through the URL hash and ignores unknown values', (
   assert.equal(hashCode('#ASP?groups=chinese', features), 'ASP');
   assert.equal(buildHashState({}), '');
   assert.equal(buildHashState({ groups: ['black'] }), '#?groups=black');
+});
+
+test('blendColor paints a translucent colour over an opaque ground', () => {
+  assert.equal(blendColor('#000000', '#ffffff', 0.5), '#808080');
+  assert.equal(blendColor('#095746', '#edf1e9', 1), '#095746');
+  assert.equal(blendColor('#095746', '#edf1e9', 0), '#edf1e9');
+  // The deepest light-theme bin is far paler on the map than its raw colour.
+  assert.equal(displayedFill('population', '#095746', false), '#5b8e81');
+  assert.equal(displayedFill('population', '#88d1b0', true), blendColor('#88d1b0', MAP_GROUND.dark, 0.92));
+});
+
+test('contrast follows the WCAG definition and picks the more readable ink', () => {
+  assert.equal(contrastRatio('#000000', '#ffffff'), 21);
+  assert.equal(contrastRatio('#777777', '#777777'), 1);
+  assert.equal(labelInk('#ffffff'), 'dark');
+  assert.equal(labelInk('#000000'), 'light');
+  assert.equal(labelInk(MAP_GROUND.light), 'dark');
+  assert.equal(labelInk(MAP_GROUND.dark), 'light');
+});
+
+test('every scale step leaves a community name readable (4.5:1) in one of the two inks', () => {
+  const fills = [];
+  for (const dark of [false, true]) {
+    for (const bin of POPULATION_BINS)
+      fills.push([`population ${bin.label}`, dark, displayedFill('population', dark ? bin.dark : bin.color, dark)]);
+    for (const bin of INCOME_BINS) fills.push([`income ${bin.label}`, dark, displayedFill('income', bin.color, dark)]);
+    fills.push(['no data', dark, MAP_GROUND[dark ? 'dark' : 'light']]);
+  }
+  for (const [name, dark, fill] of fills) {
+    const ratio = contrastRatio(fill, LABEL_INK[labelInk(fill)]);
+    assert.ok(ratio >= 4.5, `${name} (${dark ? 'dark' : 'light'} theme, ${fill}) only reaches ${ratio.toFixed(2)}:1`);
+  }
+  // White names on the two brightest dark-theme steps were the original defect (1.9:1 and 3:1).
+  const brightest = displayedFill('population', POPULATION_BINS.at(-1).dark, true);
+  assert.ok(contrastRatio(brightest, LABEL_INK.light) < 2);
+  assert.equal(labelInk(brightest), 'dark');
+});
+
+test('the map ground in the stylesheets matches the one legends and labels are computed from', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const read = name => readFile(new URL(`../src/styles/${name}`, import.meta.url), 'utf8');
+  const [map, base] = await Promise.all([read('map.css'), read('base.css')]);
+  assert.match(map, new RegExp(`\\.leaflet-container \\{[^}]*background: ${MAP_GROUND.light};`));
+  assert.match(
+    base,
+    new RegExp(`html\\[data-theme='dark'\\] \\.leaflet-container,[^}]*\\{\\s*background: ${MAP_GROUND.dark};`),
+  );
 });

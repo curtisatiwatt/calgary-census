@@ -120,6 +120,47 @@ test('switching language updates the interface and returns cleanly', async ({ pa
   expect(await untranslatedText(page)).toEqual([]);
 });
 
+test('no-data areas are hatched, names pick a readable ink and the legend shows the drawn colours', async ({
+  page,
+}) => {
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await openMap(page, '?view=compare&groups=not_visible_minority');
+  const map = page.locator('#comparison-map');
+  // 107 of the 313 areas publish no population table.
+  await expect(map.locator('path[data-community][fill="url(#no-data-hatch)"]')).toHaveCount(107);
+  // Most of the city is in the brightest dark-theme step, where names switch to dark ink.
+  await expect(map.locator('.community-label.ink-dark').first()).toBeAttached();
+  await expect(map.locator('.community-label.ink-light').first()).toBeAttached();
+  const { drawn, legend, inks } = await page.evaluate(() => {
+    const rgb = value =>
+      value
+        .match(/\d+(\.\d+)?/g)
+        .slice(0, 3)
+        .map(Number);
+    const container = document.getElementById('comparison-map');
+    const ground = rgb(getComputedStyle(container).backgroundColor);
+    const drawn = new Set();
+    for (const path of container.querySelectorAll('path[data-community]')) {
+      if (path.getAttribute('fill').startsWith('url')) continue;
+      const opacity = Number(path.getAttribute('fill-opacity'));
+      const fill = rgb(getComputedStyle(path).fill);
+      drawn.add(fill.map((value, i) => Math.round(value * opacity + ground[i] * (1 - opacity))).join(','));
+    }
+    const legend = [...document.querySelectorAll('#population-legend .population-bin-labels > span')].map(swatch =>
+      rgb(getComputedStyle(swatch, '::before').backgroundColor).join(','),
+    );
+    const inks = [...container.querySelectorAll('.community-label')].map(label => ({
+      dark: label.classList.contains('ink-dark'),
+      color: rgb(getComputedStyle(label).color).join(','),
+    }));
+    return { drawn: [...drawn], legend, inks };
+  });
+  expect(legend).toHaveLength(6);
+  expect(drawn.length).toBeGreaterThan(1);
+  for (const color of drawn) expect(legend).toContain(color);
+  for (const ink of inks) expect(ink.color).toBe(ink.dark ? '23,26,29' : '245,247,250');
+});
+
 test('switching theme restyles the basemap straight away', async ({ page }) => {
   await openMap(page);
   // Mean brightness of the road canvas: white roads in the light theme, grey-blue in the dark one.

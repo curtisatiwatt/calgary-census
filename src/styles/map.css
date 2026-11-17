@@ -1525,6 +1525,16 @@ html[data-theme='dark'] .community-label.hierarchy-community-label,
 html[data-theme='dark'] .community-label.focus-label {
   color: #f5f7fa;
 }
+/* A community name takes the ink that contrasts with its own fill (chosen in
+   main.js), with a halo in the opposite tone for where it overhangs a neighbour. */
+html[data-theme] .community-label.ink-dark {
+  color: #171a1d;
+  text-shadow: var(--map-label-halo-light);
+}
+html[data-theme] .community-label.ink-light {
+  color: #f5f7fa;
+  text-shadow: var(--map-label-halo-dark);
+}
 html[data-theme='dark'] .road-label {
   color: #f3f5f8;
 }
@@ -1568,10 +1578,12 @@ html[data-theme='dark'] .orientation-label > span {
 html[data-theme='dark'] .donut-key i.gap-swatch {
   border-color: #a6b4ac;
 }
-/* Population legend swatches follow the active theme's scale. */
+/* Legend swatches show each bin as it is drawn on the map in the active theme. */
+.income-ramp > span,
 .population-ramp > span {
   background: var(--bin-light);
 }
+html[data-theme='dark'] .income-ramp > span,
 html[data-theme='dark'] .population-ramp > span {
   background: var(--bin-dark);
 }
