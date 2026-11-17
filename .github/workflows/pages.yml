@@ -12,7 +12,9 @@ permissions:
 jobs:
   verify:
     # Runs for every pull request and push, so unchecked changes never reach main.
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest moved to Ubuntu 26, which Playwright 1.56's
+    # `install --with-deps` does not support yet.
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     concurrency:
       group: verify-${{ github.ref }}
