@@ -1,6 +1,6 @@
 /** Screen-space placement for geographic reference labels. No Leaflet dependency. */
 export function displayMapName(name) {
-  const acronyms = new Set(['NW', 'NE', 'SW', 'SE', 'YYC', 'YEG']);
+  const acronyms = new Set(['NW', 'NE', 'SW', 'SE', 'YYC']);
   const abbreviations = { AV: 'Ave', AVE: 'Ave', ST: 'St', TR: 'Trail', TRL: 'Trail', RD: 'Rd', DR: 'Dr', BV: 'Blvd', BLVD: 'Blvd', HWY: 'Hwy' };
   return String(name || '').replace(/\s+/g, ' ').trim().split(' ').map(word => {
     const upper = word.toUpperCase();
@@ -15,7 +15,8 @@ export function roadLabelName(name) {
 export function roadPriority(properties) {
   const name = String(properties.name || '');
   const classes = (properties.classes || []).join(' ');
-  if (/Stoney|Deerfoot|Anthony Henday|Whitemud Dr|Yellowhead/i.test(name)) return 4;
+  // Calgary's ring road and main north-south freeway lead the road labels.
+  if (/Stoney|Deerfoot/i.test(name)) return 4;
   if (/Arterial-Class A|Skeletal Road|Freeway|Expressway/i.test(classes)) return 3;
   if (/Arterial-Class B|Arterial Street|Industrial Arterial/i.test(classes)) return 2;
   return 1;

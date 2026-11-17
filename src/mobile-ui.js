@@ -10,7 +10,7 @@ addTranslations({
   '更多': 'More', '地图设置': 'Map menu', '关闭设置': 'Close menu',
   '图例': 'Legend', '关闭图例': 'Close legend', '查看详情': 'Details', '收起': 'Collapse',
   '语言': 'Language', '外观': 'Appearance',
-  '搜索 Calgary 社区': 'Search Calgary communities', '搜索 Edmonton 社区': 'Search Edmonton communities',
+  '搜索 Calgary 社区': 'Search Calgary communities',
 });
 
 const $ = id => document.getElementById(id);
@@ -31,7 +31,6 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
   const legend = $('mobile-legend-dialog');
   const filters = $('mobile-filter-dialog');
   const portals = new Map();
-  const city = document.querySelector('.brand strong').textContent.match(/Calgary|Edmonton/)?.[0] || '';
   let measured = { top: 0, right: 0, bottom: 0, left: 0 };
   let scheduled = 0;
   let moved = false;
@@ -107,7 +106,6 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
       move($('groups-panel'), filters);
       move($('layers-panel'), filters);
     } else if (!mobile && moved) { closeTransient(); restore(); moved = false; }
-    $('search').placeholder = t(`搜索 ${city} 社区`);
     $('mobile-map-switcher').hidden = !mobile || !comparing || !groups;
     pager.hidden = mobile && (!comparing || !groups);
     $('mobile-composition-legend').hidden = comparing;

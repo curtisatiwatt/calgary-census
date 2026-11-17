@@ -58,7 +58,7 @@ export function initDesktopUI({ onLayoutChange = () => {} } = {}) {
   menuButton.setAttribute('aria-controls', 'desktop-navigation');
   const city = document.createElement('span');
   city.className = 'desktop-city-name';
-  city.textContent = document.querySelector('.brand strong')?.textContent.match(/Calgary|Edmonton/)?.[0] || 'Community Atlas';
+  city.textContent = 'Calgary';
   railHeader.append(menuButton, city);
   nav.prepend(railHeader);
   nav.id ||= 'desktop-navigation';

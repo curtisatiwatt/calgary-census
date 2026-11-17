@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { clipSegment, groupRoadLabels, roadLabelName, visibleLineAnchors, visibleWaterAnchors } from '../src/label-placement.js';
+import { clipSegment, displayMapName, groupRoadLabels, roadLabelName, roadPriority, visibleLineAnchors, visibleWaterAnchors } from '../src/label-placement.js';
 
 const project = ([x, y]) => ({ x, y });
 const size = { x: 400, y: 300 };
@@ -23,9 +23,9 @@ test('clipping cannot bridge disjoint road pieces or create an off-road label', 
 
 test('opposite travel directions share a road label without losing address quadrants', () => {
   const feature = (name, classes = []) => ({ properties: { name, classes }, geometry: { type: 'MultiLineString', coordinates: [[[1, 2], [3, 4]]] } });
-  const groups = groupRoadLabels([feature('100 Ave EB NW'), feature('100 Ave WB NW'), feature('100 Ave NE'), feature('Anthony Henday Dr SB NW', ['Arterial-Class A'])]);
+  const groups = groupRoadLabels([feature('100 Ave EB NW'), feature('100 Ave WB NW'), feature('100 Ave NE'), feature('Glenmore Tr SB SW', ['Skeletal Road'])]);
   assert.equal(groups.length, 3);
-  assert.equal(groups[0].name, 'Anthony Henday Dr NW');
+  assert.equal(groups[0].name, 'Glenmore Trail SW');
   assert.equal(groups.find(g => g.name === '100 Ave NW').lines.length, 2);
   assert.equal(roadLabelName('DEERFOOT TR SE'), 'Deerfoot Trail SE');
 });
@@ -44,4 +44,11 @@ test('water holes and fully offscreen water do not receive label anchors', () =>
   assert.ok(anchors.length);
   assert.ok(anchors.every(p => !(p.x > 100 && p.x < 280 && p.y > 80 && p.y < 220)));
   assert.deepEqual(visibleWaterAnchors(geometry, ([x, y]) => ({ x: x + 500, y }), size), []);
+});
+
+test('only Calgary freeways get top road-label priority', () => {
+  assert.equal(roadPriority({ name: 'STONEY TR NW', classes: [] }), 4);
+  assert.equal(roadPriority({ name: 'DEERFOOT TR SE', classes: [] }), 4);
+  assert.equal(roadPriority({ name: 'Anthony Henday Dr', classes: [] }), 1);
+  assert.equal(displayMapName('YEG ROAD'), 'Yeg Road');
 });

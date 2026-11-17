@@ -268,7 +268,6 @@ addTranslationPatterns([[/^(.+) ↗$/, (_, label) => `${translate(label, 'en')} 
 
 addTranslations({
   '地图仅覆盖 Calgary 市内社区，不含 Springbank、Bearspaw 等市外地区。': 'The map covers Calgary communities, excluding Springbank, Bearspaw and other areas outside the city.',
-  '地图仅覆盖 Edmonton 市内社区，不含 St. Albert、Sherwood Park 等市外地区。': 'The map covers Edmonton neighbourhoods, excluding St. Albert, Sherwood Park and other municipalities.',
 });
 
 addTranslations({
