@@ -34,14 +34,40 @@ async function untranslatedText(page) {
   }, HAN.source);
 }
 
+// Every helper below drives the controls the way a person does (real pointer and
+// keyboard input through locators), so a control that is hidden, covered by a
+// panel or disabled fails the test instead of being clicked through script.
+
+/** Phones keep the view tabs, filters and preferences in the menu; desktop shows them in the rail. */
+async function openMenu(page, isMobile) {
+  if (isMobile) await page.locator('#mobile-more').click();
+}
+
+async function switchView(page, isMobile, view) {
+  await openMenu(page, isMobile);
+  await page.locator(`#${view}-tab`).click();
+  await expect(page.locator(`#${view}-view`)).toBeVisible();
+}
+
+async function setLayer(page, isMobile, layer, on) {
+  await openMenu(page, isMobile);
+  await page.locator('#layers-button').click();
+  await page.locator(`#${layer}-toggle`).setChecked(on);
+  await page.locator('#close-layers').click();
+  await expect(page.locator('#layers-panel')).toBeHidden();
+}
+
+/** Change the language or appearance select (`language-preference` / `theme-preference`). */
+async function setPreference(page, isMobile, id, value) {
+  await openMenu(page, isMobile);
+  await page.locator(`#${id}`).selectOption(value);
+  if (isMobile) await page.locator('#close-mobile-more').click();
+}
+
 /** Select the five largest groups through the real controls on either layout. */
 async function chooseTopFive(page, isMobile) {
-  if (isMobile) {
-    await page.locator('#mobile-more').click();
-    await page.locator('#groups-button').click();
-  } else {
-    await page.locator('#groups-button').click();
-  }
+  await openMenu(page, isMobile);
+  await page.locator('#groups-button').click();
   await page.locator('#default-groups').click();
   await expect(page.locator('#group-count')).toHaveText('5');
   if (isMobile) await page.locator('#close-groups').click();
@@ -57,14 +83,14 @@ test('the census map loads in English with no errors or untranslated text', asyn
   expect(errors).toEqual([]);
 });
 
-test('optional layers load on demand', async ({ page }) => {
+test('optional layers load on demand', async ({ page, isMobile }) => {
   const requested = [];
   page.on('request', request => requested.push(new URL(request.url()).pathname.split('/').pop()));
   await openMap(page);
   await expect.poll(() => requested.includes('basemap.geojson')).toBe(true);
   expect(requested).not.toContain('ctrain-operating.geojson');
   expect(requested).not.toContain('geographic-context.geojson');
-  await page.evaluate(() => document.getElementById('transit-toggle').click());
+  await setLayer(page, isMobile, 'transit', true);
   await expect(page.locator('[data-station-id]').first()).toBeAttached();
   expect(requested).toContain('ctrain-operating.geojson');
 });
@@ -80,14 +106,16 @@ test('search selects a community and records it in the URL', async ({ page }) =>
 test('groups, compare view and URL state work together', async ({ page, isMobile }) => {
   await openMap(page, 'ASP');
   await chooseTopFive(page, isMobile);
-  await page.evaluate(() => document.getElementById('distribution-tab').click());
+  await switchView(page, isMobile, 'distribution');
   await expect(page.locator('#comparison-map path[data-community]')).toHaveCount(313);
   // The single comparison map spans the whole viewport on both layouts.
   const mapBox = await page.locator('#comparison-map').boundingBox();
   expect(mapBox.width).toBe(page.viewportSize().width);
   await expect(page.locator('#comparison-page')).toHaveText('1 / 5');
-  await page.evaluate(() => document.getElementById('next-groups').click());
+  await expect(page.locator('#comparison-select option:checked')).toHaveText('South Asian');
+  await page.locator('#next-groups').click();
   await expect(page.locator('#comparison-page')).toHaveText('2 / 5');
+  await expect(page.locator('#comparison-select option:checked')).toHaveText('Chinese');
   await expect(page).toHaveURL(/view=compare/);
   await expect(page).toHaveURL(/compare=chinese/);
   expect(await untranslatedText(page)).toEqual([]);
@@ -117,23 +145,14 @@ test('links keep every layer toggle, and a link without a community deselects', 
   await expect(page).toHaveURL(/#\?groups=chinese$/);
 });
 
-test('switching language updates the interface and returns cleanly', async ({ page }) => {
+test('switching language updates the interface and returns cleanly', async ({ page, isMobile }) => {
   await openMap(page, 'ASP');
-  const select = page.locator('#language-preference');
-  await page.evaluate(() => {
-    const s = document.getElementById('language-preference');
-    s.value = 'zh';
-    s.dispatchEvent(new Event('change'));
-  });
+  await setPreference(page, isMobile, 'language-preference', 'zh');
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
   await expect(page.locator('#search')).toHaveAttribute('placeholder', '搜索 Calgary 社区');
-  await page.evaluate(() => {
-    const s = document.getElementById('language-preference');
-    s.value = 'en';
-    s.dispatchEvent(new Event('change'));
-  });
+  await setPreference(page, isMobile, 'language-preference', 'en');
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
-  await expect(select).toHaveValue('en');
+  await expect(page.locator('#language-preference')).toHaveValue('en');
   expect(await untranslatedText(page)).toEqual([]);
 });
 
@@ -178,7 +197,7 @@ test('no-data areas are hatched, names pick a readable ink and the legend shows 
   for (const ink of inks) expect(ink.color).toBe(ink.dark ? '23,26,29' : '245,247,250');
 });
 
-test('switching theme restyles the basemap straight away', async ({ page }) => {
+test('switching theme restyles the basemap straight away', async ({ page, isMobile }) => {
   await openMap(page);
   // Mean brightness of the road canvas: white roads in the light theme, grey-blue in the dark one.
   const roadBrightness = () =>
@@ -195,11 +214,7 @@ test('switching theme restyles the basemap straight away', async ({ page }) => {
       return count ? sum / count / 3 : 0;
     });
   await expect.poll(roadBrightness).toBeGreaterThan(200);
-  await page.evaluate(() => {
-    const select = document.getElementById('theme-preference');
-    select.value = 'dark';
-    select.dispatchEvent(new Event('change'));
-  });
+  await setPreference(page, isMobile, 'theme-preference', 'dark');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect.poll(roadBrightness).toBeLessThan(180);
 });

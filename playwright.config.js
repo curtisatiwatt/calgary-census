@@ -12,7 +12,9 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   webServer: {
-    command: 'npm run build && npx vite preview --host 127.0.0.1 --port 4173 --strictPort',
+    // CI builds once in its own step and tests exactly the files it then publishes;
+    // locally the tests build first so they never run against a stale dist/.
+    command: `${process.env.CI ? '' : 'npm run build && '}npx vite preview --host 127.0.0.1 --port 4173 --strictPort`,
     url: 'http://127.0.0.1:4173/',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

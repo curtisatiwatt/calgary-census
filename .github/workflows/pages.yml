@@ -37,6 +37,8 @@ jobs:
         run: npm run build
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
+      # Serves the dist/ built above (CI=true skips the rebuild), so the tests
+      # exercise exactly the files that are uploaded below.
       - name: Run end-to-end smoke tests
         run: npm run test:e2e
       - name: Upload static site
