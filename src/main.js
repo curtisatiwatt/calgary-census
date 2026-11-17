@@ -32,6 +32,7 @@ import {
 import {
   POPULATION_BINS,
   COMPOSITION_OTHER_COLOR,
+  POPULATION_GROUP_COLORS,
   populationShare,
   populationColor,
   donutSvg,
@@ -41,21 +42,6 @@ const $ = id => document.getElementById(id);
 const mobile = () => window.matchMedia('(max-width: 760px)').matches;
 const sidebar = document.querySelector('.sidebar');
 const dialog = $('method-dialog');
-const PALETTE = [
-  '#518a7b',
-  '#c29b4d',
-  '#7e85af',
-  '#5c8eac',
-  '#b67768',
-  '#8d9963',
-  '#947cac',
-  '#bb8c67',
-  '#688b92',
-  '#a18696',
-  '#7f8990',
-  '#b7a268',
-  '#c2c9bd',
-];
 const state = {
   features: [],
   byCode: new Map(),
@@ -1466,7 +1452,7 @@ async function init() {
     state.counts = summarize(data.features);
     state.groups = data.populationData.groups;
     state.groupById = new Map(state.groups.map(g => [g.id, g]));
-    state.colors = Object.fromEntries(state.groups.map((g, i) => [g.id, PALETTE[i % PALETTE.length]]));
+    state.colors = Object.fromEntries(state.groups.map(g => [g.id, POPULATION_GROUP_COLORS[g.id] || '#4c7870']));
     state.selectedGroups = [];
     const link = readUrlState();
     state.selected = link.code || (state.byCode.has('PAN') ? 'PAN' : data.features[0].properties.code);

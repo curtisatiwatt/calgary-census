@@ -31,6 +31,25 @@ export const POPULATION_NO_DATA_COLOR = '#d6dcd9';
 // One grey for "other groups" in the ring, legend and detail bars; it must stay
 // visible on the white/dark ring background and on the detail bar track.
 export const COMPOSITION_OTHER_COLOR = '#bcc7bd';
+// One colour per category for rings, legend swatches and detail bars. Ring
+// segments touch without a separator, so every colour has to stay clearly apart
+// from the others and from the "other groups" grey (checked by a unit test).
+export const POPULATION_GROUP_COLORS = Object.freeze({
+  south_asian: '#518a7b',
+  chinese: '#c29b4d',
+  black: '#7e85af',
+  filipino: '#5c8eac',
+  arab: '#b67768',
+  latin_american: '#8d9963',
+  southeast_asian: '#947cac',
+  west_asian: '#bb8c67',
+  korean: '#688b92',
+  japanese: '#a18696',
+  visible_minority_nie: '#7f8990',
+  multiple_visible_minorities: '#b7a268',
+  // The largest category city-wide: a deep olive, far from the pale "other" grey.
+  not_visible_minority: '#7a6c50',
+});
 
 const validCount = value => typeof value === 'number' && Number.isFinite(value) && value >= 0;
 const validPopulation = record =>

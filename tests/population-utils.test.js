@@ -4,6 +4,8 @@ import {
   POPULATION_GROUP_IDS,
   POPULATION_BINS,
   POPULATION_NO_DATA_COLOR,
+  POPULATION_GROUP_COLORS,
+  COMPOSITION_OTHER_COLOR,
   populationShare,
   compositionSegments,
   populationColor,
@@ -127,4 +129,67 @@ test('donut SVG permits only safe colors and numeric dimensions; no source label
   assert.doesNotMatch(svg, /onload|alert|script|chinese/);
   assert.match(svg, /stroke="#4c7870"/);
   assert.match(donutSvg(data, ['chinese'], { chinese: '#C084FC' }, 24), /stroke="#C084FC"/);
+});
+
+/** CIEDE2000 colour difference between two #rrggbb colours. */
+function colorDifference(first, second) {
+  const lab = hex => {
+    const [r, g, b] = [1, 3, 5]
+      .map(index => parseInt(hex.slice(index, index + 2), 16) / 255)
+      .map(c => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+    const f = value => (value > 0.008856 ? Math.cbrt(value) : 7.787 * value + 16 / 116);
+    const x = f((0.4124564 * r + 0.3575761 * g + 0.1804375 * b) / 0.95047);
+    const y = f(0.2126729 * r + 0.7151522 * g + 0.072175 * b);
+    const z = f((0.0193339 * r + 0.119192 * g + 0.9503041 * b) / 1.08883);
+    return [116 * y - 16, 500 * (x - y), 200 * (y - z)];
+  };
+  const radians = degrees => (degrees * Math.PI) / 180;
+  const hue = (b, a) => ((Math.atan2(b, a) * 180) / Math.PI + 360) % 360;
+  const [l1, a1, b1] = lab(first);
+  const [l2, a2, b2] = lab(second);
+  const meanChroma = (Math.hypot(a1, b1) + Math.hypot(a2, b2)) / 2;
+  const g = 0.5 * (1 - Math.sqrt(meanChroma ** 7 / (meanChroma ** 7 + 25 ** 7)));
+  const [a1p, a2p] = [a1 * (1 + g), a2 * (1 + g)];
+  const [c1, c2] = [Math.hypot(a1p, b1), Math.hypot(a2p, b2)];
+  const [h1, h2] = [c1 ? hue(b1, a1p) : 0, c2 ? hue(b2, a2p) : 0];
+  let hueGap = c1 * c2 ? h2 - h1 : 0;
+  if (hueGap > 180) hueGap -= 360;
+  else if (hueGap < -180) hueGap += 360;
+  const deltaHue = 2 * Math.sqrt(c1 * c2) * Math.sin(radians(hueGap / 2));
+  const meanLight = (l1 + l2) / 2;
+  const meanC = (c1 + c2) / 2;
+  let meanHue = h1 + h2;
+  if (c1 * c2) meanHue = Math.abs(h1 - h2) <= 180 ? meanHue / 2 : (meanHue + (meanHue < 360 ? 360 : -360)) / 2;
+  const t =
+    1 -
+    0.17 * Math.cos(radians(meanHue - 30)) +
+    0.24 * Math.cos(radians(2 * meanHue)) +
+    0.32 * Math.cos(radians(3 * meanHue + 6)) -
+    0.2 * Math.cos(radians(4 * meanHue - 63));
+  const sl = 1 + (0.015 * (meanLight - 50) ** 2) / Math.sqrt(20 + (meanLight - 50) ** 2);
+  const sc = 1 + 0.045 * meanC;
+  const sh = 1 + 0.015 * meanC * t;
+  const rotation =
+    -Math.sin(radians(60 * Math.exp(-(((meanHue - 275) / 25) ** 2)))) *
+    2 *
+    Math.sqrt(meanC ** 7 / (meanC ** 7 + 25 ** 7));
+  const [dl, dc, dh] = [(l2 - l1) / sl, (c2 - c1) / sc, deltaHue / sh];
+  return Math.sqrt(dl ** 2 + dc ** 2 + dh ** 2 + rotation * dc * dh);
+}
+
+test('every group colour is defined and clearly apart from the "other groups" grey and from each other', () => {
+  assert.equal(colorDifference('#ffffff', '#ffffff'), 0);
+  assert.ok(colorDifference('#000000', '#ffffff') > 99);
+  // The colour this replaced: indistinguishable from the grey once both sat side by side in a ring.
+  assert.ok(colorDifference('#c2c9bd', COMPOSITION_OTHER_COLOR) < 3);
+  assert.deepEqual(Object.keys(POPULATION_GROUP_COLORS), [...POPULATION_GROUP_IDS]);
+  const entries = Object.entries(POPULATION_GROUP_COLORS);
+  for (const [id, color] of entries) {
+    assert.match(color, /^#[0-9a-f]{6}$/, id);
+    // The old not_visible_minority colour sat 1.9 away from the grey and merged with it in the ring.
+    assert.ok(colorDifference(color, COMPOSITION_OTHER_COLOR) >= 12, `${id} is too close to the "other groups" grey`);
+  }
+  for (const [index, [id, color]] of entries.entries())
+    for (const [otherId, otherColor] of entries.slice(index + 1))
+      assert.ok(colorDifference(color, otherColor) >= 6, `${id} and ${otherId} are too similar`);
 });
