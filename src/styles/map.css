@@ -261,8 +261,8 @@
   position: absolute;
   inset: 69px 0 0;
   display: grid;
-  grid-template-columns: repeat(var(--map-columns, 3), minmax(0, 1fr));
-  gap: 1px;
+  /* One comparison map, reused for every group, on every screen size. */
+  grid-template-columns: minmax(0, 1fr);
   background: #cad7c2;
 }
 .comparison-card {
@@ -1680,10 +1680,6 @@ html[data-theme='dark'] .population-bin-labels > span {
   #mobile-legend-dialog .transit-legend {
     gap: 8px 12px;
     font-size: 0.75rem;
-  }
-  .comparison-maps {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0;
   }
   .empty-map {
     inset: 0;

@@ -82,6 +82,9 @@ test('groups, compare view and URL state work together', async ({ page, isMobile
   await chooseTopFive(page, isMobile);
   await page.evaluate(() => document.getElementById('distribution-tab').click());
   await expect(page.locator('#comparison-map path[data-community]')).toHaveCount(313);
+  // The single comparison map spans the whole viewport on both layouts.
+  const mapBox = await page.locator('#comparison-map').boundingBox();
+  expect(mapBox.width).toBe(page.viewportSize().width);
   await expect(page.locator('#comparison-page')).toHaveText('1 / 5');
   await page.evaluate(() => document.getElementById('next-groups').click());
   await expect(page.locator('#comparison-page')).toHaveText('2 / 5');
