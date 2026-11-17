@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite';
 
+// Dev and preview servers listen on localhost only; use `npm run dev -- --host`
+// to test from another device on the same network.
 export default defineConfig({
   base: './',
-  server: { host: '0.0.0.0', allowedHosts: ['terminal.local'] },
-  preview: { host: '0.0.0.0' },
   build: { target: 'es2022' },
 });
