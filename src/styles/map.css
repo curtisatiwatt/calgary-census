@@ -186,10 +186,8 @@
 }
 .population-donut {
   border-radius: 50%;
-  filter: drop-shadow(0 1px 2px #24453238);
 }
 .population-donut.selected-donut {
-  outline: 2px solid #264f46;
   outline-offset: 2px;
 }
 .population-donut svg {
@@ -197,21 +195,12 @@
   pointer-events: none;
 }
 .community-label {
-  color: #536a4d;
   font-size: 9px;
-  font-weight: 550;
   white-space: nowrap;
-  text-shadow:
-    0 0 3px white,
-    0 0 3px white,
-    1px 1px 1px white;
   pointer-events: none !important;
-  letter-spacing: -0.1px;
 }
 .community-label.focus-label {
   font-size: 11px;
-  color: #203e3c;
-  font-weight: 650;
 }
 .community-tooltip.leaflet-tooltip {
   background: #243f42;
@@ -220,10 +209,7 @@
   border-radius: 5px;
   box-shadow: 0 4px 15px #1f393829;
   padding: 10px 12px;
-  font-size: 11px;
   line-height: 1.7;
-  width: 230px;
-  max-width: min(230px, calc(100vw - 48px));
   white-space: normal;
   overflow-wrap: break-word;
 }
@@ -350,11 +336,6 @@
     font-size: 9px;
     gap: 6px;
   }
-  .map-tools {
-    top: 12px;
-    right: 12px;
-    gap: 6px;
-  }
   .map-button {
     padding: 8px 10px;
     font-size: 10px;
@@ -368,9 +349,6 @@
   .composition-key {
     top: 51px;
     left: 12px;
-    width: 192px;
-    padding: 10px 11px;
-    max-width: calc(100% - 83px);
   }
   .map-key strong {
     font-size: 10px;
@@ -415,53 +393,17 @@
     font-size: 8px;
     margin-top: 6px;
   }
-  .map-warning {
-    top: 180px;
-    left: 12px;
-    right: 60px;
-    bottom: auto;
-    font-size: 10px;
-  }
   .community-label {
     font-size: 8px;
   }
   .community-label.focus-label {
     font-size: 10px;
   }
-  .community-tooltip {
-    display: none;
-  }
-  .comparison-maps {
-    inset: 56px 0 0;
-  }
-  .comparison-map {
-    inset: 59px 0 0;
-  }
-  .comparing .map-tools {
-    top: 127px;
-    right: 12px;
-  }
   .population-legend {
     transform: none;
     left: 12px;
     width: 270px;
     max-width: calc(100% - 63px);
-  }
-  .empty-map {
-    inset: 56px 0 0;
-    justify-content: flex-start;
-    padding-top: 60px;
-    gap: 12px;
-  }
-  .empty-map h2 {
-    font-size: 16px;
-  }
-  .empty-map p {
-    font-size: 11px;
-  }
-  .leaflet-control-attribution {
-    font-size: 7px !important;
-    max-width: 100%;
   }
   .loading-overlay {
     justify-content: flex-start;
@@ -518,40 +460,12 @@
   gap: 5px;
 }
 .road-label {
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 0.25px;
   text-align: center;
-  pointer-events: none !important;
-  white-space: nowrap;
-  color: #5b685e;
-  text-shadow:
-    0 0 3px #fff,
-    0 0 3px #fff,
-    1px 1px 1px #fff;
 }
 .road-label span {
   background: #fffff3c9;
   padding: 1px 3px;
   border-radius: 2px;
-}
-.station-label {
-  font-size: 9px;
-  font-weight: 600;
-  line-height: 1.2;
-  white-space: nowrap;
-  pointer-events: none !important;
-  color: #344c4c;
-  text-shadow:
-    -1px -1px 1px #fff,
-    1px -1px 1px #fff,
-    -1px 1px 1px #fff,
-    1px 1px 1px #fff;
-}
-.station-label > span {
-  background: #fffff2bf;
-  border-radius: 2px;
-  padding: 1px 2px;
 }
 .future-station-label {
   color: #2b7047;
@@ -559,23 +473,6 @@
 }
 .landmark-label {
   text-align: center;
-  font-size: 10px;
-  font-weight: 650;
-  letter-spacing: 0.35px;
-  line-height: 1.25;
-  color: #546c48;
-  pointer-events: none !important;
-  text-shadow:
-    0 0 3px #fffffa,
-    0 0 3px #fffffa,
-    1px 1px 1px #fffffa;
-}
-.landmark-label.airport-label {
-  color: #6b557e;
-}
-.landmark-label.reserve-label {
-  color: #826740;
-  font-size: 11px;
 }
 .landmark-label span {
   background: #fffff52e;
@@ -684,13 +581,9 @@
   .transit-legend {
     font-size: 8px;
     gap: 5px 8px;
-    max-width: 280px;
   }
   .comparing .transit-legend {
     max-width: 270px;
-  }
-  .road-label {
-    font-size: 7px;
   }
 }
 
@@ -698,9 +591,6 @@
   .context-legend {
     gap: 12px;
     font-size: 10px;
-  }
-  .map-status {
-    display: none;
   }
   .transit-legend {
     top: 12px;
@@ -719,15 +609,6 @@
     top: 124px;
     left: 12px;
     max-width: calc(100% - 80px);
-  }
-  .station-label {
-    font-size: 8px;
-  }
-  .landmark-label {
-    font-size: 9px;
-  }
-  .landmark-label.reserve-label {
-    font-size: 10px;
   }
   .community-tooltip {
     display: none;
@@ -850,9 +731,6 @@ html[data-theme='dark'] .hierarchy-community-label {
     1px 1px 2px #14272e,
     0 0 4px #14272e;
 }
-html[data-theme='dark'] .community-label.focus-label {
-  color: #fff3c9;
-}
 html[data-theme='dark'] .road-label,
 html[data-theme='dark'] .station-label,
 html[data-theme='dark'] .landmark-label {
@@ -860,7 +738,6 @@ html[data-theme='dark'] .landmark-label {
     0 0 3px #14272e,
     0 0 3px #14272e,
     1px 1px 1px #14272e;
-  color: #ceddd6;
 }
 html[data-theme='dark'] .road-label span,
 html[data-theme='dark'] .station-label > span {
@@ -868,12 +745,6 @@ html[data-theme='dark'] .station-label > span {
 }
 html[data-theme='dark'] .future-station-label {
   color: #a6d5ad;
-}
-html[data-theme='dark'] .landmark-label.airport-label {
-  color: #c8bce2;
-}
-html[data-theme='dark'] .landmark-label.reserve-label {
-  color: #dac29a;
 }
 html[data-theme='dark'] .landmark-label span {
   background: #14272e45;
@@ -953,22 +824,8 @@ html[data-theme='dark'] .loading-overlay {
     width: 250px;
   }
 }
-.road-label {
-  font-size: 9px;
-  letter-spacing: 0.05px;
-}
 .water-label {
-  font-size: 11px;
-  font-style: italic;
-  font-weight: 600;
-  letter-spacing: 0.3px;
   text-align: center;
-  white-space: nowrap;
-  pointer-events: none !important;
-  color: #37798a;
-  text-shadow:
-    0 0 3px #f6fbf5,
-    0 0 3px #f6fbf5;
 }
 .water-label span {
   background: #f6fbf538;
@@ -979,14 +836,6 @@ html[data-theme='dark'] .loading-overlay {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 10px;
-  font-weight: 650;
-  color: #63516e;
-  pointer-events: none !important;
-  text-shadow:
-    0 0 3px #fffffff0,
-    0 0 3px #fffffff0,
-    1px 1px 1px #fff;
 }
 .orientation-label span {
   white-space: nowrap;
@@ -997,11 +846,8 @@ html[data-theme='dark'] .loading-overlay {
   height: 4px;
   flex: none;
   border-radius: 50%;
-  background: #80628b;
-  box-shadow: 0 0 0 1px #fff;
 }
 html[data-theme='dark'] .water-label {
-  color: #8fc4d5;
   text-shadow:
     0 0 3px #14272e,
     0 0 3px #14272e;
@@ -1010,7 +856,6 @@ html[data-theme='dark'] .water-label span {
   background: #14272e38;
 }
 html[data-theme='dark'] .orientation-label {
-  color: #d7c6e5;
   text-shadow:
     0 0 3px #14272e,
     0 0 3px #14272e,
@@ -1018,7 +863,6 @@ html[data-theme='dark'] .orientation-label {
 }
 html[data-theme='dark'] .orientation-label:before {
   background: #c2a5d3;
-  box-shadow: 0 0 0 1px #14272e;
 }
 
 @media (max-width: 760px) {
@@ -1075,27 +919,7 @@ html[data-theme='dark'] .orientation-label:before {
     font-size: 1.65rem;
   }
   #mobile-legend-button {
-    position: absolute;
-    left: 10px;
-    bottom: calc(var(--mobile-sheet-height) + 12px);
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    min-height: 44px;
-    padding: 0.55rem 0.75rem;
-    font-size: 0.875rem;
     font-weight: 550;
-    border-radius: 12px;
-    background: var(--mobile-surface);
-    color: var(--mobile-ink);
-    border: 1px solid var(--line);
-    box-shadow: 0 2px 8px #142b2420;
-    z-index: 900;
-  }
-  #mobile-legend-button svg {
-    width: 18px;
-    height: 18px;
-    flex: none;
   }
   .map-workspace > .transit-legend,
   .map-view > .map-key,
@@ -1242,9 +1066,6 @@ html[data-theme='dark'] .orientation-label:before {
     font-size: 0.8125rem;
     line-height: 1.5;
     color: var(--mobile-muted);
-  }
-  #mobile-legend-dialog > .dialog-scroll {
-    padding-top: 18px;
   }
 }
 /* Shared navigation: one menu model, with a right drawer on small screens. */
@@ -1408,9 +1229,6 @@ html[data-theme='dark'] .orientation-label:before {
   }
   .sidebar:not([data-sheet-snap='closed']) ~ .map-workspace #mobile-legend-button {
     bottom: calc(var(--mobile-sheet-height) + 12px);
-  }
-  .sidebar[data-sheet-snap='full'] ~ .map-workspace #mobile-legend-button {
-    display: none;
   }
   #mobile-legend-dialog[open] {
     width: calc(100vw - 24px);

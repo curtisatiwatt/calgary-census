@@ -182,7 +182,6 @@ strong {
 }
 .header-actions {
   display: flex;
-  gap: 24px;
   align-items: center;
   font-size: 11px;
   white-space: nowrap;
@@ -1187,15 +1186,6 @@ html[data-theme='dark'] #income-control:has(input:checked) {
   border-color: #8bbcad;
   color: #fff;
 }
-#mobile-more-dialog .mobile-settings-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 12px;
-  min-height: 68px;
-  padding: 10px 0;
-  font-size: 1rem;
-}
 #mobile-more-dialog select {
   flex: 1;
   width: auto;
@@ -1208,11 +1198,6 @@ html[data-theme='dark'] #income-control:has(input:checked) {
   font: inherit;
   color: inherit;
   background: var(--paper);
-}
-#mobile-settings-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
 }
 #mobile-settings-content > .text-button {
   min-height: 48px;
@@ -1423,9 +1408,8 @@ html[data-theme='dark'] #income-control:has(input:checked) {
 .community-sheet-close {
   display: none;
 }
-/* Quiet, readable map type. Import after the base and responsive UI styles. */
-/* A thin halo in the basemap colour keeps labels readable over any fill,
-including every bin of the light and dark population scales. */
+/* Map label halos: a thin glow keeps a name readable over any fill. Labels use
+   the theme's halo; a community name uses the one opposite to its own ink. */
 html {
   --map-label-halo-light: 0 0 1px #fff, 0 0 2px #fff, 0 0 3px rgba(255, 255, 255, 0.85);
   --map-label-halo-dark: 0 0 1px #0d1f25, 0 0 2px #0d1f25, 0 0 3px rgba(13, 31, 37, 0.9);

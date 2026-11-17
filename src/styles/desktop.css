@@ -30,10 +30,6 @@
 }
 
 @media (max-width: 1150px) and (min-width: 761px) {
-  .app-header {
-    padding: 0 20px;
-    gap: 20px;
-  }
   .data-edition {
     display: none;
   }
@@ -42,13 +38,6 @@
   }
   .detail-panel {
     padding: 21px;
-  }
-  .viewbar {
-    padding: 0 20px;
-    gap: 20px;
-  }
-  .view-controls {
-    gap: 16px;
   }
   .mode-description {
     display: none;
@@ -65,9 +54,6 @@
   }
   .income-value {
     font-size: 23px;
-  }
-  .comparison-toolbar {
-    padding: 0 13px;
   }
   .comparison-toolbar > div:first-child span {
     font-size: 9px;
@@ -436,7 +422,6 @@
     border-radius: 14px;
     background: transparent;
     color: var(--desktop-text);
-    font-size: 14px;
     line-height: 1.4;
   }
   .app-header .search-wrap input::placeholder {
@@ -804,11 +789,6 @@
 }
 
 @media (min-width: 761px) and (max-height: 700px) {
-  .viewbar {
-    gap: 8px;
-    padding-top: 8px;
-    padding-bottom: 8px;
-  }
   .viewbar .view-tabs button,
   .viewbar .view-controls > #groups-button,
   .viewbar .view-controls > #layers-button,
@@ -817,11 +797,6 @@
   .viewbar #mobile-more {
     min-height: 55px;
     gap: 3px;
-    padding-top: 6px;
-    padding-bottom: 6px;
-  }
-  .viewbar .view-tabs,
-  .desktop-rail-footer {
     padding-top: 6px;
     padding-bottom: 6px;
   }
