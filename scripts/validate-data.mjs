@@ -5,7 +5,7 @@ import { searchFeatures, isNumber } from '../src/map-utils.js';
 
 const root = new URL('../', import.meta.url);
 const read = path => JSON.parse(fs.readFileSync(new URL(path, root), 'utf8'));
-const integrity = read('data-integrity.json');
+const integrity = read('data/audit/data-integrity.json');
 for (const [path, expected] of Object.entries(integrity.files)) {
   const bytes = fs.readFileSync(new URL(path, root));
   assert.equal(bytes.length, expected.bytes, `${path}: published data file size changed`);
@@ -16,8 +16,8 @@ for (const [path, expected] of Object.entries(integrity.files)) {
 const communities = read('public/data/communities.geojson');
 const basemap = read('public/data/basemap.geojson');
 const metadata = read('public/data/metadata.json');
-const audit = read('data-audit.json');
-const basemapAudit = read('basemap-audit.json');
+const audit = read('data/audit/data-audit.json');
+const basemapAudit = read('data/audit/basemap-audit.json');
 assert.equal(communities.type, 'FeatureCollection');
 assert.equal(communities.features.length, audit.features);
 assert.equal(new Set(communities.features.map(f => f.properties.code)).size, 313);

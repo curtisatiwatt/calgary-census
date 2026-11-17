@@ -204,8 +204,9 @@ def main():
             "Snapshot checked on 2026-11-03, not a live construction or service feed.",
         ],
     }
-    (ROOT / "ctrain-green-audit.json").write_text(json.dumps(audit, ensure_ascii=False, indent=2) + "\n")
+    (ROOT / "data/audit/ctrain-green-audit.json").write_text(json.dumps(audit, ensure_ascii=False, indent=2) + "\n")
     print(json.dumps(audit["counts"]))
+    print('Next: node scripts/round-coordinates.mjs <changed public/data files>, then node scripts/update-integrity.mjs --reason "..." <files> and npm run check.')
 
 
 if __name__ == "__main__":

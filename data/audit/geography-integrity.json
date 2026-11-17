@@ -82,5 +82,11 @@
       },
       "validation": "The script checked every output vertex is an input vertex rounded, in order, and deep-compared every feature's properties; npm run check then re-verified counts, coordinate ranges and that every community display anchor is still inside its boundary."
     }
-  ]
+  ],
+  "orientationLandmarks": {
+    "public/data/orientation-landmarks.geojson": {
+      "bytes": 2211,
+      "sha256": "683dca32e5397bb512efd20c55375025915aa5cb07ddf606e59f7023ed4d5b77"
+    }
+  }
 }

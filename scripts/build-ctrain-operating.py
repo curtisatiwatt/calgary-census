@@ -194,8 +194,9 @@ def main():
         'limitations': ['Geographic overview, not a live timetable or closure feed.', 'Opposite platform points are represented by one published station coordinate; use the official station maps for entrances/accessibility.', 'Shared downtown Red/Blue route geometry overlaps; the renderer should retain both line identities.'],
         'sourceSha256': {name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in paths.items()},
         'outputSha256': hashlib.sha256(output.read_bytes()).hexdigest(), 'stations': station_audit}
-    (ROOT / 'ctrain-operating-audit.json').write_text(json.dumps(audit, ensure_ascii=False, indent=2) + '\n')
+    (ROOT / 'data/audit/ctrain-operating-audit.json').write_text(json.dumps(audit, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps({'output': str(output), 'bytes': output.stat().st_size, 'counts': audit['counts'], 'sourceDates': source_dates}, ensure_ascii=False))
+    print('Next: node scripts/round-coordinates.mjs <changed public/data files>, then node scripts/update-integrity.mjs --reason "..." <files> and npm run check.')
 
 
 if __name__ == '__main__':

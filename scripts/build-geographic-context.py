@@ -222,9 +222,10 @@ def main():
                          {'name': 'Calgary Community District Boundaries', 'url': BOUNDARY_SOURCE, 'licenseUrl': CALGARY_LICENSE},
                          {'name': 'NRCan Aboriginal Lands of Canada Legislative Boundaries', 'url': RESERVE_SOURCE, 'serviceUrl': RESERVE_SERVICE, 'licenseUrl': CANADA_LICENSE}],
              'rawSources': [{'file': name, 'url': url, 'sha256': sha(args.source_dir / name)} for name, url in URLS.items()]}
-    (ROOT / 'geographic-context-audit.json').write_text(json.dumps(audit, ensure_ascii=False, indent=2) + '\n')
+    (ROOT / 'data/audit/geographic-context-audit.json').write_text(json.dumps(audit, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps({'features': len(features), 'counts': audit['outputCounts'], 'bytes': output.stat().st_size,
                       'sha256': audit['outputSha256']}, ensure_ascii=False))
+    print('Next: node scripts/round-coordinates.mjs <changed public/data files>, then node scripts/update-integrity.mjs --reason "..." <files> and npm run check.')
 
 
 if __name__ == '__main__':

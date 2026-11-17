@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 
 const root = new URL('../', import.meta.url);
 const read = path => JSON.parse(fs.readFileSync(new URL(path, root), 'utf8'));
-const integrity = read('geography-integrity.json');
+const integrity = read('data/audit/geography-integrity.json');
 const loaded = {};
 for (const [path, expected] of Object.entries(integrity.files)) {
   const bytes = fs.readFileSync(new URL(path, root));
@@ -78,4 +78,20 @@ const railways = loaded['railways.geojson'];
 assert.deepEqual(new Set(railways.map(f => f.properties.kind)), new Set(['railway']), 'railways.geojson must contain only non-LRT railways');
 assert.ok(context.some(f => f.properties.kind === 'reserve' && /145/.test(f.properties.name)), 'Tsuut’ina 145 context is missing');
 assert.ok(context.some(f => f.properties.kind === 'airport'), 'Calgary airport context is missing');
+// Orientation landmarks: a handful of hand-checked points with their own audit.
+const landmarkAudit = read('data/audit/orientation-landmarks.json');
+for (const [path, expected] of Object.entries(integrity.orientationLandmarks)) {
+  const bytes = fs.readFileSync(new URL(path, root));
+  assert.equal(bytes.length, expected.bytes, `${path}: audited snapshot size changed`);
+  assert.equal(createHash('sha256').update(bytes).digest('hex'), expected.sha256, `${path}: audited landmark snapshot changed`);
+  const landmarks = JSON.parse(bytes).features;
+  assert.equal(landmarks.length, landmarkAudit.featureCount, `${path}: feature count differs from its audit`);
+  for (const feature of landmarks) {
+    const p = feature.properties;
+    assert.equal(p.kind, 'orientation_landmark');
+    assert.ok(p.name && p.sourceUrl && new URL(p.sourceUrl).protocol === 'https:', `${path}/${p.name}: missing name or https source`);
+    assert.equal(feature.geometry.type, 'Point');
+    position(feature.geometry.coordinates, `${path}/${p.name}`);
+  }
+}
 console.log(`PASS: audited official geography; ${stations.length} operating CTrain stations, ${integrity.expected.greenStations} non-operating Green Line stations; railways, airport, parks and reserves; valid regional coordinates and source links.`);

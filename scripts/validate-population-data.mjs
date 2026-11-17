@@ -9,7 +9,7 @@ const data = read('public/data/population-groups.json');
 const features = read('public/data/communities.geojson').features;
 const byCode = new Map(features.map(f => [f.properties.code, f.properties]));
 const metadata = read('public/data/metadata.json');
-const audit = read('population-data-audit.json');
+const audit = read('data/audit/population-data-audit.json');
 assert.equal(data.schemaVersion, 1);
 assert.equal(data.censusYear, 2021);
 assert.equal(data.variable, 'visible_minority');

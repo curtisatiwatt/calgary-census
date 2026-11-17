@@ -182,7 +182,7 @@ def main():
         }],
         "sourceTextFiles": sources,
     }
-    (ROOT / "population-data-audit.json").write_text(json.dumps(audit, ensure_ascii=False, indent=2) + "\n")
+    (ROOT / "data/audit/population-data-audit.json").write_text(json.dumps(audit, ensure_ascii=False, indent=2) + "\n")
     print(f"Extracted {len(result['communities'])} communities × {len(GROUPS)} categories; all city references and existing Chinese values agree.")
     print(f"Missing profiles: {len(missing_codes)}; data size: {output_path.stat().st_size:,} bytes.")
 
