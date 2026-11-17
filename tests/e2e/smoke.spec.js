@@ -536,6 +536,18 @@ test('a hover tooltip near the top of the map opens where it can be read', async
   await expect(tooltip).toHaveClass(/leaflet-tooltip-bottom/);
 });
 
+test('group search matches the label shown in the current language', async ({ page, isMobile }) => {
+  await openMap(page);
+  await openMenu(page, isMobile);
+  await page.locator('#groups-button').click();
+  // "Census category" is only in the displayed English label, not in the short source name.
+  await page.locator('#group-search').fill('census cat');
+  await expect(page.locator('.group-option')).toHaveCount(1);
+  await expect(page.locator('.group-option')).toContainText('Not a visible minority (Census category)');
+  await page.locator('#group-search').fill('zzzz');
+  await expect(page.locator('#group-list')).toHaveText('No matching group.');
+});
+
 test('desktop keeps a legend card; mobile opens it on demand', async ({ page, isMobile }) => {
   await openMap(page);
   await chooseTopFive(page, isMobile);

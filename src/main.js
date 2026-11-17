@@ -245,7 +245,8 @@ function refreshGroupControl() {
 
 function renderGroupList() {
   const query = $('group-search').value.trim().toLowerCase();
-  const groups = state.groups.filter(g => `${g.label} ${g.name}`.toLowerCase().includes(query));
+  // Match what is on screen too: the English label can be longer than the short English name.
+  const groups = state.groups.filter(g => `${g.label} ${g.name} ${t(g.label)}`.toLowerCase().includes(query));
   $('group-list').innerHTML = groups.length
     ? groups
         .map(
