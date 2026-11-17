@@ -46,6 +46,8 @@ async function chooseTopFive(page, isMobile) {
   await expect(page.locator('#group-count')).toHaveText('5');
   if (isMobile) await page.locator('#close-groups').click();
   else await page.keyboard.press('Escape');
+  // Escape must work even while the desktop legend card (a non-modal dialog) is open.
+  await expect(page.locator('#groups-panel')).toBeHidden();
 }
 
 test('the census map loads in English with no errors or untranslated text', async ({ page }) => {
@@ -126,6 +128,15 @@ test('communities are reachable from the keyboard', async ({ page, isMobile }) =
   expect(focused).toBeTruthy();
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(new RegExp(`#${focused}$`));
+});
+
+test('keyboard shortcuts keep working while the desktop legend card is open', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'keyboard shortcuts are a desktop interaction');
+  await openMap(page);
+  await chooseTopFive(page, isMobile);
+  await expect(page.locator('#mobile-legend-dialog')).toBeVisible();
+  await page.keyboard.press('/');
+  await expect(page.locator('#search')).toBeFocused();
 });
 
 test('desktop keeps a legend card; mobile opens it on demand', async ({ page, isMobile }) => {

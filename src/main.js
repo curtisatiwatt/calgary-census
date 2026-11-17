@@ -1397,8 +1397,10 @@ function initializeControls() {
     )
       toggleGroups(false);
   });
+  // The desktop legend card is a non-modal <dialog open>; only a modal dialog owns the keyboard.
+  const modalOpen = () => Boolean(document.querySelector('dialog:modal'));
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && !document.querySelector('dialog[open]')) {
+    if (event.key === 'Escape' && !modalOpen()) {
       closeTooltips();
       if (!$('layers-panel').hidden) {
         toggleLayers(false);
@@ -1411,7 +1413,7 @@ function initializeControls() {
     if (
       event.key === '/' &&
       !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) &&
-      !document.querySelector('dialog[open]')
+      !modalOpen()
     ) {
       event.preventDefault();
       $('search').focus();
