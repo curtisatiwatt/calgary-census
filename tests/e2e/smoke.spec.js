@@ -257,6 +257,27 @@ test('communities are reachable from the keyboard', async ({ page, isMobile }) =
   await expect(stop).toHaveCount(1);
 });
 
+test('tabbing to a community that was panned away brings it back into view', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'keyboard navigation is a desktop interaction');
+  await openMap(page, 'DNC');
+  await page.locator('#desktop-details-toggle').click();
+  // Drag the selected community far outside the window.
+  for (let i = 0; i < 2; i++) {
+    await page.mouse.move(900, 500);
+    await page.mouse.down();
+    await page.mouse.move(250, 120, { steps: 5 });
+    await page.mouse.up();
+  }
+  const stop = page.locator('#composition-map path[data-community="DNC"]');
+  await expect(stop).not.toBeInViewport();
+  await page.locator('#composition-map').focus();
+  await page.keyboard.press('Tab');
+  await expect(stop).toBeFocused();
+  await expect(stop).toBeInViewport();
+  // Its tooltip, opened by the same focus, is still there after the map moved.
+  await expect(page.locator('.community-tooltip')).toBeVisible();
+});
+
 test('the comparison map keeps a single tab stop while moving between communities', async ({ page, isMobile }) => {
   test.skip(isMobile, 'keyboard navigation is a desktop interaction');
   await openMap(page, '?view=compare&groups=chinese');

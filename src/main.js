@@ -537,6 +537,17 @@ function createMap(element, groupId = null) {
     const code = event.target.closest?.('path[data-community]')?.dataset.community;
     if (code) communityKeydown(context, code, event);
   });
+  // Tabbing onto a community that was panned out of view brings it back. This
+  // runs in the capture phase, before the outline and tooltip react to the focus.
+  map.getContainer().addEventListener(
+    'focus',
+    event => {
+      const path = event.target.closest?.('path[data-community]');
+      const centroid = path?.matches(':focus-visible') && state.byCode.get(path.dataset.community)?.properties.centroid;
+      if (centroid) map.panInside([centroid[1], centroid[0]], { ...fitPadding(map), animate: false });
+    },
+    true,
+  );
   if (!groupId) {
     context.contextLayers = createContextLayers({
       context,
