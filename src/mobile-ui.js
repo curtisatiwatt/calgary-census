@@ -115,8 +115,6 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
     $('mobile-legend-button').hidden = !hasLegend;
     if (!hasLegend) closeDialog(legend);
     for (const node of document.querySelectorAll('[data-mobile-text]')) node.textContent = t(node.dataset.mobileText);
-    const binColors = [...$('population-ramp').children].map(node => node.style.background);
-    document.querySelectorAll('.population-bin-labels>span').forEach((node, index) => node.style.setProperty('--bin-color', binColors[index] || '#ddd'));
     $('mobile-more').setAttribute('aria-label', t('菜单'));
     $('mobile-more').title = t('菜单');
     $('mobile-more').setAttribute('aria-expanded', String(more.open));

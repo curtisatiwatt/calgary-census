@@ -119,7 +119,9 @@ function renderMetadata() {
     $('source-list').append(link);
   }
   $('income-ramp').innerHTML = INCOME_BINS.map(bin => `<span style="background:${bin.color}" title="${esc(bin.label)}"></span>`).join('');
-  $('population-ramp').innerHTML = POPULATION_BINS.map(bin => `<span style="background:${bin.color}" title="${esc(bin.label)}"></span>`).join('');
+  const binColors = bin => `--bin-light:${bin.color};--bin-dark:${bin.dark}`;
+  $('population-ramp').innerHTML = POPULATION_BINS.map(bin => `<span style="${binColors(bin)}" title="${esc(bin.label)}"></span>`).join('');
+  document.querySelectorAll('.population-bin-labels>span').forEach((node, index) => { if (POPULATION_BINS[index]) node.style.cssText += binColors(POPULATION_BINS[index]); });
   localize(document.querySelector('.app-header'), dialog, $('income-legend'), $('population-legend'), document.querySelector('.map-status'));
 }
 
@@ -220,8 +222,8 @@ function styleFor(context, feature) {
   return {
     color: missing ? (dark ? '#5a7075' : '#a7b3ac') : (dark ? '#5a7075' : '#fafbf5'),
     weight: 0.75, opacity: 1,
-    fillColor: missing ? (dark ? '#263b42' : '#d6dcd9') : context.groupId ? populationColor(value) : state.income ? colorFor(value) : (dark ? '#263b42' : '#e0e8dc'),
-    fillOpacity: missing ? 0.35 : context.groupId ? (dark ? 0.72 : 0.64) : state.income ? (dark ? 0.62 : 0.67) : 0.72,
+    fillColor: missing ? (dark ? '#263b42' : '#d6dcd9') : context.groupId ? populationColor(value, dark) : state.income ? colorFor(value) : (dark ? '#263b42' : '#e0e8dc'),
+    fillOpacity: missing ? 0.35 : context.groupId ? (dark ? 0.92 : 0.64) : state.income ? (dark ? 0.62 : 0.67) : 0.72,
     dashArray: missing ? '3 3' : null,
   };
 }

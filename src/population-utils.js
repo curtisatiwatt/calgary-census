@@ -6,13 +6,15 @@ export const POPULATION_GROUP_IDS = Object.freeze([
 ]);
 
 // A single, absolute scale shared by every community and comparison panel.
+// Light mode runs pale -> deep; dark mode runs from the dark basemap toward
+// bright, so higher shares always stand out more in either theme.
 export const POPULATION_BINS = Object.freeze([
-  { min: 0, max: 0.05, color: '#edf8f5', label: '0–<5%' },
-  { min: 0.05, max: 0.1, color: '#c4e5dc', label: '5–<10%' },
-  { min: 0.1, max: 0.2, color: '#8ccdbd', label: '10–<20%' },
-  { min: 0.2, max: 0.3, color: '#4cae98', label: '20–<30%' },
-  { min: 0.3, max: 0.4, color: '#21836f', label: '30–<40%' },
-  { min: 0.4, max: Infinity, color: '#095746', label: '40% 及以上' },
+  { min: 0, max: 0.05, color: '#edf8f5', dark: '#1f3d40', label: '0–<5%' },
+  { min: 0.05, max: 0.1, color: '#c4e5dc', dark: '#1f5550', label: '5–<10%' },
+  { min: 0.1, max: 0.2, color: '#8ccdbd', dark: '#236e60', label: '10–<20%' },
+  { min: 0.2, max: 0.3, color: '#4cae98', dark: '#2f8a72', label: '20–<30%' },
+  { min: 0.3, max: 0.4, color: '#21836f', dark: '#4fa98a', label: '30–<40%' },
+  { min: 0.4, max: Infinity, color: '#095746', dark: '#88d1b0', label: '40% 及以上' },
 ]);
 
 export const POPULATION_NO_DATA_COLOR = '#d6dcd9';
@@ -59,10 +61,10 @@ export function compositionSegments(record, selectedIds) {
   return segments;
 }
 
-export function populationColor(share) {
-  return validCount(share)
-    ? POPULATION_BINS.find(bin => share < bin.max).color
-    : POPULATION_NO_DATA_COLOR;
+export function populationColor(share, dark = false) {
+  if (!validCount(share)) return POPULATION_NO_DATA_COLOR;
+  const bin = POPULATION_BINS.find(candidate => share < candidate.max);
+  return dark ? bin.dark : bin.color;
 }
 
 const safeColor = color => typeof color === 'string'

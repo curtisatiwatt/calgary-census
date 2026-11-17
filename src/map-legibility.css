@@ -1,4 +1,8 @@
 /* Quiet, readable map type. Import after the base and responsive UI styles. */
+/* A thin halo in the basemap colour keeps labels readable over any fill,
+   including every bin of the light and dark population scales. */
+html { --map-label-halo: 0 0 1px #fff, 0 0 2px #fff, 0 0 3px rgba(255, 255, 255, .85); }
+html[data-theme=dark] { --map-label-halo: 0 0 1px #0d1f25, 0 0 2px #0d1f25, 0 0 3px rgba(13, 31, 37, .9); }
 html .community-label,
 html .community-label.hierarchy-community-label,
 html .community-label.all-community-label,
@@ -6,7 +10,7 @@ html .community-label.focus-label {
   color: #171a1d;
   font-weight: 550;
   letter-spacing: 0;
-  text-shadow: none;
+  text-shadow: var(--map-label-halo);
   filter: none;
   line-height: 1.25;
 }
@@ -29,7 +33,7 @@ html .orientation-label {
   font-weight: 500;
   line-height: 1.4;
   letter-spacing: 0;
-  text-shadow: none;
+  text-shadow: var(--map-label-halo);
   filter: none;
   white-space: nowrap;
   pointer-events: none !important;
@@ -65,16 +69,15 @@ html[data-theme=dark] .community-label.hierarchy-community-label,
 html[data-theme=dark] .community-label.all-community-label,
 html[data-theme=dark] .community-label.focus-label {
   color: #f5f7fa;
-  text-shadow: none;
 }
-html[data-theme=dark] .road-label { color: #f3f5f8; text-shadow: none; }
-html[data-theme=dark] .water-label { color: #b4def3; text-shadow: none; }
-html[data-theme=dark] .station-label { color: #e7eef4; text-shadow: none; }
+html[data-theme=dark] .road-label { color: #f3f5f8; }
+html[data-theme=dark] .water-label { color: #b4def3; }
+html[data-theme=dark] .station-label { color: #e7eef4; }
 html[data-theme=dark] .station-label.future-station-label { color: #a9d6ba; }
-html[data-theme=dark] .landmark-label { color: #c7dec9; text-shadow: none; }
+html[data-theme=dark] .landmark-label { color: #c7dec9; }
 html[data-theme=dark] .landmark-label.airport-label { color: #d8cce8; }
 html[data-theme=dark] .landmark-label.reserve-label { color: #e0cfac; }
-html[data-theme=dark] .orientation-label { color: #ddd0ec; text-shadow: none; }
+html[data-theme=dark] .orientation-label { color: #ddd0ec; }
 html[data-theme=dark] .orientation-label:before { box-shadow: none; }
 html[data-theme=dark] .road-label > span,
 html[data-theme=dark] .water-label > span,
@@ -85,3 +88,9 @@ html[data-theme=dark] .orientation-label > span { background: transparent; }
 /* Source-table discrepancy swatch: unfilled, so it matches the ring in either theme. */
 .donut-key i.gap-swatch { background: transparent; border: 1px dotted #819080; box-sizing: border-box; }
 html[data-theme=dark] .donut-key i.gap-swatch { border-color: #a6b4ac; }
+
+/* Population legend swatches follow the active theme's scale. */
+.population-ramp > span { background: var(--bin-light); }
+html[data-theme=dark] .population-ramp > span { background: var(--bin-dark); }
+.population-bin-labels > span { --bin-color: var(--bin-light); }
+html[data-theme=dark] .population-bin-labels > span { --bin-color: var(--bin-dark); }
