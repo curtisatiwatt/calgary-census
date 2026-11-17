@@ -17,8 +17,12 @@ export function stationContent(properties) {
   return localizeHtml(`<strong>${esc(properties.name)}</strong><span class="station-lines">${esc(names)}</span><span class="station-status${properties.status === 'operating' ? '' : ' future-status'}">${esc(statusName(properties.status))}</span>${properties.phaseLabel ? `<span class="station-phase">${esc(properties.phaseLabel)}${properties.funding === 'unfunded' ? ' · 远期规划 / 未获建设资金' : ''}</span>` : ''}${approximate ? '<span class="station-position-note">规划示意位置，非最终站位</span>' : ''}${properties.locationNote ? `<span class="station-position-note">${esc(properties.locationNote)}</span>` : ''}${properties.note ? `<span class="station-position-note">${esc(properties.note)}</span>` : ''}${source ? `<a class="station-source" href="${source}" target="_blank" rel="noopener noreferrer">官方线路资料 ↗</a>` : ''}`);
 }
 
-/** Context geometry never changes census statistics or the heat-map scale. */
-export function createContextLayers({ context, basemap, geography, operatingTransit, greenTransit, orientationLandmarks, communityNames = [], visible, onStationOpen, getLabelObstacles }) {
+/**
+ * Context geometry never changes census statistics or the heat-map scale.
+ * Each dataset is attached when it arrives (setBasemap, setRailways,
+ * setLandmarks, setTransit), so the census map never waits for context layers.
+ */
+export function createContextLayers({ context, visible, onStationOpen, getLabelObstacles }) {
   const map = context.map;
   const definitions = [['geography', 405], ['water', 410], ['roads', 420], ['roadLabels', 460], ['waterLabels', 465], ['transit', 440], ['stations', 480], ['stationLabels', 485], ['landmarkLabels', 490]];
   for (const [name, zIndex] of definitions) {
@@ -31,31 +35,18 @@ export function createContextLayers({ context, basemap, geography, operatingTran
   const waterLabels = L.layerGroup().addTo(map);
   const stationLabels = L.layerGroup().addTo(map);
   const landmarkLabels = L.layerGroup().addTo(map);
-  const transitFeatures = [...features(operatingTransit), ...features(greenTransit)];
-  const routes = transitFeatures.filter(f => f.properties.kind === 'transit_route');
-  const stations = transitFeatures.filter(f => f.properties.kind === 'transit_station' && f.geometry?.type === 'Point');
-  const roadFeatures = features(basemap).filter(f => f.properties.kind === 'road');
-  const roadLabelGroups = groupRoadLabels(roadFeatures);
-  const waterFeatures = features(basemap).filter(f => f.properties.kind === 'water' && f.properties.name && !/facility|storm.?water|management|industrial|energy park|pond [0-9]/i.test(f.properties.name))
-    .sort((a, b) => waterPriority(b.properties.name) - waterPriority(a.properties.name));
-  const orientationFeatures = features(orientationLandmarks).filter(f => f.properties.kind === 'orientation_landmark' && f.geometry?.type === 'Point' && f.properties.name)
-    .sort((a, b) => (b.properties.priority || 0) - (a.properties.priority || 0));
   const project = coordinate => map.latLngToContainerPoint([coordinate[1], coordinate[0]]);
   function waterPriority(name) { return /river/i.test(name) ? 4 : /reservoir/i.test(name) ? 3 : /creek/i.test(name) ? 2 : 1; }
-  const areaFeatures = features(geography).filter(f => ['airport', 'park', 'reserve'].includes(f.properties.kind));
   const normalizeName = name => String(name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-  const parkLabelsByName = new Map();
   const iconicParks = new Set(['nosehillpark', 'fishcreekpark', 'northglenmorepark', 'southglenmorepark', 'bownesspark', 'princesislandpark']);
-  for (const feature of areaFeatures.filter(f => f.properties.kind === 'park' && f.properties.named !== false)) {
-    const p = feature.properties;
-    // A single descriptive park label, not depot/school/parcel names from the same site.
-    const name = String(p.name || '').split(';').map(part => part.trim()).find(part => /\bpark\b|natural area|sanctuary|wetland|garden|ravine/i.test(part));
-    if (!name) continue;
-    const key = normalizeName(name);
-    const existing = parkLabelsByName.get(key);
-    if (!existing || (p.areaHa || 0) > (existing.feature.properties.areaHa || 0)) parkLabelsByName.set(key, { feature, name, key, iconic: iconicParks.has(key) });
-  }
-  const parkLabelCandidates = [...parkLabelsByName.values()].sort((a, b) => Number(b.iconic) - Number(a.iconic) || (b.feature.properties.areaHa || 0) - (a.feature.properties.areaHa || 0));
+  let stations = [];
+  let roadLabelGroups = [];
+  let waterFeatures = [];
+  let orientationFeatures = [];
+  let areaFeatures = [];
+  let parkLabelCandidates = [];
+  let areasLayer = null;
+  let waterLayer = null;
   const roads = [];
   const railways = [];
   const routeLayers = [];
@@ -64,6 +55,7 @@ export function createContextLayers({ context, basemap, geography, operatingTran
   const labelBoxes = [];
   const collection = items => ({ type: 'FeatureCollection', features: items });
   const textMeasure = document.createElement('canvas').getContext('2d');
+  const loaded = { basemap: false, railways: false, landmarks: false, transit: false };
 
   function roadStyle(feature, casing, zoomBucket, dark) {
     const priority = roadPriority(feature.properties);
@@ -79,67 +71,115 @@ export function createContextLayers({ context, basemap, geography, operatingTran
     };
   }
 
-  const areasLayer = L.geoJSON(collection(areaFeatures), {
-    pane: 'geography', interactive: false,
-    style: feature => {
-      const kind = feature.properties.kind;
-      return kind === 'airport' ? { color: '#9585ad', weight: .8, opacity: .55, fillColor: '#c3b9da', fillOpacity: .42 }
-        : kind === 'reserve' ? { color: '#af926b', weight: 1, dashArray: '5 4', opacity: .6, fillColor: '#ded0b7', fillOpacity: .35 }
-          : { color: '#80a777', weight: .4, opacity: .4, fillColor: '#a5c898', fillOpacity: .42 };
-    },
-  }).addTo(map);
-  const waterLayer = L.geoJSON(basemap || collection([]), { filter: f => f.properties.kind === 'water', pane: 'water', interactive: false, style: { color: '#75a7b5', weight: .85, fillColor: '#a5cad4', fillOpacity: .9 } }).addTo(map);
-  for (const casing of [true, false]) {
-    const layer = L.geoJSON(collection(roadFeatures), { pane: 'roads', interactive: false, style: feature => roadStyle(feature, casing, 0, isDarkTheme()) }).addTo(map);
-    roads.push({ layer, casing });
-  }
-  for (const casing of [true, false]) {
-    const layer = L.geoJSON(geography || collection([]), { filter: f => f.properties.kind === 'railway', pane: 'roads', interactive: false, style: { color: casing ? '#65716e' : '#f5f6ed', weight: casing ? 2.1 : 1.2, opacity: .85, dashArray: casing ? null : '7 5' } }).addTo(map);
-    railways.push({ layer, casing });
-  }
-  // All casings are painted first so shared Red / Blue track retains both colours.
-  for (const feature of routes) {
-    const layer = L.geoJSON(feature, { pane: 'transit', interactive: false, style: { color: '#fffef7', weight: 4, opacity: .8 } }).addTo(map);
-    routeCasings.push({ layer, lineId: feature.properties.lineId, future: feature.properties.funding === 'unfunded' });
-  }
-  for (const lineId of ['red', 'blue', 'green']) {
-    for (const feature of routes.filter(f => f.properties.lineId === lineId)) {
-      const future = feature.properties.funding === 'unfunded';
-      const layer = L.geoJSON(feature, { pane: 'transit', interactive: false, style: { color: future ? '#65a17b' : LINE_COLORS[lineId], weight: future ? 2.2 : lineId === 'red' ? 5.2 : 3.1, opacity: future ? .82 : .94, dashArray: future ? '3 6' : lineId === 'green' ? '7 6' : null, lineCap: 'round', lineJoin: 'round' } }).addTo(map);
-      routeLayers.push({ layer, lineId, future });
+  // Newly attached layers receive the current zoom/theme styling on the next update.
+  function attached() { lastStyleBucket = null; update(); }
+
+  function setBasemap(basemap) {
+    if (loaded.basemap || !features(basemap).length) return;
+    loaded.basemap = true;
+    const roadFeatures = features(basemap).filter(f => f.properties.kind === 'road');
+    roadLabelGroups = groupRoadLabels(roadFeatures);
+    waterFeatures = features(basemap).filter(f => f.properties.kind === 'water' && f.properties.name && !/facility|storm.?water|management|industrial|energy park|pond [0-9]/i.test(f.properties.name))
+      .sort((a, b) => waterPriority(b.properties.name) - waterPriority(a.properties.name));
+    waterLayer = L.geoJSON(basemap, { filter: f => f.properties.kind === 'water', pane: 'water', interactive: false, style: { color: '#75a7b5', weight: .85, fillColor: '#a5cad4', fillOpacity: .9 } }).addTo(map);
+    for (const casing of [true, false]) {
+      const layer = L.geoJSON(collection(roadFeatures), { pane: 'roads', interactive: false, style: feature => roadStyle(feature, casing, 0, isDarkTheme()) }).addTo(map);
+      roads.push({ layer, casing });
     }
+    attached();
   }
-  for (const feature of stations) {
-    const p = feature.properties;
-    const ids = p.lineIds || [];
-    const shared = ids.includes('red') && ids.includes('blue');
-    const color = p.funding === 'unfunded' ? '#65a17b' : LINE_COLORS[ids[0]] || LINE_COLORS.green;
-    const future = p.status !== 'operating';
-    const marker = L.circleMarker([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], { pane: 'stations', className: 'transit-station', radius: shared ? 4.7 : 3.7, color: shared ? LINE_COLORS.blue : color, weight: 1.9, fillColor: shared ? '#efb3b6' : '#fffef8', fillOpacity: 1, dashArray: future ? '2 2' : null, bubblingMouseEvents: false }).addTo(map);
-    const open = () => {
-      onStationOpen?.();
-      context.tooltip.close();
-      L.popup({ className: 'station-popup', maxWidth: 280, autoPan: true, autoPanPaddingTopLeft: [12, 48], autoPanPaddingBottomRight: [12, window.matchMedia('(max-width: 760px)').matches ? 145 : 24], closeButton: true, autoClose: true, closeOnClick: true })
-        .setLatLng(marker.getLatLng()).setContent(stationContent(p)).openOn(map);
-    };
-    marker.on('click', open);
-    const keydown = event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); } };
-    let element = null;
-    const detachElement = () => { element?.removeEventListener('keydown', keydown); element = null; };
-    const attachElement = () => {
-      detachElement();
-      element = marker.getElement();
-      element?.setAttribute('data-station-id', p.id);
-      element?.setAttribute('aria-label', stationLabel(p));
-      element?.setAttribute('tabindex', '0');
-      element?.setAttribute('role', 'button');
-      element?.addEventListener('keydown', keydown);
-    };
-    marker.on('add', attachElement);
-    marker.on('remove', detachElement);
-    attachElement();
-    context.tooltip.bind(marker, { content: () => stationContent(p), anchor: () => marker.getLatLng(), offset: [0, -8] });
-    stationLayers.push({ marker, shared, properties: p });
+
+  function setRailways(data) {
+    const tracks = features(data).filter(f => f.properties.kind === 'railway');
+    if (loaded.railways || !tracks.length) return;
+    loaded.railways = true;
+    for (const casing of [true, false]) {
+      const layer = L.geoJSON(collection(tracks), { pane: 'roads', interactive: false, style: { color: casing ? '#65716e' : '#f5f6ed', weight: casing ? 2.1 : 1.2, opacity: .85, dashArray: casing ? null : '7 5' } }).addTo(map);
+      railways.push({ layer, casing });
+    }
+    attached();
+  }
+
+  function setLandmarks(geography, orientationLandmarks) {
+    if (loaded.landmarks) return;
+    loaded.landmarks = true;
+    areaFeatures = features(geography).filter(f => ['airport', 'park', 'reserve'].includes(f.properties.kind));
+    orientationFeatures = features(orientationLandmarks).filter(f => f.properties.kind === 'orientation_landmark' && f.geometry?.type === 'Point' && f.properties.name)
+      .sort((a, b) => (b.properties.priority || 0) - (a.properties.priority || 0));
+    const parkLabelsByName = new Map();
+    for (const feature of areaFeatures.filter(f => f.properties.kind === 'park' && f.properties.named !== false)) {
+      const p = feature.properties;
+      // A single descriptive park label, not depot/school/parcel names from the same site.
+      const name = String(p.name || '').split(';').map(part => part.trim()).find(part => /\bpark\b|natural area|sanctuary|wetland|garden|ravine/i.test(part));
+      if (!name) continue;
+      const key = normalizeName(name);
+      const existing = parkLabelsByName.get(key);
+      if (!existing || (p.areaHa || 0) > (existing.feature.properties.areaHa || 0)) parkLabelsByName.set(key, { feature, name, key, iconic: iconicParks.has(key) });
+    }
+    parkLabelCandidates = [...parkLabelsByName.values()].sort((a, b) => Number(b.iconic) - Number(a.iconic) || (b.feature.properties.areaHa || 0) - (a.feature.properties.areaHa || 0));
+    areasLayer = L.geoJSON(collection(areaFeatures), {
+      pane: 'geography', interactive: false,
+      style: feature => {
+        const kind = feature.properties.kind;
+        return kind === 'airport' ? { color: '#9585ad', weight: .8, opacity: .55, fillColor: '#c3b9da', fillOpacity: .42 }
+          : kind === 'reserve' ? { color: '#af926b', weight: 1, dashArray: '5 4', opacity: .6, fillColor: '#ded0b7', fillOpacity: .35 }
+            : { color: '#80a777', weight: .4, opacity: .4, fillColor: '#a5c898', fillOpacity: .42 };
+      },
+    }).addTo(map);
+    attached();
+  }
+
+  function setTransit(operatingTransit, greenTransit) {
+    if (loaded.transit) return;
+    loaded.transit = true;
+    const transitFeatures = [...features(operatingTransit), ...features(greenTransit)];
+    const routes = transitFeatures.filter(f => f.properties.kind === 'transit_route');
+    stations = transitFeatures.filter(f => f.properties.kind === 'transit_station' && f.geometry?.type === 'Point');
+    // All casings are painted first so shared Red / Blue track retains both colours.
+    for (const feature of routes) {
+      const layer = L.geoJSON(feature, { pane: 'transit', interactive: false, style: { color: '#fffef7', weight: 4, opacity: .8 } }).addTo(map);
+      routeCasings.push({ layer, lineId: feature.properties.lineId, future: feature.properties.funding === 'unfunded' });
+    }
+    for (const lineId of ['red', 'blue', 'green']) {
+      for (const feature of routes.filter(f => f.properties.lineId === lineId)) {
+        const future = feature.properties.funding === 'unfunded';
+        const layer = L.geoJSON(feature, { pane: 'transit', interactive: false, style: { color: future ? '#65a17b' : LINE_COLORS[lineId], weight: future ? 2.2 : lineId === 'red' ? 5.2 : 3.1, opacity: future ? .82 : .94, dashArray: future ? '3 6' : lineId === 'green' ? '7 6' : null, lineCap: 'round', lineJoin: 'round' } }).addTo(map);
+        routeLayers.push({ layer, lineId, future });
+      }
+    }
+    for (const feature of stations) {
+      const p = feature.properties;
+      const ids = p.lineIds || [];
+      const shared = ids.includes('red') && ids.includes('blue');
+      const color = p.funding === 'unfunded' ? '#65a17b' : LINE_COLORS[ids[0]] || LINE_COLORS.green;
+      const future = p.status !== 'operating';
+      const marker = L.circleMarker([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], { pane: 'stations', className: 'transit-station', radius: shared ? 4.7 : 3.7, color: shared ? LINE_COLORS.blue : color, weight: 1.9, fillColor: shared ? '#efb3b6' : '#fffef8', fillOpacity: 1, dashArray: future ? '2 2' : null, bubblingMouseEvents: false }).addTo(map);
+      const open = () => {
+        onStationOpen?.();
+        context.tooltip.close();
+        L.popup({ className: 'station-popup', maxWidth: 280, autoPan: true, autoPanPaddingTopLeft: [12, 48], autoPanPaddingBottomRight: [12, window.matchMedia('(max-width: 760px)').matches ? 145 : 24], closeButton: true, autoClose: true, closeOnClick: true })
+          .setLatLng(marker.getLatLng()).setContent(stationContent(p)).openOn(map);
+      };
+      marker.on('click', open);
+      const keydown = event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); } };
+      let element = null;
+      const detachElement = () => { element?.removeEventListener('keydown', keydown); element = null; };
+      const attachElement = () => {
+        detachElement();
+        element = marker.getElement();
+        element?.setAttribute('data-station-id', p.id);
+        element?.setAttribute('aria-label', stationLabel(p));
+        element?.setAttribute('tabindex', '0');
+        element?.setAttribute('role', 'button');
+        element?.addEventListener('keydown', keydown);
+      };
+      marker.on('add', attachElement);
+      marker.on('remove', detachElement);
+      attachElement();
+      context.tooltip.bind(marker, { content: () => stationContent(p), anchor: () => marker.getLatLng(), offset: [0, -8] });
+      stationLayers.push({ marker, shared, properties: p });
+    }
+    attached();
   }
 
   function setVisible(next) {
@@ -172,13 +212,13 @@ export function createContextLayers({ context, basemap, geography, operatingTran
     if (styleBucket !== lastStyleBucket) {
       lastStyleBucket = styleBucket;
       const detail = zoomBucket === 2;
-      areasLayer.setStyle(feature => {
+      areasLayer?.setStyle(feature => {
         const kind = feature.properties.kind;
         return kind === 'airport' ? { color: dark ? '#77718c' : '#9585ad', fillColor: dark ? '#3d3c57' : '#c3b9da' }
           : kind === 'reserve' ? { color: dark ? '#81765d' : '#af926b', fillColor: dark ? '#484333' : '#ded0b7' }
           : { color: dark ? '#416850' : '#80a777', fillColor: dark ? '#27483a' : '#a5c898' };
       });
-      waterLayer.setStyle({ color: dark ? '#648caa' : '#648fa9', weight: .9, fillColor: dark ? '#294d68' : '#acd2e3' });
+      waterLayer?.setStyle({ color: dark ? '#648caa' : '#648fa9', weight: .9, fillColor: dark ? '#294d68' : '#acd2e3' });
       roads.forEach(({ layer, casing }) => layer.setStyle(feature => roadStyle(feature, casing, zoomBucket, dark)));
       railways.forEach(({ layer, casing }) => layer.setStyle({ color: casing ? (dark ? '#83918d' : '#65716e') : (dark ? '#20343a' : '#f5f6ed'), weight: casing ? (detail ? 1.6 : 1) : (detail ? .9 : .6), opacity: detail ? .6 : .32 }));
       const routeWeight = (lineId, future) => future ? (detail ? 2.3 : 1.6) : lineId === 'red' ? (detail ? 5 : 3.4) : (detail ? 3 : 2.1);
@@ -300,5 +340,5 @@ export function createContextLayers({ context, basemap, geography, operatingTran
 
   }
   setVisible(visible);
-  return { setVisible, update, labelBoxes, stationCount: stations.length };
+  return { setVisible, update, labelBoxes, setBasemap, setRailways, setLandmarks, setTransit, loaded };
 }

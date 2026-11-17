@@ -10,7 +10,7 @@ import './map-controls.css';
 import { initDesktopUI } from './desktop-ui.js';
 import { initMobileUI, getMobileMapInsets } from './mobile-ui.js';
 import { initCommunitySheet } from './community-sheet.js';
-import { loadData } from './data.js';
+import { loadCoreData, loadLayerData } from './data.js';
 import { t, currentLanguage, initLanguagePreference, applyStaticTranslations, localizeHtml } from './i18n.js';
 import { initTheme, refreshThemeControl, isDarkTheme } from './theme.js';
 import { createMapTooltip } from './map-tooltip.js';
@@ -26,7 +26,6 @@ const dialog = $('method-dialog');
 const PALETTE = ['#518a7b', '#c29b4d', '#7e85af', '#5c8eac', '#b67768', '#8d9963', '#947cac', '#bb8c67', '#688b92', '#a18696', '#7f8990', '#b7a268', '#c2c9bd'];
 const state = {
   features: [], byCode: new Map(), metadata: {}, counts: {}, data: null, basemap: null,
-  operatingTransit: null, greenTransit: null, geographicContext: null, orientationLandmarks: null,
   roads: true, labels: true, transit: false, landmarks: false,
   groups: [], groupById: new Map(), selectedGroups: [], colors: {}, selected: null, selectionActive: false,
   mode: 'composition', income: false, contexts: [], comparisonContexts: [], composition: null,
@@ -279,7 +278,7 @@ function createMap(element, groupId = null) {
     },
   }).addTo(map);
   if (!groupId) {
-    context.contextLayers = createContextLayers({ context, basemap: state.basemap, geography: state.geographicContext, orientationLandmarks: state.orientationLandmarks, operatingTransit: state.operatingTransit, greenTransit: state.greenTransit, communityNames: state.features.map(f => f.properties.name), visible: { roads: state.roads, transit: state.transit, landmarks: state.landmarks, communityLabels: state.labels }, getLabelObstacles: () => [...mapLabelObstacles(map), ...(context.donutBoxes || [])], onStationOpen: () => { closeTooltips(); toggleGroups(false); toggleLayers(false); if (mobile()) setCollapsed(true); } });
+    context.contextLayers = createContextLayers({ context, visible: { roads: state.roads, transit: state.transit, landmarks: state.landmarks, communityLabels: state.labels }, getLabelObstacles: () => [...mapLabelObstacles(map), ...(context.donutBoxes || [])], onStationOpen: () => { closeTooltips(); toggleGroups(false); toggleLayers(false); if (mobile()) setCollapsed(true); } });
   } else {
     renderComparisonBasemap(context);
   }
@@ -303,6 +302,48 @@ function createMap(element, groupId = null) {
   return context;
 }
 
+
+// Context layers load after the census map is usable; transit and landmarks
+// only when first switched on.
+const layerData = {};
+const layerRequests = {};
+const layerFailures = new Set();
+const LAYER_NAMES = { basemap: '道路与河流', railways: '铁路', transit: 'CTrain 线路与车站', landmarks: '地理地标' };
+function ensureLayer(name) {
+  if (layerData[name] || layerRequests[name]) return;
+  layerFailures.delete(name);
+  layerRequests[name] = loadLayerData(name)
+    .then(data => { layerData[name] = data; attachLayers(); })
+    .catch(() => { layerFailures.add(name); })
+    .finally(() => { delete layerRequests[name]; renderLayerWarning(); });
+}
+function attachLayers() {
+  const layers = state.composition?.contextLayers;
+  if (layers) {
+    if (layerData.basemap) layers.setBasemap(layerData.basemap[0]);
+    if (layerData.railways) layers.setRailways(layerData.railways[0]);
+    if (layerData.landmarks) layers.setLandmarks(...layerData.landmarks);
+    if (layerData.transit) layers.setTransit(...layerData.transit);
+  }
+  if (layerData.basemap && !state.basemap) {
+    state.basemap = layerData.basemap[0];
+    state.comparisonContexts.filter(context => !context.refreshBasemap).forEach(renderComparisonBasemap);
+  }
+  renderOverlays();
+}
+function renderLayerWarning() {
+  const failed = [...layerFailures].map(name => LAYER_NAMES[name]);
+  $('map-warning').hidden = !failed.length;
+  if (!failed.length) return;
+  $('map-warning').textContent = `${failed.join('、')}暂未载入，社区统计仍可使用。`;
+  localize($('map-warning'));
+}
+function ensureVisibleLayers() {
+  ensureLayer('basemap');
+  if (state.roads) ensureLayer('railways');
+  if (state.transit) ensureLayer('transit');
+  if (state.landmarks) ensureLayer('landmarks');
+}
 
 function renderComparisonBasemap(context) {
   if (!state.basemap?.features) return;
@@ -684,7 +725,7 @@ function initializeControls() {
   });
   $('layers-button').addEventListener('click', () => toggleLayers($('layers-panel').hidden));
   $('close-layers').addEventListener('click', () => { toggleLayers(false); (mobile() ? $('mobile-more') : $('layers-button')).focus(); });
-  for (const layer of ['roads', 'labels', 'transit', 'landmarks']) $(`${layer}-toggle`).addEventListener('change', event => { state[layer] = event.target.checked; updateLayerVisibility(); });
+  for (const layer of ['roads', 'labels', 'transit', 'landmarks']) $(`${layer}-toggle`).addEventListener('change', event => { state[layer] = event.target.checked; ensureVisibleLayers(); updateLayerVisibility(); });
   $('groups-button').addEventListener('click', () => toggleGroups($('groups-panel').hidden));
   $('close-groups').addEventListener('click', () => { toggleGroups(false); (mobile() ? $('mobile-more') : $('groups-button')).focus({ preventScroll: true }); });
   $('empty-choose-groups').addEventListener('click', () => { toggleGroups(true); });
@@ -773,9 +814,8 @@ async function init() {
   } });
   desktopUI = initDesktopUI({ onLayoutChange: () => renderOverlays() });
   try {
-    const data = await loadData();
-    state.metadata = data.metadata; state.features = data.features; state.data = data.populationData; state.basemap = data.basemap;
-    state.operatingTransit = data.operatingTransit; state.greenTransit = data.greenTransit; state.geographicContext = data.geographicContext; state.orientationLandmarks = data.orientationLandmarks;
+    const data = await loadCoreData();
+    state.metadata = data.metadata; state.features = data.features; state.data = data.populationData;
     state.byCode = new Map(data.features.map(f => [f.properties.code, f])); state.counts = summarize(data.features);
     state.groups = data.populationData.groups; state.groupById = new Map(state.groups.map(g => [g.id, g]));
     state.colors = Object.fromEntries(state.groups.map((g, i) => [g.id, PALETTE[i % PALETTE.length]]));
@@ -785,13 +825,12 @@ async function init() {
     renderMetadata(); renderGroupList(); renderDonutKey(); renderDetail();
     $('group-count').textContent = state.selectedGroups.length;
     state.composition = createMap('composition-map');
-    const unavailable = [[data.basemap, '道路与河流'], [data.operatingTransit, '运营 CTrain'], [data.greenTransit, 'Green Line'], [data.geographicContext, '铁路与地理地标']].filter(([loaded]) => !loaded).map(([, label]) => label);
-    if (unavailable.length) { $('map-warning').textContent = `${unavailable.join('、')}暂未载入，社区统计仍可使用。`; $('map-warning').hidden = false; localize($('map-warning')); }
     $('loading-overlay').hidden = true;
     mobileUI.refresh();
     fitCity(); selectCommunity(state.selected, false, false);
     if (linkedCode) selectCommunity(linkedCode, true, true);
     setReady(true);
+    ensureVisibleLayers();
   } catch (error) {
     $('loading-overlay').hidden = false;
     $('loading-overlay').innerHTML = `<strong>地图暂时无法载入</strong><span>${esc(error.message)}</span><button class="map-button" id="retry">重新载入</button>`;
