@@ -277,10 +277,10 @@ export function createContextLayers({ context, visible, onStationOpen, getLabelO
         dashArray: future ? '2 2' : null,
         bubblingMouseEvents: false,
       }).addTo(map);
-      const open = () => {
+      const open = ({ keyboard = false } = {}) => {
         onStationOpen?.();
         context.tooltip.close();
-        L.popup({
+        const popup = L.popup({
           className: 'station-popup',
           maxWidth: 280,
           autoPan: true,
@@ -293,8 +293,21 @@ export function createContextLayers({ context, visible, onStationOpen, getLabelO
           .setLatLng(marker.getLatLng())
           .setContent(stationContent(p))
           .openOn(map);
+        const box = popup.getElement();
+        box?.querySelector('.leaflet-popup-close-button')?.setAttribute('aria-label', t('关闭站点信息'));
+        const content = box?.querySelector('.leaflet-popup-content');
+        if (!keyboard || !content) return;
+        // Opened from the keyboard: focus goes into the popup, so its link and close
+        // button are the next tab stops, and comes back to the station when it closes.
+        content.setAttribute('tabindex', '-1');
+        content.focus({ preventScroll: true });
+        popup.once('remove', () => {
+          const active = document.activeElement;
+          if (!active || active === document.body || box.contains(active))
+            marker.getElement()?.focus({ preventScroll: true });
+        });
       };
-      marker.on('click', open);
+      marker.on('click', () => open());
       // Keys are handled once for the whole pane (below); updateStations() decides the tab stop.
       const describe = () => {
         const element = marker.getElement();
@@ -329,7 +342,7 @@ export function createContextLayers({ context, visible, onStationOpen, getLabelO
     if (!entry) return;
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      entry.open();
+      entry.open({ keyboard: true });
       return;
     }
     const direction = ARROW_DIRECTIONS[event.key];

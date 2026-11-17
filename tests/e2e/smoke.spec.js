@@ -356,10 +356,20 @@ test('CTrain stations share one tab stop and are reached with arrow keys', async
   await expect(stop).toHaveCount(1);
   await expect(stop).toBeFocused();
   await page.keyboard.press('Enter');
-  await expect(page.locator('.station-popup')).toBeVisible();
+  const popup = page.locator('.station-popup');
+  await expect(popup).toBeVisible();
+  // Focus moves into the popup: its source link and close button are the next stops.
+  await expect(popup.locator('.leaflet-popup-content')).toBeFocused();
   await page.keyboard.press('Tab');
-  // The popup's own controls come next; no other station is in the tab order.
-  expect(await page.evaluate(() => document.activeElement.dataset.stationId)).toBeUndefined();
+  await expect(popup.locator('a.station-source')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(popup.locator('.leaflet-popup-close-button')).toBeFocused();
+  await expect(popup.locator('.leaflet-popup-close-button')).toHaveAttribute('aria-label', 'Close station details');
+  // Escape closes it and returns focus to the station it belongs to.
+  await page.keyboard.press('Escape');
+  await expect(popup).toHaveCount(0);
+  await expect(stop).toBeFocused();
+  expect(await page.evaluate(() => document.activeElement.dataset.stationId)).toBe(second);
 });
 
 test('keyboard focus is not lost when a control hides or disables itself', async ({ page, isMobile }) => {

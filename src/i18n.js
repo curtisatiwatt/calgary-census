@@ -235,6 +235,7 @@ const translations = {
   未运营: 'Not in service',
   '规划示意位置，非最终站位': 'Schematic planning position, not the final station location',
   '官方线路资料 ↗': 'Official line information ↗',
+  关闭站点信息: 'Close station details',
   一期东南段: 'Phase 1 southeast',
   一期市中心段: 'Phase 1 downtown',
   远期北延线: 'Future north extension',
