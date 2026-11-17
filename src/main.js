@@ -441,7 +441,7 @@ function mapLabelObstacles(map) {
     // few floating boxes; the rest of the top edge stays available for labels.
     const { left } = desktopUI?.getInsets() || { left: 0 };
     bands = [{ x: 0, y: 0, w: left, h: size.y }];
-    floating.push('.app-header', '.comparison-pager');
+    floating.push('.app-header', '.comparison-pager', '#mobile-legend-dialog[open]');
   }
   const controls = [...document.querySelectorAll(floating.join(','))].filter(visible).map(rectOf);
   return [...bands, ...controls];
@@ -678,15 +678,11 @@ function renderMobileSummary() {
   mobileUI?.refresh();
 }
 
+/** The compared group's city-wide baseline sits beside the group switcher. */
 function renderComparisonHeadings() {
-  for (const context of state.comparisonContexts) {
-    const group = state.groupById.get(context.groupId);
-    const value = populationShare(populationRecord(state.selected), group.id);
-    const name = state.byCode.get(state.selected)?.properties.name || '';
-    const node = $('comparison-heading');
-    if (node) node.innerHTML = `<div><h2>${esc(group.label)}</h2><span>全市 ${percent(populationShare(state.data.city, group.id))}</span></div>${state.selectionActive ? `<p title="${esc(name)}">${esc(name)} <strong>${percent(value)}</strong></p>` : ''}`;
-  }
-  localize($('comparison-maps'), $('comparison-select'));
+  const group = state.groupById.get(state.comparisonContexts[0]?.groupId);
+  $('comparison-city').textContent = group ? `全市 ${percent(populationShare(state.data.city, group.id))}` : '';
+  localize($('comparison-maps'), $('comparison-select'), $('comparison-city'));
   renderMobileSummary();
 }
 
@@ -721,7 +717,7 @@ function rebuildComparison({ preserveView = true } = {}) {
   let context = state.comparisonContexts[0];
   const created = !context;
   if (created) {
-    $('comparison-maps').innerHTML = '<section class="comparison-card"><header class="comparison-card-heading" id="comparison-heading"></header><div id="comparison-map" class="comparison-map" role="region"></div></section>';
+    $('comparison-maps').innerHTML = '<section class="comparison-card"><div id="comparison-map" class="comparison-map" role="region"></div></section>';
     syncing = true;
     context = createMap('comparison-map', group.id);
     state.comparisonContexts = [context];

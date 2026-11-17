@@ -35,6 +35,8 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
   let measured = { top: 0, right: 0, bottom: 0, left: 0 };
   let scheduled = 0;
   let moved = false;
+  // Desktop shows the legend as a persistent, non-modal card that can be collapsed.
+  let desktopLegendCollapsed = false;
 
   // Legends belong to one on-demand dialog on every screen size.
   for (const id of ['composition-key', 'income-legend', 'transit-legend']) $('mobile-composition-legend').append($(id));
@@ -111,7 +113,11 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
     $('mobile-composition-legend').hidden = comparing;
     $('mobile-distribution-legend').hidden = !comparing;
     const hasLegend = comparing ? groups > 0 : groups > 0 || $('income-toggle').checked || $('transit-toggle').checked;
-    $('mobile-legend-button').hidden = !hasLegend;
+    const persistentLegend = !mobile && hasLegend && !desktopLegendCollapsed;
+    // Opening via the attribute (not show()) keeps focus where the user is.
+    if (persistentLegend && !legend.open) legend.setAttribute('open', '');
+    if (legend.open && (mobile ? !legend.matches(':modal') : !persistentLegend)) closeDialog(legend);
+    $('mobile-legend-button').hidden = !hasLegend || persistentLegend;
     if (!hasLegend) closeDialog(legend);
     for (const node of document.querySelectorAll('[data-mobile-text]')) node.textContent = t(node.dataset.mobileText);
     $('mobile-more').setAttribute('aria-label', t('菜单'));
@@ -127,9 +133,19 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
   $('back-method')?.addEventListener('click', () => { $('method-dialog').close(); openDialog(more); });
   $('layers-button').addEventListener('click', () => closeDialog(more), true);
   tabs.addEventListener('click', () => { if (media.matches) closeDialog(more); });
-  $('mobile-legend-button').addEventListener('click', () => openDialog(legend));
+  $('mobile-legend-button').addEventListener('click', () => {
+    if (media.matches) openDialog(legend);
+    else { desktopLegendCollapsed = false; refresh(); }
+  });
   $('close-mobile-more').addEventListener('click', () => closeDialog(more));
-  $('close-mobile-legend').addEventListener('click', () => closeDialog(legend));
+  $('close-mobile-legend').addEventListener('click', () => {
+    closeDialog(legend);
+    if (media.matches) return;
+    // Collapsing on desktop leaves the Legend button to bring it back; keep focus there.
+    desktopLegendCollapsed = true;
+    refresh();
+    $('mobile-legend-button').focus({ preventScroll: true });
+  });
   $('method-button').addEventListener('click', () => closeDialog(more), true);
   for (const dialog of [more, legend, filters]) {
     dialog.addEventListener('close', () => { if (dialog === filters) closeFilters(); refresh(); });

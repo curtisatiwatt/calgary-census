@@ -100,7 +100,25 @@
   .comparison-pager select{display:block;width:200px;max-width:calc(100vw - var(--desktop-rail-width) - var(--desktop-drawer-width) - 142px);min-width:105px;height:44px;padding:8px 10px;border:0;border-radius:8px;background:var(--desktop-surface);color:var(--desktop-text);font-size:14px}
   .comparison-pager button{width:36px;height:42px;min-width:36px;border:0;border-radius:9px;background:var(--desktop-surface);color:var(--desktop-text);font-size:25px}
   .comparison-pager button:hover{background:var(--desktop-hover)}
-  .comparison-pager>span{display:none}
+  .comparison-pager>span{display:block;padding:0 8px;font-size:13px;color:var(--desktop-muted);white-space:nowrap}
+  .comparison-pager>#comparison-city{padding-left:0;color:var(--desktop-text);font-weight:600}
+  .comparison-pager>span:empty{display:none}
+  /* Persistent, non-modal legend card at the map's bottom-left. */
+  #mobile-legend-dialog[open]{display:block;position:fixed;inset:auto auto 28px calc(var(--desktop-rail-width) + 12px);z-index:900;width:300px;max-width:calc(100vw - var(--desktop-rail-width) - 150px);max-height:calc(100dvh - 140px);margin:0;padding:10px 14px 14px;overflow:auto;border:1px solid var(--desktop-border);border-radius:14px;background:var(--desktop-surface);color:var(--desktop-text);box-shadow:var(--desktop-shadow)}
+  body.desktop-details-open #mobile-legend-dialog[open]{left:calc(var(--desktop-rail-width) + var(--desktop-drawer-width) + 24px)}
+  #mobile-legend-dialog .dialog-nav{display:flex;align-items:center;justify-content:space-between;min-height:0;margin:0 0 6px;padding:0;border:0}
+  #mobile-legend-dialog .dialog-nav h2{font-size:12px;font-weight:650;letter-spacing:.02em;text-transform:uppercase;color:var(--desktop-muted)}
+  #mobile-legend-dialog .dialog-close{width:28px;height:28px;min-width:28px;font-size:1.1rem;background:transparent;color:var(--desktop-muted)}
+  #mobile-legend-dialog .dialog-close:hover{background:var(--desktop-hover)}
+  #mobile-legend-dialog .dialog-scroll{max-height:none;overflow:visible;padding:0}
+  #mobile-legend-dialog .mobile-legend-stack{gap:12px}
+  #mobile-legend-dialog .map-key strong,#mobile-legend-dialog .legend-title strong{font-size:.8125rem;color:var(--desktop-text)}
+  #mobile-legend-dialog .map-key>p,#mobile-legend-dialog .legend-title>span,#mobile-legend-dialog .map-legend>p,#mobile-legend-dialog .ramp-ticks,#mobile-legend-dialog .population-bin-labels{font-size:.75rem;color:var(--desktop-muted)}
+  #mobile-legend-dialog .legend-title{margin-bottom:6px}
+  #mobile-legend-dialog .donut-key{font-size:.75rem;gap:6px 10px;color:var(--desktop-text)}
+  #mobile-legend-dialog .population-bin-labels{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  #mobile-legend-dialog .population-bin-labels>span:before{width:14px;height:12px}
+  #mobile-legend-dialog .transit-legend{gap:8px 12px;font-size:.75rem}
   .comparison-maps{grid-template-columns:minmax(0,1fr);gap:0}
   .comparison-card-heading{display:none}
   .empty-map{inset:0;padding:80px 40px 40px calc(var(--desktop-rail-width) + 40px);text-align:center}
