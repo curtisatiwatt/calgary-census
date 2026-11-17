@@ -1214,8 +1214,14 @@ function rebuildComparison() {
     .join('');
   $('comparison-select').disabled = !groups.length;
   $('comparison-page').textContent = groups.length ? `${state.compareStart + 1} / ${groups.length}` : '0 / 0';
+  const pressed = [$('previous-groups'), $('next-groups')].find(button => button === document.activeElement);
   $('previous-groups').disabled = state.compareStart === 0;
   $('next-groups').disabled = state.compareStart + 1 >= groups.length;
+  if (pressed?.disabled) {
+    // Reaching either end disables the arrow just used: focus moves to the other one.
+    const other = pressed === $('next-groups') ? $('previous-groups') : $('next-groups');
+    (other.disabled ? $('comparison-select') : other).focus({ preventScroll: true });
+  }
   localize($('comparison-select'));
   if (!group) {
     destroyComparisonMap();
@@ -1319,11 +1325,11 @@ function renderSearch() {
   localize($('search-results'));
 }
 function chooseSearchResult(code) {
+  // A phone puts its keyboard away; on desktop focus stays in the box, ready for the next search.
   if (mobile()) $('search').blur();
   selectCommunity(code);
   $('search').value = '';
   closeSearch();
-  $('search').blur();
   toggleGroups(false);
 }
 

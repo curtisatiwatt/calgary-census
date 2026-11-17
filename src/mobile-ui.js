@@ -186,6 +186,8 @@ export function initMobileUI({ onLayoutChange = () => {} } = {}) {
     else {
       desktopLegendCollapsed = false;
       refresh();
+      // This button hides once the card is back: hand focus to the card instead of losing it.
+      $('close-mobile-legend').focus({ preventScroll: true });
     }
   });
   $('close-mobile-more').addEventListener('click', () => closeDialog(more));

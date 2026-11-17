@@ -338,6 +338,28 @@ test('CTrain stations share one tab stop and are reached with arrow keys', async
   expect(await page.evaluate(() => document.activeElement.dataset.stationId)).toBeUndefined();
 });
 
+test('keyboard focus is not lost when a control hides or disables itself', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'keyboard navigation is a desktop interaction');
+  await openMap(page, '?groups=south_asian,chinese');
+  // Collapsing the legend and reopening it from the keyboard.
+  await page.locator('#close-mobile-legend').focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#mobile-legend-button')).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#close-mobile-legend')).toBeFocused();
+  // Choosing a search result keeps focus in the search box.
+  await page.locator('#search').fill('aspen');
+  await page.locator('#search').press('Enter');
+  await expect(page.locator('#community-name')).toHaveText('Aspen Woods');
+  await expect(page.locator('#search')).toBeFocused();
+  // The switcher arrow that reaches the last group disables itself.
+  await page.locator('#distribution-tab').click();
+  await page.locator('#next-groups').focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#next-groups')).toBeDisabled();
+  await expect(page.locator('#previous-groups')).toBeFocused();
+});
+
 test('keyboard shortcuts keep working while the desktop legend card is open', async ({ page, isMobile }) => {
   test.skip(isMobile, 'keyboard shortcuts are a desktop interaction');
   await openMap(page);
