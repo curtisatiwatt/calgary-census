@@ -207,6 +207,13 @@ test('links keep every layer toggle, and a link without a community deselects', 
   const outline = page.locator('#composition-map .community-selected-outline');
   await expect(outline).not.toHaveCount(0);
 
+  // A bare #CODE keeps the rest of the view, and the address is completed again.
+  await page.evaluate(() => {
+    location.hash = '#ASP';
+  });
+  await expect(page).toHaveURL(/#ASP\?groups=chinese&hide=roads,labels$/);
+  await expect(page.locator('#roads-toggle')).not.toBeChecked();
+
   // Editing the address to a link with no community code restores "nothing selected".
   await page.evaluate(() => {
     location.hash = '#?groups=chinese';

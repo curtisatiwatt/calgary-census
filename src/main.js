@@ -1553,9 +1553,13 @@ function initializeControls() {
     const link = readUrlState();
     // A bare #CODE (the original link format) only jumps to that community and
     // keeps the current view; a link carrying view parameters restores all of it.
-    if (location.hash.includes('?')) applyUrlState(link);
-    else if (!link.code) clearSelection();
-    else if (!state.selectionActive || link.code !== state.selected) selectCommunity(link.code);
+    if (location.hash.includes('?')) return applyUrlState(link);
+    // Going to a community's link always shows it, even when it is already
+    // selected (its details may be hidden). The address is then rewritten in
+    // full, so it still carries the view, groups and layers that are on screen.
+    if (link.code) selectCommunity(link.code);
+    else clearSelection();
+    writeUrlState();
   });
   let resizeTimer;
   window.addEventListener('resize', () => {
