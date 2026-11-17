@@ -1,12 +1,11 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import './styles.css';
-import './mobile-ui.css';
-import './mobile-dialogs.css';
-import './community-sheet.css';
-import './map-legibility.css';
-import './desktop-ui.css';
-import './map-controls.css';
+// Order matters: shared base, then the two mutually exclusive layout shells, then
+// everything drawn on or over the map (see the header of each file).
+import './styles/base.css';
+import './styles/mobile.css';
+import './styles/desktop.css';
+import './styles/map.css';
 import { initDesktopUI } from './desktop-ui.js';
 import { initMobileUI, getMobileMapInsets } from './mobile-ui.js';
 import { initCommunitySheet } from './community-sheet.js';

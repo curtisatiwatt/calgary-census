@@ -59,6 +59,8 @@ npm run test:e2e
 
 代码格式由 Prettier 统一，提交前可运行 `npm run format`。`index.html` 和发布数据不参与格式化：页面文字由翻译表逐字匹配，数据文件带有指纹。
 
+样式按职责分为 `src/styles/` 下四个文件，按 base → mobile → desktop → map 的顺序载入（地图样式最后载入，同等优先级时覆盖外壳样式）。手机与电脑的规则分别放在互斥的媒体查询里（≤760px / ≥761px），不会互相覆盖；地图上显示的内容无论属于哪种布局都放在 `map.css`。新增规则时先确定它属于哪个文件，同一文件内越靠后的规则优先。
+
 生产预览默认 <http://localhost:4173>。开发和生产预览都使用 Vite，运行项目只需 Node.js。`dist/` 是自动生成的构建结果，不能在里面修改源码。不要直接双击 HTML 文件。
 
 Vite 使用相对资源路径，兼容 GitHub Pages 的 `/calgary-census/` 子目录。
@@ -99,10 +101,13 @@ Vite 使用相对资源路径，兼容 GitHub Pages 的 `/calgary-census/` 子�
 | `src/population-utils.js` | 人口占比、完整构成、浅色与深色共享色阶、环形图纯函数 |
 | `src/i18n.js` | 中英文字典、带参数的语句（`t('key', { … })`）与语言偏好 |
 | `src/theme.js` | 白天／夜间与跟随系统 |
-| `src/desktop-ui.js` / `src/desktop-ui.css` | 电脑端侧栏、详情面板与常驻图例 |
-| `src/mobile-ui.js` / `src/mobile-ui.css` | 手机浮动控件、菜单、图例与动态布局 |
-| `src/community-sheet.js` / `src/community-sheet-utils.js` / `src/community-sheet.css` | 手机社区面板三档拖动、滚动衔接与键盘操作 |
-| `src/styles.css`、`src/mobile-dialogs.css`、`src/map-legibility.css`、`src/map-controls.css` | 基础样式、手机对话框、地图文字清晰度与地图控件 |
+| `src/desktop-ui.js` | 电脑端侧栏、详情面板与常驻图例 |
+| `src/mobile-ui.js` | 手机浮动控件、菜单、图例与动态布局 |
+| `src/community-sheet.js` / `src/community-sheet-utils.js` | 手机社区面板三档拖动、滚动衔接与键盘操作 |
+| `src/styles/base.css` | 设计变量、基础样式，以及各布局共用的界面组件（页头、搜索、视图控件、面板、详情、对话框）及其夜间样式 |
+| `src/styles/map.css` | 地图上的一切：Leaflet 覆盖样式、社区／道路／水域／站点／地标标注、构成圆环、提示框、地图控件与图例，含响应式和夜间样式 |
+| `src/styles/mobile.css` | 手机外壳（≤760px）：浮动控件、菜单与图例面板、筛选对话框、可拖动的社区面板 |
+| `src/styles/desktop.css` | 电脑外壳（≥761px）：导航栏、浮动详情面板、搜索框与切换器、常驻图例卡片 |
 | `public/data/communities.geojson` | 313 个区域的边界、统计和来源 |
 | `public/data/population-groups.json` | 206 个社区及全市的 13 类人口原始人数、原公布占比与分母 |
 | `public/data/metadata.json` | 年份、统计口径定义、全市值和数据来源（数据说明直接读取这些字段） |

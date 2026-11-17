@@ -1,17 +1,126 @@
-/* One map fills the browser. Desktop navigation and details float above it. */
-.desktop-only {
-  display: none;
+/*
+ * Desktop shell (min-width: 761px): one full-window map with a navigation rail,
+ * a floating details panel, the search box and comparison switcher, and the
+ * persistent legend card.
+ */
+
+@media (min-width: 1550px) {
+  .workspace {
+    grid-template-columns: 370px minmax(0, 1fr);
+  }
+  .detail-panel {
+    padding: 28px 30px;
+  }
+  .detail-panel h1 {
+    font-size: 28px;
+  }
+  .composition-row {
+    margin-top: 17px;
+  }
+  .population-summary {
+    padding-top: 25px;
+    padding-bottom: 22px;
+  }
+  .composition-detail {
+    padding-top: 23px;
+  }
+  .bar-track {
+    height: 8px;
+  }
 }
-/* Keep tab text visible after giving its icon a separate desktop layout. */
-@media (max-width: 760px) {
-  .view-tabs button > .desktop-tab-label {
-    display: inline;
-    margin: 0;
-    font: inherit;
+
+@media (max-width: 1150px) and (min-width: 761px) {
+  .app-header {
+    padding: 0 20px;
+    gap: 20px;
+  }
+  .data-edition {
+    display: none;
+  }
+  .workspace {
+    grid-template-columns: 300px minmax(0, 1fr);
+  }
+  .detail-panel {
+    padding: 21px;
+  }
+  .viewbar {
+    padding: 0 20px;
+    gap: 20px;
+  }
+  .view-controls {
+    gap: 16px;
+  }
+  .mode-description {
+    display: none;
+  }
+  .view-tabs button {
+    min-width: 126px;
+    padding: 10px 13px;
+  }
+  .groups-panel {
+    left: 308px;
+  }
+  .detail-panel h1 {
+    font-size: 23px;
+  }
+  .income-value {
+    font-size: 23px;
+  }
+  .comparison-toolbar {
+    padding: 0 13px;
+  }
+  .comparison-toolbar > div:first-child span {
+    font-size: 9px;
+  }
+  .bar-heading small {
+    font-size: 9px;
+  }
+  .bar-heading > span:last-child {
+    gap: 6px;
+  }
+  .layers-panel {
+    left: auto;
+    right: 20px;
+  }
+  .view-controls {
+    gap: 12px;
   }
 }
 
 @media (min-width: 761px) {
+  .app-header > .settings-trigger {
+    order: 4;
+  }
+  #mobile-more-dialog[open] {
+    inset: 0;
+    width: min(440px, calc(100vw - 40px));
+    max-height: 85dvh;
+    margin: auto;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  #mobile-more-dialog::backdrop {
+    background: #102b2959;
+  }
+  #mobile-more-dialog .mobile-sheet-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  #close-mobile-more {
+    width: 44px;
+    height: 44px;
+    flex: none;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    background: var(--line);
+  }
+  #mobile-settings-content > .text-button {
+    padding: 12px 0;
+  }
   :root {
     --desktop-rail-width: 80px;
     --desktop-drawer-width: 344px;
@@ -55,12 +164,6 @@
     position: absolute;
     inset: 0;
   }
-  .map-canvas,
-  .comparison-maps,
-  .comparison-map {
-    inset: 0;
-  }
-
   .viewbar {
     position: fixed;
     inset: 0 auto 0 0;
@@ -294,7 +397,6 @@
     justify-content: center;
     padding: 10px;
   }
-
   .app-header {
     position: fixed;
     top: 12px;
@@ -368,7 +470,6 @@
     background: var(--desktop-surface);
     box-shadow: var(--desktop-shadow);
   }
-
   .sidebar,
   .sidebar.collapsed {
     position: fixed;
@@ -539,7 +640,6 @@
   .sidebar .source-link {
     padding: 8px 0;
   }
-
   .viewbar > .groups-panel,
   .viewbar > .layers-panel {
     position: fixed;
@@ -624,7 +724,6 @@
     font-size: 14px;
     min-height: 42px;
   }
-
   .comparison-toolbar {
     position: absolute;
     top: 12px;
@@ -699,158 +798,6 @@
   .comparison-pager > span:empty {
     display: none;
   }
-  /* Persistent, non-modal legend card at the map's bottom-left. */
-  #mobile-legend-dialog[open] {
-    display: block;
-    position: fixed;
-    inset: auto auto 28px calc(var(--desktop-rail-width) + 12px);
-    z-index: 900;
-    width: 300px;
-    max-width: calc(100vw - var(--desktop-rail-width) - 150px);
-    max-height: calc(100dvh - 140px);
-    margin: 0;
-    padding: 10px 14px 14px;
-    overflow: auto;
-    border: 1px solid var(--desktop-border);
-    border-radius: 14px;
-    background: var(--desktop-surface);
-    color: var(--desktop-text);
-    box-shadow: var(--desktop-shadow);
-  }
-  body.desktop-details-open #mobile-legend-dialog[open] {
-    left: calc(var(--desktop-rail-width) + var(--desktop-drawer-width) + 24px);
-  }
-  #mobile-legend-dialog .dialog-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 0;
-    margin: 0 0 6px;
-    padding: 0;
-    border: 0;
-  }
-  #mobile-legend-dialog .dialog-nav h2 {
-    font-size: 12px;
-    font-weight: 650;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    color: var(--desktop-muted);
-  }
-  #mobile-legend-dialog .dialog-close {
-    width: 28px;
-    height: 28px;
-    min-width: 28px;
-    font-size: 1.1rem;
-    background: transparent;
-    color: var(--desktop-muted);
-  }
-  #mobile-legend-dialog .dialog-close:hover {
-    background: var(--desktop-hover);
-  }
-  #mobile-legend-dialog .dialog-scroll {
-    max-height: none;
-    overflow: visible;
-    padding: 0;
-  }
-  #mobile-legend-dialog .mobile-legend-stack {
-    gap: 12px;
-  }
-  #mobile-legend-dialog .map-key strong,
-  #mobile-legend-dialog .legend-title strong {
-    font-size: 0.8125rem;
-    color: var(--desktop-text);
-  }
-  #mobile-legend-dialog .map-key > p,
-  #mobile-legend-dialog .legend-title > span,
-  #mobile-legend-dialog .map-legend > p,
-  #mobile-legend-dialog .ramp-ticks,
-  #mobile-legend-dialog .population-bin-labels {
-    font-size: 0.75rem;
-    color: var(--desktop-muted);
-  }
-  #mobile-legend-dialog .legend-title {
-    margin-bottom: 6px;
-  }
-  #mobile-legend-dialog .donut-key {
-    font-size: 0.75rem;
-    gap: 6px 10px;
-    color: var(--desktop-text);
-  }
-  #mobile-legend-dialog .population-bin-labels {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
-  }
-  #mobile-legend-dialog .population-bin-labels > span:before {
-    width: 14px;
-    height: 12px;
-  }
-  #mobile-legend-dialog .transit-legend {
-    gap: 8px 12px;
-    font-size: 0.75rem;
-  }
-  .comparison-maps {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0;
-  }
-
-  .empty-map {
-    inset: 0;
-    padding: 80px 40px 40px calc(var(--desktop-rail-width) + 40px);
-    text-align: center;
-  }
-  .map-tools,
-  .comparing .map-tools {
-    top: auto;
-    right: 20px;
-    bottom: 28px;
-    gap: 8px;
-  }
-  .map-tools .map-button {
-    min-height: 42px;
-    border: 1px solid var(--desktop-border);
-    border-radius: 10px;
-    background: var(--desktop-surface);
-    color: var(--desktop-text);
-    box-shadow: var(--desktop-shadow);
-    font-size: 13px;
-  }
-  .map-tools .map-button.square {
-    width: 42px;
-    height: 42px;
-    font-size: 24px;
-  }
-  .map-status {
-    display: none;
-  }
-  .map-key {
-    left: calc(var(--desktop-rail-width) + 12px);
-    top: 76px;
-  }
-  .map-legend,
-  .population-legend {
-    left: calc(var(--desktop-rail-width) + 12px);
-    bottom: 20px;
-    transform: none;
-  }
-  .desktop-details-open .map-key,
-  .desktop-details-open .map-legend {
-    left: calc(var(--desktop-rail-width) + var(--desktop-drawer-width) + 24px);
-  }
-  .transit-legend {
-    left: auto;
-    right: 20px;
-    top: 12px;
-    transform: none;
-    max-width: calc(100vw - var(--desktop-rail-width) - var(--desktop-drawer-width) - 60px);
-  }
-  .map-warning {
-    left: calc(var(--desktop-rail-width) + 12px);
-    right: 80px;
-    bottom: 155px;
-  }
-  .desktop-details-open .map-warning {
-    left: calc(var(--desktop-rail-width) + var(--desktop-drawer-width) + 24px);
-  }
   .viewbar #mobile-more[aria-expanded='true'] {
     background: var(--desktop-selected);
   }
@@ -879,15 +826,13 @@
     padding-bottom: 6px;
   }
 }
+
 @media (min-width: 761px) and (max-width: 1100px) {
   :root {
     --desktop-drawer-width: 304px;
   }
   body.desktop-menu-expanded {
     --desktop-rail-width: 188px;
-  }
-  .desktop-details-open .map-legend {
-    width: min(280px, calc(100vw - var(--desktop-rail-width) - var(--desktop-drawer-width) - 98px));
   }
   .comparison-toolbar {
     left: auto;
@@ -905,8 +850,8 @@
   }
 }
 
-/* Direct preferences replace the old nested Settings entry. */
 @media (min-width: 761px) {
+  /* Direct preferences replace the old nested Settings entry. */
   .app-header > #mobile-more {
     display: none !important;
   }
@@ -1009,20 +954,11 @@
     color: var(--desktop-muted);
     font-size: 12px;
   }
-  #mobile-legend-button {
-    right: 20px;
-    bottom: 200px;
-    left: auto;
-    top: auto;
-    min-height: 42px;
-    background: var(--desktop-surface);
-    color: var(--desktop-text);
-    border-color: var(--desktop-border);
-  }
   #mobile-map-switcher {
     display: none;
   }
 }
+
 @media (min-width: 761px) and (max-height: 760px) {
   .viewbar {
     gap: 6px;
