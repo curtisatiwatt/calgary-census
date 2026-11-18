@@ -117,7 +117,7 @@
     height: 3px;
     top: 6px;
     left: calc(50% - 16px);
-    background: #c1cec0;
+    background: var(--grey-85);
     border-radius: 3px;
   }
   .detail-topline {
@@ -342,7 +342,7 @@
     grid-template-columns: minmax(0, 1fr) auto;
     border: 1px solid var(--line);
     background: var(--mobile-surface);
-    box-shadow: 0 2px 8px #142b2420;
+    box-shadow: 0 2px 8px #25262a20;
     align-items: center;
     z-index: 2100;
   }
@@ -408,7 +408,7 @@
     max-height: min(48dvh, 24rem);
     border-radius: 14px;
     background: var(--mobile-surface);
-    box-shadow: 0 4px 18px #142b2430;
+    box-shadow: 0 4px 18px #25262a30;
   }
   .search-result {
     min-height: 56px;
@@ -450,7 +450,7 @@
     border: 1px solid var(--line);
     border-radius: 13px;
     background: var(--mobile-surface);
-    box-shadow: 0 2px 7px #142b2414;
+    box-shadow: 0 2px 7px #25262a14;
   }
   .view-tabs button {
     min-width: 0;
@@ -467,7 +467,7 @@
     display: none;
   }
   .view-tabs button.active {
-    background: #e5f1ec;
+    background: var(--grey-95);
     color: var(--grey-23);
     box-shadow: none;
     font-weight: 650;
@@ -498,7 +498,7 @@
     border-radius: 22px;
     color: var(--mobile-ink);
     background: var(--mobile-surface);
-    box-shadow: 0 2px 7px #142b2414;
+    box-shadow: 0 2px 7px #25262a14;
   }
   #groups-button > span[aria-hidden],
   #layers-button > span[aria-hidden] {
@@ -509,7 +509,7 @@
     min-width: 20px;
     padding: 1px 4px;
     color: var(--mobile-ink);
-    background: #eef1ee;
+    background: var(--grey-95);
   }
   html[data-theme='dark'] #group-count {
     background: #30483f;
@@ -529,7 +529,7 @@
     line-height: 1.25;
     background: var(--mobile-surface);
     color: var(--mobile-ink);
-    box-shadow: 0 2px 7px #142b2414;
+    box-shadow: 0 2px 7px #25262a14;
     white-space: normal;
   }
   body.mobile-map-ui #income-control input {
@@ -537,7 +537,7 @@
     height: 22px;
   }
   body.mobile-map-ui #income-control:has(input:checked) {
-    background: #e5f1ec;
+    background: var(--grey-95);
     color: var(--grey-23);
   }
   html[data-theme='dark'] body.mobile-map-ui #income-control:has(input:checked) {
@@ -580,7 +580,7 @@
     border-radius: 22px;
     background: var(--mobile-surface);
     border: 1px solid var(--line);
-    box-shadow: 0 2px 7px #142b2414;
+    box-shadow: 0 2px 7px #25262a14;
     overflow: hidden;
   }
   .comparison-pager select {
@@ -616,7 +616,7 @@
     border-bottom: 0;
     border-radius: 20px 20px 0 0;
     background: var(--mobile-surface);
-    box-shadow: 0 -2px 12px #142b2420;
+    box-shadow: 0 -2px 12px #25262a20;
     backdrop-filter: none;
     z-index: 1200;
   }
@@ -788,10 +788,10 @@
     border-bottom: 0;
     border-radius: 22px 22px 0 0;
     overscroll-behavior: contain;
-    box-shadow: 0 -4px 28px #102b2940;
+    box-shadow: 0 -4px 28px #25262a40;
   }
   .mobile-sheet::backdrop {
-    background: #102b2947;
+    background: #25262a47;
     backdrop-filter: none;
   }
   .mobile-sheet-heading {
@@ -816,7 +816,7 @@
     height: 44px;
     border-radius: 50%;
     font-size: 1.5rem;
-    background: #eef2ef;
+    background: var(--grey-96);
     color: var(--mobile-ink);
   }
   html[data-theme='dark'] .mobile-sheet-heading button,
@@ -1266,7 +1266,7 @@
     background: var(--mobile-surface);
   }
   #mobile-more-dialog::backdrop {
-    background: #142a3045;
+    background: #25262a45;
     backdrop-filter: none;
   }
   #mobile-more-dialog > .dialog-nav {
@@ -1340,7 +1340,7 @@
   }
   #mobile-more-dialog .view-tabs button.active,
   #mobile-more-dialog #income-control:has(input:checked) {
-    background: #e5f1ec;
+    background: var(--grey-95);
     color: var(--grey-23);
   }
   html[data-theme='dark'] #mobile-more-dialog .view-tabs button.active,
@@ -1548,7 +1548,7 @@
     width: 36px;
     height: 5px;
     border-radius: 4px;
-    background: #b9bdc3;
+    background: var(--grey-79);
     pointer-events: none;
   }
   html[data-theme='dark'] .sidebar .mobile-detail-handle .handle-bar {
@@ -1581,7 +1581,7 @@
     padding: 9px;
     border: 0;
     border-radius: 50%;
-    background: #f0f1f3;
+    background: var(--grey-96);
     color: var(--mobile-ink);
     touch-action: manipulation;
   }

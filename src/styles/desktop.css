@@ -88,7 +88,7 @@
     color: var(--ink);
   }
   #mobile-more-dialog::backdrop {
-    background: #102b2959;
+    background: #25262a59;
   }
   #mobile-more-dialog .mobile-sheet-heading {
     display: flex;
@@ -113,10 +113,10 @@
     --desktop-surface: #fff;
     --desktop-text: var(--grey-23);
     --desktop-muted: var(--grey-49);
-    --desktop-hover: #edf1ee;
-    --desktop-selected: #e1eee8;
-    --desktop-border: #dce2de;
-    --desktop-shadow: 0 2px 12px #1d302418;
+    --desktop-hover: var(--grey-95);
+    --desktop-selected: var(--grey-93);
+    --desktop-border: var(--grey-90);
+    --desktop-shadow: 0 2px 12px #2a2b2f18;
   }
   html[data-theme='dark'] {
     --desktop-surface: #192b31;
@@ -163,7 +163,7 @@
     background: var(--desktop-surface);
     border: 0;
     border-right: 1px solid var(--desktop-border);
-    box-shadow: 1px 0 6px #21352b08;
+    box-shadow: 1px 0 6px #2f303408;
     z-index: 2000;
     overflow-y: auto;
     overflow-x: hidden;
@@ -655,7 +655,7 @@
     border: 1px solid var(--desktop-border);
     border-radius: 16px;
     background: var(--desktop-surface);
-    box-shadow: 0 5px 24px #20342925;
+    box-shadow: 0 5px 24px #2f303425;
     z-index: 2200;
   }
   .viewbar > .groups-panel > .dialog-nav,
