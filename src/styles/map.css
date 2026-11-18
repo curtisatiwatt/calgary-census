@@ -633,6 +633,14 @@ html[data-theme='dark'] .orientation-label:before {
   justify-content: center;
   flex-direction: column;
   gap: 12px;
+  transition:
+    opacity 260ms ease,
+    display 260ms allow-discrete;
+}
+/* The map arrives by fading its loading cover out; the cover stays in the way of nothing meanwhile. */
+.loading-overlay[hidden] {
+  opacity: 0;
+  pointer-events: none;
 }
 .loading-overlay strong {
   font-size: 18px;
