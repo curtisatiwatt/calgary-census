@@ -48,6 +48,11 @@
   --paper: var(--grey-99);
   --line: var(--grey-92);
   --accent: var(--grey-23);
+  /* Corners come in four sizes: a control, a tile or button, a floating card and a phone sheet. */
+  --radius-control: 8px;
+  --radius-tile: 12px;
+  --radius-card: 16px;
+  --radius-sheet: 22px;
   --shadow: 0 8px 32px #34353a20;
   font-family:
     Inter,
@@ -218,7 +223,7 @@ strong {
   width: 100%;
   height: 42px;
   padding: 0 40px;
-  border-radius: 7px;
+  border-radius: var(--radius-control);
   font-size: 13px;
   color: var(--ink);
   /* A placeholder longer than a narrow box ends in an ellipsis instead of mid-letter. */
@@ -304,7 +309,7 @@ html[data-theme='dark'] #search::-webkit-search-cancel-button {
   background: white;
   padding: 6px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius-tile);
   box-shadow: var(--shadow);
   max-height: 360px;
   overflow: auto;
@@ -319,7 +324,7 @@ html[data-theme='dark'] #search::-webkit-search-cancel-button {
   background: white;
   gap: 12px;
   padding: 12px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius-control);
 }
 .search-result:hover,
 .search-result.active {
@@ -370,12 +375,12 @@ html[data-theme='dark'] #search::-webkit-search-cancel-button {
   gap: 4px;
   padding: 4px;
   background: var(--grey-95);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   flex-shrink: 0;
 }
 .view-tabs button {
   background: transparent;
-  border-radius: 5px;
+  border-radius: var(--radius-control);
   padding: 10px 16px;
   font-size: 13px;
   color: var(--grey-54);
@@ -408,7 +413,7 @@ html[data-theme='dark'] #search::-webkit-search-cancel-button {
   padding: 10px 13px;
   background: #fff;
   border: 1px solid var(--grey-87);
-  border-radius: 6px;
+  border-radius: var(--radius-control);
   white-space: nowrap;
   min-height: 39px;
 }
@@ -451,7 +456,7 @@ html[data-theme='dark'] #search::-webkit-search-cancel-button {
   padding: 20px;
   background: var(--paper);
   border: 1px solid var(--grey-90);
-  border-radius: 11px;
+  border-radius: var(--radius-tile);
   box-shadow: var(--shadow);
   z-index: 2200;
 }
@@ -502,7 +507,7 @@ html[data-theme='dark'] #search::-webkit-search-cancel-button {
   height: 38px;
   background: var(--grey-96);
   border: 1px solid var(--grey-90);
-  border-radius: 5px;
+  border-radius: var(--radius-control);
   margin-top: 16px;
   padding: 0 11px;
   font-size: 12px;
@@ -915,7 +920,7 @@ html[data-theme='dark'] {
   height: 30px;
   background: #fff;
   border: 1px solid var(--grey-90);
-  border-radius: 5px;
+  border-radius: var(--radius-control);
   font-size: 20px;
   color: var(--grey-54);
 }
@@ -930,7 +935,7 @@ html[data-theme='dark'] {
   border: 1px solid var(--grey-90);
   padding: 7px;
   background: #fff;
-  border-radius: 5px;
+  border-radius: var(--radius-control);
   color: var(--grey-49);
   font-size: 11px;
 }
@@ -946,7 +951,7 @@ dialog {
   width: min(680px, calc(100vw - 32px));
   max-height: 88dvh;
   border: 1px solid var(--grey-90);
-  border-radius: 16px;
+  border-radius: var(--radius-card);
   padding: 30px;
   background: var(--paper);
   color: var(--ink);
@@ -1113,7 +1118,7 @@ dialog[open]::backdrop {
   padding: 20px;
   background: var(--paper);
   border: 1px solid var(--grey-90);
-  border-radius: 11px;
+  border-radius: var(--radius-tile);
   box-shadow: var(--shadow);
   z-index: 2200;
 }
@@ -1407,7 +1412,7 @@ html[data-theme='dark'] .method-sources p {
   min-height: 44px;
   padding: 10px 14px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius-tile);
   background: var(--paper);
   font-size: 0.875rem;
   font-weight: 600;
@@ -1428,7 +1433,7 @@ html[data-theme='dark'] .method-sources p {
   padding: 9px 12px;
   margin: 0;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   background: var(--paper);
   color: var(--ink);
   font-size: 0.875rem;
@@ -1457,7 +1462,7 @@ html[data-theme='dark'] #income-control:has(input:checked) {
   min-height: 44px;
   padding: 8px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   font: inherit;
   color: inherit;
   background: var(--paper);
@@ -1552,7 +1557,7 @@ html[data-theme='dark'] #income-control:has(input:checked) {
   height: 38px;
   background: var(--surface-soft);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   margin-top: 16px;
   padding: 0 11px;
   font-size: 1rem;
@@ -1617,7 +1622,7 @@ html[data-theme='dark'] #income-control:has(input:checked) {
   overflow: hidden;
   background: var(--paper);
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: var(--radius-card);
 }
 #mobile-more-dialog .settings-link,
 #mobile-more-dialog .mobile-settings-row {
@@ -1704,7 +1709,7 @@ html[data-theme='dark'] #income-control:has(input:checked) {
   min-height: 44px;
   padding: 8px 6px;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--radius-control);
   background: var(--paper);
   font-size: 1rem;
   text-align: right;

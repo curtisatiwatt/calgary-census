@@ -83,7 +83,7 @@
     max-height: 85dvh;
     margin: auto;
     border: 1px solid var(--line);
-    border-radius: 18px;
+    border-radius: var(--radius-card);
     background: var(--paper);
     color: var(--ink);
   }
@@ -257,7 +257,7 @@
     margin: 0;
     padding: 8px 2px;
     border: 0;
-    border-radius: 12px;
+    border-radius: var(--radius-tile);
     background: transparent;
     color: var(--desktop-text);
     box-shadow: none;
@@ -360,7 +360,7 @@
     display: none;
     min-width: 17px;
     padding: 1px 3px;
-    border-radius: 8px;
+    border-radius: var(--radius-control);
     background: var(--accent);
     color: white;
     font-size: 10px;
@@ -426,7 +426,7 @@
     margin: 0;
     padding: 0;
     border: 1px solid var(--desktop-border);
-    border-radius: 14px;
+    border-radius: var(--radius-card);
     background: var(--desktop-surface);
     box-shadow: var(--desktop-shadow);
     z-index: 2100;
@@ -448,7 +448,7 @@
     width: 100%;
     padding: 0 42px 0 42px;
     border: 0;
-    border-radius: 14px;
+    border-radius: var(--radius-card);
     background: transparent;
     color: var(--desktop-text);
     line-height: 1.4;
@@ -489,7 +489,7 @@
     right: -1px;
     max-height: min(60dvh, 440px);
     border: 1px solid var(--desktop-border);
-    border-radius: 14px;
+    border-radius: var(--radius-card);
     background: var(--desktop-surface);
     box-shadow: var(--desktop-shadow);
   }
@@ -506,7 +506,7 @@
     max-height: none;
     overflow: hidden;
     border: 1px solid var(--desktop-border);
-    border-radius: 16px;
+    border-radius: var(--radius-card);
     background: var(--desktop-surface);
     box-shadow: var(--desktop-shadow);
     z-index: 1400;
@@ -679,7 +679,7 @@
     padding: 0;
     overflow: hidden;
     border: 1px solid var(--desktop-border);
-    border-radius: 16px;
+    border-radius: var(--radius-card);
     background: var(--desktop-surface);
     box-shadow: 0 5px 24px #2f303425;
     z-index: 2200;
@@ -778,7 +778,7 @@
     max-width: 100%;
     padding: 3px;
     border: 1px solid var(--desktop-border);
-    border-radius: 13px;
+    border-radius: var(--radius-tile);
     background: var(--desktop-surface);
     box-shadow: var(--desktop-shadow);
     pointer-events: auto;
@@ -793,7 +793,7 @@
     height: 44px;
     padding: 8px 10px;
     border: 0;
-    border-radius: 8px;
+    border-radius: var(--radius-control);
     background: var(--desktop-surface);
     color: var(--desktop-text);
     font-size: 14px;
@@ -803,7 +803,7 @@
     height: 42px;
     min-width: 36px;
     border: 0;
-    border-radius: 9px;
+    border-radius: var(--radius-control);
     background: var(--desktop-surface);
     color: var(--desktop-text);
     font-size: 25px;
@@ -905,7 +905,7 @@
     margin: 0;
     padding: 8px 2px;
     border: 0;
-    border-radius: 12px;
+    border-radius: var(--radius-tile);
     background: none;
     color: var(--desktop-text);
     font-size: 11px;
@@ -981,7 +981,7 @@
     margin: 0;
     padding: 4px 8px;
     border: 1px solid var(--desktop-border);
-    border-radius: 7px;
+    border-radius: var(--radius-control);
     background: var(--desktop-surface);
     color: var(--desktop-muted);
     font-size: 12px;

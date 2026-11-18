@@ -36,7 +36,7 @@
   gap: 8px;
   background: #fffffff0;
   border: 1px solid var(--grey-90);
-  border-radius: 5px;
+  border-radius: var(--radius-control);
   padding: 9px 12px;
   font-size: 10px;
   color: var(--grey-54);
@@ -57,7 +57,7 @@
 .map-button {
   background: #fffffff5;
   border: 1px solid var(--grey-90);
-  border-radius: 5px;
+  border-radius: var(--radius-control);
   padding: 10px 12px;
   font-size: 11px;
   box-shadow: 0 2px 6px #44454910;
@@ -333,7 +333,7 @@ html[data-theme='dark'] .future-line {
   padding: 10px 12px;
   color: #826d3c;
   border: 1px solid #e5dbb8;
-  border-radius: 6px;
+  border-radius: var(--radius-control);
   font-size: 11px;
 }
 /* Composition rings: one per community, drawn as SVG by main.js. */
@@ -495,7 +495,7 @@ html[data-theme='dark'] .orientation-label:before {
   background: var(--grey-23);
   color: #fff;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-tile);
   box-shadow: 0 4px 15px #34353a29;
   padding: 11px 13px 10px;
   line-height: 1.5;
@@ -890,7 +890,7 @@ html[data-theme='dark'] .loading-overlay {
     height: auto;
     padding: 0.55rem 0.5rem;
     font-size: 0.8125rem;
-    border-radius: 12px;
+    border-radius: var(--radius-tile);
     box-shadow: 0 2px 8px #25262a25;
     background: var(--mobile-surface);
     color: var(--mobile-ink);
@@ -964,7 +964,7 @@ html[data-theme='dark'] .loading-overlay {
   margin: auto;
   padding: 0;
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: var(--radius-sheet);
   background: var(--paper);
   color: var(--ink);
 }
@@ -1004,7 +1004,7 @@ html[data-theme='dark'] .loading-overlay {
   min-height: 44px;
   padding: 10px 14px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-tile);
   background: var(--paper);
   color: var(--ink);
   box-shadow: 0 2px 10px #25262a1c;
@@ -1028,7 +1028,7 @@ html[data-theme='dark'] .loading-overlay {
     font-size: 0.875rem;
     background: var(--mobile-surface);
     color: var(--mobile-ink);
-    border-radius: 12px;
+    border-radius: var(--radius-tile);
     z-index: 1000;
   }
   .sidebar:not([data-sheet-snap='closed']) ~ .map-workspace #mobile-legend-button {
@@ -1040,7 +1040,7 @@ html[data-theme='dark'] .loading-overlay {
     inset: auto 12px max(12px, env(safe-area-inset-bottom));
     max-height: 85dvh;
     margin: 0;
-    border-radius: 18px;
+    border-radius: var(--radius-sheet);
   }
 }
 /* Community polygons show keyboard focus with the highlight outline, not a bounding box. */
@@ -1075,7 +1075,7 @@ html[data-theme='dark'] .loading-overlay {
     padding: 10px 14px 14px;
     overflow: auto;
     border: 1px solid var(--desktop-border);
-    border-radius: 14px;
+    border-radius: var(--radius-card);
     background: var(--desktop-surface);
     color: var(--desktop-text);
     box-shadow: var(--desktop-shadow);
@@ -1128,7 +1128,7 @@ html[data-theme='dark'] .loading-overlay {
   .map-tools .map-button {
     min-height: 42px;
     border: 1px solid var(--desktop-border);
-    border-radius: 10px;
+    border-radius: var(--radius-tile);
     background: var(--desktop-surface);
     color: var(--desktop-text);
     box-shadow: var(--desktop-shadow);
