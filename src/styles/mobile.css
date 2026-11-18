@@ -313,6 +313,7 @@
     --mobile-surface: #fff;
     --mobile-ink: var(--grey-23);
     --mobile-muted: var(--grey-49);
+    --mobile-shadow: 0 2px 8px #25262a20;
   }
   html[data-theme='dark'] {
     --mobile-surface: var(--grey-27);
@@ -342,7 +343,7 @@
     grid-template-columns: minmax(0, 1fr) auto;
     border: 1px solid var(--line);
     background: var(--mobile-surface);
-    box-shadow: 0 2px 8px #25262a20;
+    box-shadow: var(--mobile-shadow);
     align-items: center;
     z-index: 2100;
   }
@@ -408,7 +409,7 @@
     max-height: min(48dvh, 24rem);
     border-radius: var(--radius-card);
     background: var(--mobile-surface);
-    box-shadow: 0 4px 18px #25262a30;
+    box-shadow: var(--shadow-raised);
   }
   .search-result {
     min-height: 56px;
@@ -450,7 +451,7 @@
     border: 1px solid var(--line);
     border-radius: var(--radius-tile);
     background: var(--mobile-surface);
-    box-shadow: 0 2px 7px #25262a14;
+    box-shadow: var(--mobile-shadow);
   }
   .view-tabs button {
     min-width: 0;
@@ -498,7 +499,7 @@
     border-radius: 22px;
     color: var(--mobile-ink);
     background: var(--mobile-surface);
-    box-shadow: 0 2px 7px #25262a14;
+    box-shadow: var(--mobile-shadow);
   }
   #groups-button > span[aria-hidden],
   #layers-button > span[aria-hidden] {
@@ -529,7 +530,7 @@
     line-height: 1.25;
     background: var(--mobile-surface);
     color: var(--mobile-ink);
-    box-shadow: 0 2px 7px #25262a14;
+    box-shadow: var(--mobile-shadow);
     white-space: normal;
   }
   body.mobile-map-ui #income-control input {
@@ -580,7 +581,7 @@
     border-radius: 22px;
     background: var(--mobile-surface);
     border: 1px solid var(--line);
-    box-shadow: 0 2px 7px #25262a14;
+    box-shadow: var(--mobile-shadow);
     overflow: hidden;
   }
   .comparison-pager select {

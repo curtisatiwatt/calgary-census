@@ -53,6 +53,8 @@
   --radius-tile: 12px;
   --radius-card: 16px;
   --radius-sheet: 22px;
+  /* A surface opened above the page (a panel, the search results, a tooltip) casts this shadow. */
+  --shadow-raised: 0 5px 24px #2f303425;
   --shadow: 0 8px 32px #34353a20;
   font-family:
     Inter,
@@ -1200,6 +1202,7 @@ html[data-theme='dark'] {
   --paper: var(--grey-25);
   --line: var(--grey-37);
   --accent: var(--grey-97);
+  --shadow-raised: 0 6px 24px #00000055;
   --shadow: 0 8px 32px #00000045;
   --surface: var(--grey-31);
   --surface-soft: var(--grey-33);

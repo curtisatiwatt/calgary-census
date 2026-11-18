@@ -681,7 +681,7 @@
     border: 1px solid var(--desktop-border);
     border-radius: var(--radius-card);
     background: var(--desktop-surface);
-    box-shadow: 0 5px 24px #2f303425;
+    box-shadow: var(--shadow-raised);
     z-index: 2200;
     animation: surface-in var(--motion-surface) var(--ease-out);
     transform-origin: top left;

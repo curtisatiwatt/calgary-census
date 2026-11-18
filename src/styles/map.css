@@ -496,7 +496,7 @@ html[data-theme='dark'] .orientation-label:before {
   color: #fff;
   border: none;
   border-radius: var(--radius-tile);
-  box-shadow: 0 4px 15px #34353a29;
+  box-shadow: var(--shadow-raised);
   padding: 11px 13px 10px;
   line-height: 1.5;
   white-space: normal;
@@ -802,7 +802,7 @@ html[data-theme='dark'] .community-tooltip.leaflet-tooltip {
   background: var(--grey-33);
   border: 1px solid var(--grey-59);
   color: var(--grey-96);
-  box-shadow: 0 6px 24px #00000055;
+  box-shadow: var(--shadow-raised);
 }
 html[data-theme='dark'] .community-tooltip.leaflet-tooltip-top:before {
   border-top-color: var(--grey-59);
@@ -891,7 +891,7 @@ html[data-theme='dark'] .loading-overlay {
     padding: 0.55rem 0.5rem;
     font-size: 0.8125rem;
     border-radius: var(--radius-tile);
-    box-shadow: 0 2px 8px #25262a25;
+    box-shadow: var(--mobile-shadow);
     background: var(--mobile-surface);
     color: var(--mobile-ink);
   }
