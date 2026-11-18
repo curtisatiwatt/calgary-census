@@ -39,6 +39,8 @@
   --grey-27: #25262a;
   --grey-25: #202126;
   --grey-23: #1d1d1f;
+  /* Drawn icons used as masks, so each takes the colour of the text around it. */
+  --icon-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 17 17 7M8.5 7H17v8.5'/%3E%3C/svg%3E");
   --ink: var(--grey-23);
   --muted: var(--grey-54);
   --paper: var(--grey-99);
@@ -739,6 +741,21 @@ strong {
 }
 .source-link:hover {
   text-decoration: underline;
+}
+/* "Locate" and links that leave the page end with the same drawn arrow. */
+#focus-community:after,
+.source-link:after,
+.station-source:after,
+#source-list a:after {
+  content: '';
+  display: inline-block;
+  width: 0.86em;
+  height: 0.86em;
+  margin-left: 0.15em;
+  vertical-align: -0.1em;
+  background: currentColor;
+  -webkit-mask: var(--icon-arrow) center / contain no-repeat;
+  mask: var(--icon-arrow) center / contain no-repeat;
 }
 .mobile-detail-handle,
 .collapsed-summary {

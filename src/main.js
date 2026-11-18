@@ -201,7 +201,7 @@ function renderMetadata() {
     const link = document.createElement('a');
     Object.assign(link, {
       href: url,
-      textContent: `${t(source.label)} ↗`,
+      textContent: t(source.label),
       target: '_blank',
       rel: 'noopener noreferrer',
     });
