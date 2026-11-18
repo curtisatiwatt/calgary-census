@@ -6,11 +6,44 @@
  * queries); everything drawn on or over the map lives in map.css.
  */
 :root {
+  /* Neutral ramp: one barely cool grey. The number is the lightness (OKLCH, %);
+     --grey-23 is the ink. Interface colours come from here; shadows and
+     translucent layers repeat a step as a literal with alpha. Colours drawn on
+     the map are not part of the ramp. */
+  --grey-99: #fbfcfe;
+  --grey-97: #f4f5f7;
+  --grey-96: #f1f2f4;
+  --grey-95: #eeeef0;
+  --grey-93: #e7e8ea;
+  --grey-92: #e3e4e8;
+  --grey-90: #dddee1;
+  --grey-87: #d3d4d7;
+  --grey-85: #cdcdd1;
+  --grey-82: #c3c4c7;
+  --grey-79: #b9babf;
+  --grey-76: #b0b1b6;
+  --grey-72: #a3a4a9;
+  --grey-66: #919297;
+  --grey-59: #7c7d82;
+  --grey-54: #6d6e73;
+  --grey-49: #5f6065;
+  --grey-45: #54555a;
+  --grey-43: #4e4f54;
+  --grey-41: #494a4f;
+  --grey-39: #444549;
+  --grey-37: #3e3f44;
+  --grey-35: #393a3f;
+  --grey-33: #34353a;
+  --grey-31: #2f3034;
+  --grey-29: #2a2b2f;
+  --grey-27: #25262a;
+  --grey-25: #202126;
+  --grey-23: #1d1d1f;
   --ink: #263f43;
   --muted: #75847f;
   --paper: #fbfcf9;
   --line: #e1e7df;
-  --accent: #28685f;
+  --accent: var(--grey-23);
   --shadow: 0 8px 32px #233c4220;
   font-family:
     Inter,
@@ -329,7 +362,7 @@ strong {
   color: #61786a;
 }
 .plain-toggle input {
-  accent-color: #3a7568;
+  accent-color: var(--accent);
   width: 15px;
   height: 15px;
 }
@@ -422,7 +455,7 @@ strong {
 .group-option input {
   width: 16px;
   height: 16px;
-  accent-color: #387064;
+  accent-color: var(--accent);
   flex-shrink: 0;
   margin: 0;
 }
@@ -940,7 +973,7 @@ html[data-theme='dark'] {
   --muted: #a3b5b5;
   --paper: #11232a;
   --line: #2b4148;
-  --accent: #91cbbb;
+  --accent: var(--grey-97);
   --shadow: 0 8px 32px #00000045;
   --surface: #1d333b;
   --surface-soft: #203840;
@@ -1021,8 +1054,9 @@ html[data-theme='dark'] .plain-toggle {
 }
 html[data-theme='dark'] .plain-toggle input,
 html[data-theme='dark'] .group-option input,
-html[data-theme='dark'] .layer-option input {
-  accent-color: #88bda9;
+html[data-theme='dark'] .layer-option input,
+html[data-theme='dark'] #income-control input {
+  accent-color: var(--grey-93);
 }
 html[data-theme='dark'] .groups-panel,
 html[data-theme='dark'] .layers-panel {

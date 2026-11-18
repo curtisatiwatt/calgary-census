@@ -343,6 +343,9 @@
     color: white;
     font-size: 10px;
   }
+  html[data-theme='dark'] .viewbar #group-count {
+    color: var(--grey-23);
+  }
   .viewbar #group-count:not([hidden]) {
     display: block;
   }
