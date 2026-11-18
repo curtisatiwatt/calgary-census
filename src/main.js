@@ -15,6 +15,7 @@ import { initTheme, refreshThemeControl, isDarkTheme } from './theme.js';
 import { createMapTooltip } from './map-tooltip.js';
 import { createCommunityHighlight } from './community-highlight.js';
 import { createContextLayers } from './context-layers.js';
+import { createFirstHint } from './first-hint.js';
 import {
   INCOME_BINS,
   isNumber,
@@ -85,6 +86,7 @@ let lastMobile = mobile();
 let mobileUI;
 let communitySheet;
 let desktopUI;
+let firstHint;
 let observedTextSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
 const labelMeasure = document.createElement('canvas').getContext('2d');
 
@@ -863,6 +865,8 @@ function fitCommunity(code, collapse = true) {
 /** Keep the shareable URL in step with the view (community, view, groups, layers). */
 function writeUrlState() {
   if (!state.data) return;
+  // Every change of selection, view, groups or layers passes through here: the visitor has found their way.
+  firstHint?.dismiss();
   const hash = buildHashState({
     // Canonical (display) order, so the first listed group is the compare view's default.
     code: state.selectionActive ? state.selected : null,
@@ -1630,6 +1634,7 @@ async function init() {
     },
   });
   desktopUI = initDesktopUI({ onLayoutChange: () => renderOverlays(), onClose: clearSelection });
+  firstHint = createFirstHint($('first-hint'));
   try {
     const data = await loadCoreData();
     state.metadata = data.metadata;
@@ -1655,6 +1660,8 @@ async function init() {
     selectCommunity(state.selected, false, false);
     applyUrlState(link);
     setReady(true);
+    // A link that already chooses something needs no introduction.
+    if (!link.code && !link.groups.length && !link.income && link.view === 'composition') firstHint.show();
     ensureVisibleLayers();
   } catch (error) {
     state.loadError = error;

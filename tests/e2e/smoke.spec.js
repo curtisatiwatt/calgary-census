@@ -83,6 +83,35 @@ test('the census map loads in English with no errors or untranslated text', asyn
   expect(errors).toEqual([]);
 });
 
+test('a first visit gets a one-line hint that leaves at the first choice and stays away', async ({
+  page,
+  isMobile,
+}) => {
+  await openMap(page);
+  const hint = page.locator('#first-hint');
+  await expect(hint).toBeVisible();
+  await expect(hint).toHaveText('Select any community for details, or choose population groups first');
+  // Choosing a community on the map is a first real action.
+  const box = await page.locator('#composition-map path[data-community="CRA"]').boundingBox();
+  const point = [box.x + box.width / 2, box.y + box.height / 2];
+  if (isMobile) await page.touchscreen.tap(...point);
+  else await page.mouse.click(...point);
+  await expect(page).toHaveURL(/#CRA$/);
+  await expect(hint).toBeHidden();
+  // A later visit with nothing chosen is not told again.
+  await page.goto('about:blank');
+  await openMap(page);
+  await expect(hint).toBeHidden();
+  expect(await page.evaluate(() => localStorage.getItem('census-atlas-hint-seen'))).toBe('1');
+});
+
+test('a link that already chooses a community opens without the hint and does not use it up', async ({ page }) => {
+  await openMap(page, 'ASP');
+  await expect(page.locator('#community-name')).toHaveText('Aspen Woods');
+  await expect(page.locator('#first-hint')).toBeHidden();
+  expect(await page.evaluate(() => localStorage.getItem('census-atlas-hint-seen'))).toBeNull();
+});
+
 test('optional layers load on demand', async ({ page, isMobile }) => {
   const requested = [];
   page.on('request', request => requested.push(new URL(request.url()).pathname.split('/').pop()));

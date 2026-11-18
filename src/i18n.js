@@ -115,6 +115,7 @@ const translations = {
   社区详情: 'Community details',
   展开或收起社区详情: 'Expand or collapse community details',
   定位: 'Locate',
+  '点击任意社区查看详情，或先选择要观察的人群': 'Select any community for details, or choose population groups first',
   正在载入社区: 'Loading community',
   '正在加载官方社区数据…': 'Loading official community data…',
   社区: 'Community',

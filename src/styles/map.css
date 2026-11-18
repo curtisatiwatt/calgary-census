@@ -44,6 +44,53 @@
   box-shadow: 0 2px 10px #44454909;
   pointer-events: none;
 }
+/* One line for a first visit (see first-hint.js): it floats over the map without taking clicks from it. */
+.first-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 900;
+  max-width: calc(100% - 32px);
+  padding: 9px 16px;
+  border: 1px solid var(--grey-90);
+  border-radius: 999px;
+  background: #fffffff5;
+  color: var(--grey-37);
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: nowrap;
+  box-shadow: var(--desktop-shadow, 0 2px 8px #25262a20);
+  pointer-events: none;
+  transition:
+    opacity 240ms ease,
+    display 240ms allow-discrete;
+  animation: fade-in 400ms ease 500ms backwards;
+}
+.first-hint[hidden] {
+  opacity: 0;
+}
+html[data-theme='dark'] .first-hint {
+  background: #2f3034f5;
+  border-color: var(--grey-45);
+  color: var(--grey-93);
+}
+@media (max-width: 760px) {
+  /* On a phone the bottom edge belongs to the map buttons, so the line sits under the search row. */
+  .first-hint {
+    top: calc(var(--mobile-header-bottom) + 10px);
+    bottom: auto;
+    white-space: normal;
+    text-align: center;
+    width: max-content;
+  }
+}
+@media (min-width: 761px) {
+  /* Centred on the map that shows beside the rail, not on the window. */
+  .first-hint {
+    left: calc(50% + var(--desktop-rail-width) / 2);
+  }
+}
 .map-tools {
   position: absolute;
   top: 18px;
