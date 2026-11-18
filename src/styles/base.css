@@ -347,6 +347,7 @@ html[data-theme='dark'] #search::-webkit-search-cancel-button {
 .search-result > span:last-child {
   font-size: 12px;
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 .no-results {
   padding: 18px;
@@ -999,6 +1000,21 @@ dialog h2 {
 .method-sources p {
   font-size: 11px;
   margin-top: 20px;
+}
+
+/* Figures that are read against one another keep one width per digit. */
+#population,
+#income-value,
+#income-context,
+#children,
+#household,
+#collapsed-summary,
+#city-income,
+#filter-count,
+.bar-heading small,
+.ramp-ticks,
+.population-bin-labels {
+  font-variant-numeric: tabular-nums;
 }
 
 /* Motion is short and quiet: colours ease, a pressed control gives a little
