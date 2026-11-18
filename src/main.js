@@ -437,6 +437,12 @@ function refreshStyles() {
   }
 }
 
+/** One "label … value" line of the hover tooltip; `colour` adds the ring's dot for a population group. */
+function tipRow(label, value, colour = '') {
+  const dot = colour ? `<i style="background:${esc(colour)}"></i>` : '';
+  return `<span class="tip-row"><span>${dot}${esc(label)}</span> <b>${esc(value)}</b></span>`;
+}
+
 function tooltipContent(feature, context) {
   const p = feature.properties;
   const record = populationRecord(p.code);
@@ -445,24 +451,23 @@ function tooltipContent(feature, context) {
     const count = record?.counts[group.id];
     const share = percent(populationShare(state.data.city, group.id));
     // Without a published count, show only the city reference rather than "No data people".
-    const detail = isNumber(count)
-      ? t('tooltip.groupCity', { count: number(count), share })
-      : t('city.value', { value: share });
+    const rows = [
+      tipRow(t(group.label), percent(populationShare(record, group.id))),
+      isNumber(count) ? tipRow(t('tooltip.peopleLabel'), number(count)) : '',
+      tipRow(t('tooltip.cityLabel'), share),
+    ];
     return localizeHtml(
-      `<strong>${esc(p.name)}</strong>${esc(t('tooltip.groupShare', { group: t(group.label), value: percent(populationShare(record, group.id)) }))}<br>${esc(detail)}<span class="tip-note">点击固定社区，查看完整构成</span>`,
+      `<strong>${esc(p.name)}</strong>${rows.join('')}<span class="tip-note">点击固定社区，查看完整构成</span>`,
     );
   }
   const groups = record
     ? selectedGroups()
         .slice(0, 5)
-        .map(
-          g =>
-            `<br>${esc(t('tooltip.groupShare', { group: t(g.label), value: percent(populationShare(record, g.id)) }))}`,
-        )
+        .map(g => tipRow(t(g.label), percent(populationShare(record, g.id)), state.colors[g.id]))
         .join('')
-    : '<br>人口分类暂无数据';
+    : '<span class="tip-row"><span>人口分类暂无数据</span></span>';
   return localizeHtml(
-    `<strong>${esc(p.name)}</strong>${esc(t('tooltip.income', { value: money(p.income) }))}<br>${esc(t('tooltip.population', { value: number(record?.population ?? p.population) }))}${groups}<span class="tip-note">点击查看社区详情</span>`,
+    `<strong>${esc(p.name)}</strong>${tipRow(t('tooltip.incomeLabel'), money(p.income))}${tipRow(t('tooltip.populationLabel'), number(record?.population ?? p.population))}${groups}<span class="tip-note">点击查看社区详情</span>`,
   );
 }
 
