@@ -696,6 +696,31 @@ html[data-theme='dark'] #search::-webkit-search-cancel-button {
   display: block;
   border-radius: 2px;
 }
+/* The bars of a newly opened community grow from the left, one after another. */
+@keyframes bar-in {
+  from {
+    transform: scaleX(0);
+  }
+}
+.arriving .bar-fill {
+  transform-origin: left center;
+  animation: bar-in 420ms var(--ease-out) backwards;
+}
+.arriving .composition-row:nth-child(2) .bar-fill {
+  animation-delay: 30ms;
+}
+.arriving .composition-row:nth-child(3) .bar-fill {
+  animation-delay: 60ms;
+}
+.arriving .composition-row:nth-child(4) .bar-fill {
+  animation-delay: 90ms;
+}
+.arriving .composition-row:nth-child(5) .bar-fill {
+  animation-delay: 120ms;
+}
+.arriving .composition-row:nth-child(n + 6) .bar-fill {
+  animation-delay: 150ms;
+}
 .city-reference {
   position: absolute;
   top: -2px;

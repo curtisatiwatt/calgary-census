@@ -378,6 +378,10 @@ function renderDetail() {
         `<div class="composition-row" data-detail-group="${row.id}"><div class="bar-heading"><span>${esc(row.label)}</span><span><small>${t('unit.people', { count: number(row.count) })}</small><strong>${percent(row.share)}</strong></span></div><div class="bar-track"><span class="bar-fill" style="width:${Math.min(100, Math.max(0, (row.share || 0) * 100))}%;background:${row.color}"></span><i class="city-reference" style="left:${Math.min(100, Math.max(0, (row.city || 0) * 100))}%" title="${esc(t('city.value', { value: percent(row.city) }))}"></i></div><span class="sr-only">${esc(t('city.share', { value: percent(row.city) }))}</span></div>`,
     )
     .join('');
+  // Bars grow in when another community is opened, not when the same one is redrawn.
+  const bars = $('composition-bars');
+  bars.classList.toggle('arriving', bars.dataset.community !== String(p.code));
+  bars.dataset.community = p.code;
   const sum = Object.values(record.counts).reduce((a, b) => a + b, 0);
   const difference = Math.abs(sum - record.population);
   const basis = [
