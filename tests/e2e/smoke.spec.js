@@ -157,6 +157,19 @@ test('search selects a community and records it in the URL', async ({ page }) =>
   await expect(page).toHaveURL(/#ASP$/);
 });
 
+test('a search result sets the matched part of the name apart, or names the code that matched', async ({ page }) => {
+  await openMap(page);
+  const search = page.locator('#search');
+  // Search skips spaces and punctuation; the marked part still covers them.
+  await search.fill('mountp');
+  await expect(page.locator('.search-result strong').first()).toHaveText('Mount Pleasant');
+  await expect(page.locator('.search-result strong mark').first()).toHaveText('Mount P');
+  // A community code appears in no name, so the result shows the code instead.
+  await search.fill('bln');
+  await expect(page.locator('.search-result strong mark')).toHaveCount(0);
+  await expect(page.locator('.search-result small mark').first()).toHaveText('BLN');
+});
+
 test('the search list tracks its active option and closes when focus leaves', async ({ page, isMobile }) => {
   test.skip(isMobile, 'keyboard navigation is a desktop interaction');
   await openMap(page);

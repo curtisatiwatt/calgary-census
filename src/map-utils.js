@@ -97,6 +97,31 @@ export function normalize(value) {
     .replace(/[^a-z0-9\u4e00-\u9fff]/g, '');
 }
 
+/**
+ * Where `query` sits inside `text`, as [start, end) offsets into `text`, or null when it is not there.
+ * It compares the way search does: case, accents, spaces and punctuation are ignored, so
+ * "mountp" is found in "Mount Pleasant" and the range covers "Mount P".
+ */
+export function matchRange(text, query) {
+  const source = String(text ?? '');
+  const q = normalize(query);
+  if (!q) return null;
+  let flat = '';
+  const starts = [];
+  const ends = [];
+  let i = 0;
+  for (const char of source) {
+    for (const c of normalize(char)) {
+      flat += c;
+      starts.push(i);
+      ends.push(i + char.length);
+    }
+    i += char.length;
+  }
+  const at = flat.indexOf(q);
+  return at < 0 ? null : [starts[at], ends[at + q.length - 1]];
+}
+
 export function searchFeatures(features, query) {
   const q = normalize(query);
   if (!q) return [];

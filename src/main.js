@@ -23,6 +23,7 @@ import {
   number,
   percent,
   searchFeatures,
+  matchRange,
   summarize,
   escapeHtml as esc,
   safeUrl,
@@ -1336,7 +1337,14 @@ function renderSearch() {
     ? state.searchMatches
         .map((feature, i) => {
           const p = feature.properties;
-          return `<button class="search-result" id="search-option-${i}" role="option" tabindex="-1" aria-selected="false" data-code="${esc(p.code)}"><span><strong>${esc(p.name)}</strong><small>${esc(
+          const range = matchRange(p.name, query);
+          const name = range
+            ? `${esc(p.name.slice(0, range[0]))}<mark>${esc(p.name.slice(range[0], range[1]))}</mark>${esc(p.name.slice(range[1]))}`
+            : esc(p.name);
+          // When an alias or the community code matched instead, that is what gets shown.
+          const other = range ? '' : (p.aliases || []).find(alias => matchRange(alias, query)) || p.code;
+          const matched = other ? `<mark>${esc(other)}</mark> · ` : '';
+          return `<button class="search-result" id="search-option-${i}" role="option" tabindex="-1" aria-selected="false" data-code="${esc(p.code)}"><span><strong>${name}</strong><small>${matched}${esc(
             [p.sectorLabel, p.typeLabel]
               .filter(Boolean)
               .map(tag => t(tag))

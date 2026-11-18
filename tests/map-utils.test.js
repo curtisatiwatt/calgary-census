@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   colorFor,
   searchFeatures,
+  matchRange,
   hashCode,
   summarize,
   safeUrl,
@@ -41,6 +42,20 @@ test('search supports names, diacritics, renamed neighbourhoods and exact codes'
   assert.equal(searchFeatures(features, 'former name')[0].properties.code, 'TEST');
   assert.equal(searchFeatures(features, 'ASP')[0].properties.code, 'ASP');
   assert.deepEqual(searchFeatures(features, ''), []);
+});
+
+test('the matched part of a name is found the way search compares names', () => {
+  assert.deepEqual(matchRange('Mount Pleasant', 'mount'), [0, 5]);
+  assert.deepEqual(matchRange('Winston Heights/Mountview', 'MOUNT'), [16, 21]);
+  // Spaces and punctuation are skipped by search, so the range spans them.
+  assert.deepEqual(matchRange('Mount Pleasant', 'mountp'), [0, 7]);
+  assert.deepEqual(matchRange('Douglasdale/Glen', 'dale glen'), [7, 16]);
+  // An accented letter matches its plain form and stays whole in the range.
+  assert.deepEqual(matchRange('Château Test', 'chateau'), [0, 7]);
+  assert.deepEqual(matchRange('Aspen Woods', 'ASP '), [0, 3]);
+  assert.equal(matchRange('Aspen Woods', 'xyz'), null);
+  assert.equal(matchRange('Aspen Woods', '  '), null);
+  assert.equal(matchRange(undefined, 'a'), null);
 });
 
 test('coverage counts only published income values; invalid deep links do not crash the app', () => {
