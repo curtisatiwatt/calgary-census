@@ -694,7 +694,9 @@ html[data-theme='dark'] .orientation-label:before {
   flex-wrap: wrap;
   gap: 11px;
   margin-top: 15px;
-  font-size: 10px;
+  font-size: 11px;
+  /* The row keeps the height it had at 10px, so the note under it stays where it was. */
+  line-height: 14px;
   color: var(--grey-54);
 }
 .context-legend span {
@@ -717,15 +719,15 @@ html[data-theme='dark'] .orientation-label:before {
   margin-top: 5px;
 }
 .station-status {
-  font-size: 10px;
+  font-size: 11px;
 }
 .station-phase,
 .station-position-note {
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.5;
 }
 .station-source {
-  font-size: 10px;
+  font-size: 11px;
   color: inherit;
   text-decoration: underline;
 }

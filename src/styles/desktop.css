@@ -539,8 +539,8 @@
     gap: 8px;
   }
   .sidebar .detail-topline .eyebrow {
-    font-size: 10px;
-    letter-spacing: 1.1px;
+    font-size: 11px;
+    letter-spacing: 1px;
     color: var(--desktop-muted);
   }
   .sidebar .detail-topline .text-button {
