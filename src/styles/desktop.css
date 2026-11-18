@@ -111,8 +111,8 @@
     --desktop-rail-width: 80px;
     --desktop-drawer-width: 344px;
     --desktop-surface: #fff;
-    --desktop-text: #202725;
-    --desktop-muted: #5f6865;
+    --desktop-text: var(--grey-23);
+    --desktop-muted: var(--grey-49);
     --desktop-hover: #edf1ee;
     --desktop-selected: #e1eee8;
     --desktop-border: #dce2de;

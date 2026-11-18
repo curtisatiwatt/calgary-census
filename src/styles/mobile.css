@@ -311,8 +311,8 @@
     --mobile-ui-top: 180px;
     --mobile-sheet-height: 100px;
     --mobile-surface: #fff;
-    --mobile-ink: #172321;
-    --mobile-muted: #52605b;
+    --mobile-ink: var(--grey-23);
+    --mobile-muted: var(--grey-49);
   }
   html[data-theme='dark'] {
     --mobile-surface: #17282e;
@@ -468,7 +468,7 @@
   }
   .view-tabs button.active {
     background: #e5f1ec;
-    color: #163f34;
+    color: var(--grey-23);
     box-shadow: none;
     font-weight: 650;
   }
@@ -538,7 +538,7 @@
   }
   body.mobile-map-ui #income-control:has(input:checked) {
     background: #e5f1ec;
-    color: #163f34;
+    color: var(--grey-23);
   }
   html[data-theme='dark'] body.mobile-map-ui #income-control:has(input:checked) {
     background: #34554d;
@@ -1341,7 +1341,7 @@
   #mobile-more-dialog .view-tabs button.active,
   #mobile-more-dialog #income-control:has(input:checked) {
     background: #e5f1ec;
-    color: #163f34;
+    color: var(--grey-23);
   }
   html[data-theme='dark'] #mobile-more-dialog .view-tabs button.active,
   html[data-theme='dark'] #mobile-more-dialog #income-control:has(input:checked) {

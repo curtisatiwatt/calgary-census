@@ -39,8 +39,8 @@
   --grey-27: #25262a;
   --grey-25: #202126;
   --grey-23: #1d1d1f;
-  --ink: #263f43;
-  --muted: #75847f;
+  --ink: var(--grey-23);
+  --muted: var(--grey-54);
   --paper: #fbfcf9;
   --line: #e1e7df;
   --accent: var(--grey-23);
@@ -203,7 +203,7 @@ strong {
   left: 13px;
   top: 6px;
   font-size: 25px;
-  color: #6f8280;
+  color: var(--grey-54);
 }
 .search-wrap kbd {
   position: absolute;
@@ -212,7 +212,7 @@ strong {
   border: 1px solid #ccd5cd;
   border-radius: 4px;
   padding: 0 5px;
-  color: #7d8b80;
+  color: var(--grey-54);
   font-size: 12px;
 }
 .header-actions {
@@ -306,7 +306,7 @@ strong {
   border-radius: 5px;
   padding: 10px 16px;
   font-size: 13px;
-  color: #728278;
+  color: var(--grey-54);
   min-width: 137px;
   white-space: nowrap;
 }
@@ -316,7 +316,7 @@ strong {
 }
 .view-tabs button.active {
   background: #fff;
-  color: #244d46;
+  color: var(--grey-27);
   box-shadow: 0 1px 5px #244b3915;
   font-weight: 650;
 }
@@ -350,7 +350,7 @@ strong {
   padding: 2px 5px;
   border-radius: 4px;
   background: #edf2e9;
-  color: #577762;
+  color: var(--grey-54);
 }
 .plain-toggle {
   display: flex;
@@ -359,7 +359,7 @@ strong {
   white-space: nowrap;
   cursor: pointer;
   font-size: 12px;
-  color: #61786a;
+  color: var(--grey-54);
 }
 .plain-toggle input {
   accent-color: var(--accent);
@@ -369,7 +369,7 @@ strong {
 .mode-description {
   margin-left: auto;
   font-size: 11px;
-  color: #87968a;
+  color: var(--grey-54);
   letter-spacing: 0.3px;
 }
 .groups-panel {
@@ -467,16 +467,16 @@ strong {
 .group-name small {
   display: block;
   font-size: 10px;
-  color: #8a978d;
+  color: var(--grey-54);
 }
 .group-city {
   font-size: 11px;
-  color: #7b8d80;
+  color: var(--grey-54);
   font-variant-numeric: tabular-nums;
 }
 .filter-note {
   font-size: 10px;
-  color: #83907f;
+  color: var(--grey-54);
   line-height: 1.7;
   margin-top: 12px;
 }
@@ -508,7 +508,7 @@ strong {
   font-size: 9px;
   letter-spacing: 1.6px;
   font-weight: 600;
-  color: #8a998b;
+  color: var(--grey-54);
 }
 .detail-panel h1 {
   font-size: 25px;
@@ -537,7 +537,7 @@ strong {
 }
 .metric-label {
   font-size: 10px;
-  color: #7b8c80;
+  color: var(--grey-54);
   display: block;
   line-height: 1.6;
 }
@@ -552,7 +552,7 @@ strong {
 }
 .population-summary-note {
   font-size: 10px;
-  color: #94a28f;
+  color: var(--grey-54);
   text-align: right;
   line-height: 1.8;
 }
@@ -606,7 +606,7 @@ strong {
 }
 .bar-heading small {
   font-size: 10px;
-  color: #8a978b;
+  color: var(--grey-54);
 }
 .bar-heading strong {
   font-size: 11px;
@@ -637,12 +637,12 @@ strong {
   margin-top: 15px;
   font-size: 10px;
   line-height: 1.7;
-  color: #909c8e;
+  color: var(--grey-54);
 }
 .detail-empty {
   font-size: 12px;
   line-height: 1.8;
-  color: #859382;
+  color: var(--grey-54);
   padding: 5px 0;
 }
 .income-summary {
@@ -658,7 +658,7 @@ strong {
 .income-value {
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 26px;
-  color: #315850;
+  color: var(--grey-31);
   letter-spacing: -0.6px;
   white-space: nowrap;
   font-weight: 500;
@@ -670,7 +670,7 @@ strong {
 }
 .metric-context {
   font-size: 9px;
-  color: #91a08d;
+  color: var(--grey-54);
   line-height: 1.7;
   margin-top: 3px;
 }
@@ -708,7 +708,7 @@ strong {
   display: inline-block;
   font-size: 11px;
   text-decoration: none;
-  color: #7b8b80;
+  color: var(--grey-54);
   margin-top: 17px;
 }
 .source-link:hover {
@@ -773,7 +773,7 @@ html[data-theme='dark'] {
   display: block;
   font-size: 10px;
   margin-top: 5px;
-  color: #8a9b80;
+  color: var(--grey-54);
 }
 .comparison-pager {
   display: flex;
@@ -788,11 +788,11 @@ html[data-theme='dark'] {
   border: 1px solid #d7e1d0;
   border-radius: 5px;
   font-size: 20px;
-  color: #6b815d;
+  color: var(--grey-54);
 }
 .comparison-pager > span {
   font-size: 10px;
-  color: #819672;
+  color: var(--grey-54);
   white-space: nowrap;
 }
 .comparison-pager select {
@@ -802,7 +802,7 @@ html[data-theme='dark'] {
   padding: 7px;
   background: #fff;
   border-radius: 5px;
-  color: #526b47;
+  color: var(--grey-49);
   font-size: 11px;
 }
 .loader {
@@ -851,7 +851,7 @@ dialog h2 {
 .method-grid p,
 .method-sources p {
   font-size: 12px;
-  color: #768370;
+  color: var(--grey-54);
   line-height: 1.9;
 }
 .method-grid p + p {
@@ -1215,7 +1215,7 @@ html[data-theme='dark'] .method-sources p {
 #income-control:has(input:checked) {
   background: #e5f1ec;
   border-color: #75a08e;
-  color: #163f34;
+  color: var(--grey-23);
 }
 html[data-theme='dark'] #income-control:has(input:checked) {
   background: #34554d;
