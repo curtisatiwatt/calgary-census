@@ -150,7 +150,7 @@ const translations = {
   'Green · 未运营': 'Green · not in service',
   远期规划: 'Future plan',
   查看整个卡尔加里: 'View all Calgary',
-  '全市 ⤢': 'City ⤢',
+  全市: 'City',
   放大地图: 'Zoom in',
   缩小地图: 'Zoom out',
   '正在展开 Calgary': 'Opening Calgary',

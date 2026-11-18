@@ -72,6 +72,20 @@
   width: 36px;
   height: 36px;
 }
+/* Sized so the button is exactly as wide as it was with a text glyph. */
+#fit-city {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding-inline: 9.5px;
+}
+#fit-city svg {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  stroke-width: 2.2;
+}
 /* Legends. They all live in #mobile-legend-dialog: a sheet opened on demand on
    phones, a persistent card on desktop (both are set up further down). The
    rules below are the phone sizes; the desktop block after them is more compact. */
@@ -559,6 +573,14 @@ html[data-theme='dark'] .orientation-label:before {
 }
 .empty-map > span {
   font-size: 32px;
+  display: flex;
+  align-items: center;
+  height: 38px;
+}
+.empty-map > span svg {
+  width: 1em;
+  height: 1em;
+  stroke-width: 1.5;
 }
 .empty-map h2 {
   font-size: 18px;
@@ -836,6 +858,9 @@ html[data-theme='dark'] .loading-overlay {
     height: 44px;
     padding: 0;
     font-size: 1.65rem;
+  }
+  .map-tools #fit-city {
+    padding-inline: 5.5px;
   }
   #mobile-legend-button {
     font-weight: 550;

@@ -204,6 +204,13 @@ strong {
   top: 6px;
   font-size: 25px;
   color: var(--grey-54);
+  display: flex;
+  line-height: 0;
+}
+.search-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
 }
 .search-wrap kbd {
   position: absolute;
@@ -406,6 +413,25 @@ strong {
   width: 32px;
   height: 32px;
   flex-shrink: 0;
+}
+/* A button that holds one drawn icon centres it; the icon follows the button's font size. */
+.icon-button,
+.dialog-close,
+.comparison-pager button {
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+}
+.icon-button svg,
+.dialog-close svg {
+  width: 0.72em;
+  height: 0.72em;
+  stroke-width: 2;
+}
+.comparison-pager button svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
 }
 .groups-panel > input {
   width: 100%;
