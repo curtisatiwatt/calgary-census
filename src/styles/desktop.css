@@ -276,6 +276,14 @@
   .viewbar #mobile-more:hover {
     background: var(--desktop-hover);
   }
+  .viewbar .view-tabs button:active,
+  .viewbar .view-controls > #groups-button:active,
+  .viewbar .view-controls > #layers-button:active,
+  .viewbar .view-controls > #income-control:active,
+  .viewbar .desktop-nav-button:active:not(:disabled),
+  .viewbar #mobile-more:active {
+    transform: scale(0.96);
+  }
   /* One meaning per look. The filled tile is the view you are in; the lighter
      fill is a panel that is open, or the pointer; a switch that is on shows
      the tick in its corner instead of a fill. */

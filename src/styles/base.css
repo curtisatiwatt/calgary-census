@@ -959,6 +959,42 @@ dialog h2 {
   margin-top: 20px;
 }
 
+/* Motion is short and quiet: colours ease, a pressed control gives a little
+   and surfaces fade in. The reduced-motion rule below switches all of it off. */
+:root {
+  --motion-quick: 140ms;
+}
+button,
+a,
+input,
+select,
+#income-control,
+.search-result,
+.group-option,
+.layer-option,
+.mobile-settings-row {
+  transition:
+    background-color var(--motion-quick) ease,
+    color var(--motion-quick) ease,
+    border-color var(--motion-quick) ease,
+    box-shadow var(--motion-quick) ease,
+    opacity var(--motion-quick) ease,
+    transform 100ms ease;
+}
+/* Pressing a compact control squeezes it slightly; a row darkens instead. */
+.icon-button:active,
+.dialog-close:active,
+.comparison-pager button:active:not(:disabled),
+.sidebar .community-sheet-close:active,
+.settings-trigger:active {
+  transform: scale(0.94);
+}
+.search-result:active,
+.group-option:active,
+.layer-option:active {
+  background: var(--grey-93);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *:before,
@@ -1158,6 +1194,11 @@ html[data-theme='dark'] .group-option {
 }
 html[data-theme='dark'] .group-option:hover {
   background: var(--grey-33);
+}
+html[data-theme='dark'] .search-result:active,
+html[data-theme='dark'] .group-option:active,
+html[data-theme='dark'] .layer-option:active {
+  background: var(--grey-39);
 }
 html[data-theme='dark'] .mode-description,
 html[data-theme='dark'] .filter-note,

@@ -66,6 +66,10 @@
 .map-button:hover {
   background: var(--grey-97);
 }
+.map-button:active,
+#mobile-legend-button:active {
+  transform: scale(0.94);
+}
 .map-button.square {
   font-size: 22px;
   padding: 3px;
