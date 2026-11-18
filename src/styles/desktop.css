@@ -113,7 +113,7 @@
     --desktop-surface: #fff;
     --desktop-text: var(--grey-23);
     --desktop-muted: var(--grey-49);
-    --desktop-hover: var(--grey-95);
+    --desktop-hover: var(--grey-96);
     --desktop-selected: var(--grey-93);
     --desktop-border: var(--grey-90);
     --desktop-shadow: 0 2px 12px #2a2b2f18;
@@ -276,15 +276,29 @@
   .viewbar #mobile-more:hover {
     background: var(--desktop-hover);
   }
-  .viewbar .view-tabs button.active,
-  .viewbar .view-controls > #groups-button[aria-expanded='true'],
-  .viewbar .view-controls > #layers-button[aria-expanded='true'],
-  .viewbar #desktop-details-toggle[aria-expanded='true'],
-  .viewbar #mobile-more[aria-expanded='true'],
-  .viewbar .view-controls > #income-control:has(input:checked) {
+  /* One meaning per look. The filled tile is the view you are in; the lighter
+     fill is a panel that is open, or the pointer; a switch that is on shows
+     the tick in its corner instead of a fill. */
+  .viewbar .view-tabs button.active {
     background: var(--desktop-selected);
     color: var(--desktop-text);
     box-shadow: none;
+  }
+  .viewbar .view-controls > #groups-button[aria-expanded='true'],
+  .viewbar .view-controls > #layers-button[aria-expanded='true'],
+  .viewbar #desktop-details-toggle[aria-expanded='true'],
+  .viewbar #mobile-more[aria-expanded='true'] {
+    background: var(--desktop-hover);
+    color: var(--desktop-text);
+    box-shadow: none;
+  }
+  .viewbar .view-controls > #income-control:has(input:checked) {
+    background: transparent;
+    color: var(--desktop-text);
+    box-shadow: none;
+  }
+  .viewbar .view-controls > #income-control:has(input:checked):hover {
+    background: var(--desktop-hover);
   }
   .viewbar .view-tabs button.active {
     font-weight: 650;
@@ -353,8 +367,8 @@
     position: absolute;
     top: 7px;
     right: 5px;
-    width: 13px;
-    height: 13px;
+    width: 14px;
+    height: 14px;
     margin: 0;
   }
   .viewbar .desktop-nav-button:disabled {
