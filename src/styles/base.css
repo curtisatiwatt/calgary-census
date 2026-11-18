@@ -1493,6 +1493,52 @@ html[data-theme='dark'] #income-control:has(input:checked) {
   min-height: 0;
   overscroll-behavior: contain;
 }
+/* A scrolling area fades out at an edge while there is more beyond it. The fade follows the
+   scroll position itself, so no script is involved; a browser without scroll timelines keeps the plain edge. */
+@property --fade-top {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+@property --fade-bottom {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+@keyframes fade-top-in {
+  to {
+    --fade-top: 18px;
+  }
+}
+@keyframes fade-bottom-out {
+  from {
+    --fade-bottom: 30px;
+  }
+  to {
+    --fade-bottom: 0px;
+  }
+}
+@supports (animation-timeline: scroll()) {
+  .groups-panel > .dialog-scroll,
+  .layers-panel > .dialog-scroll,
+  #method-dialog > .dialog-scroll,
+  .sidebar #detail-body {
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      #000 var(--fade-top),
+      #000 calc(100% - var(--fade-bottom)),
+      transparent
+    );
+    animation:
+      fade-top-in linear both,
+      fade-bottom-out linear both;
+    animation-timeline: scroll(self), scroll(self);
+    animation-range:
+      0px 18px,
+      calc(100% - 30px) 100%;
+  }
+}
 .settings-row-icon,
 .settings-row-chevron,
 .settings-row-subtitle {
