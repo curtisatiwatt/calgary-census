@@ -269,6 +269,14 @@ html[data-theme='dark'] #search::-webkit-search-cancel-button {
   color: var(--grey-54);
   font-size: 12px;
 }
+/* The "/" hint has done its job once the box is in use. */
+.search-wrap kbd {
+  transition: opacity var(--motion-quick) ease;
+}
+.search-wrap input:focus ~ kbd,
+.search-wrap input:not(:placeholder-shown) ~ kbd {
+  opacity: 0;
+}
 .header-actions {
   display: flex;
   align-items: center;

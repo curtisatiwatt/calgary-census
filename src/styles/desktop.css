@@ -457,6 +457,10 @@
     color: var(--desktop-muted);
     opacity: 1;
   }
+  /* With text in the box the "/" hint is gone, so the clear button sits where it was. */
+  .app-header .search-wrap input:not(:placeholder-shown) {
+    padding-right: 12px;
+  }
   .app-header .search-wrap input:focus {
     background: var(--desktop-surface);
     box-shadow: inset 0 0 0 2px var(--accent);
