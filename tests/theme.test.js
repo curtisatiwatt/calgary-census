@@ -144,7 +144,7 @@ test('blocked storage still allows system defaults and an in-session manual choi
     assert.equal(theme.getTheme(), 'dark');
     assert.doesNotThrow(() => choose('light'));
     assert.equal(theme.getTheme(), 'light');
-    assert.equal(meta.get('content'), '#fbfcf9');
+    assert.equal(meta.get('content'), '#fbfcfe');
     changeSystem(false);
     changeSystem(true);
     assert.equal(theme.getTheme(), 'light');

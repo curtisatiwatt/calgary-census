@@ -28,7 +28,8 @@ function applyTheme(theme) {
   const previous = document.documentElement.dataset.theme;
   document.documentElement.dataset.theme = theme;
   document.documentElement.style.colorScheme = theme;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#11232a' : '#fbfcf9');
+  // The page colour of each theme: --paper in base.css (--grey-25 at night, --grey-99 by day).
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#202126' : '#fbfcfe');
   refreshThemeControl();
   if (previous !== theme) window.dispatchEvent(new CustomEvent('atlas-themechange', { detail: { theme } }));
 }
