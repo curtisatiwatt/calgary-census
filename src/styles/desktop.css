@@ -868,6 +868,21 @@
 }
 
 @media (min-width: 761px) {
+  /* The explanation is read at length: a size up from a caption, and darker. A phone already sets it at 16px. */
+  #method-dialog .method-grid p,
+  #method-dialog .method-sources a {
+    font-size: 13px;
+    line-height: 1.8;
+  }
+  #method-dialog .method-grid p {
+    color: var(--grey-43);
+  }
+  html[data-theme='dark'] #method-dialog .method-grid p {
+    color: var(--grey-85);
+  }
+  #method-dialog .method-sources p {
+    font-size: 12px;
+  }
   /* Direct preferences replace the old nested Settings entry. */
   .app-header > #mobile-more {
     display: none !important;
