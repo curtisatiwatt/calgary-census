@@ -460,6 +460,11 @@ function tooltipContent(feature, context) {
       `<strong>${esc(p.name)}</strong>${rows.join('')}<span class="tip-note">点击固定社区，查看完整构成</span>`,
     );
   }
+  // An area with neither an income nor a population table says so once.
+  if (!record && !isNumber(p.income) && !isNumber(p.population))
+    return localizeHtml(
+      `<strong>${esc(p.name)}</strong><span class="tip-row"><span>该区域暂无普查数据</span></span><span class="tip-note">点击查看社区详情</span>`,
+    );
   const groups = record
     ? selectedGroups()
         .slice(0, 5)

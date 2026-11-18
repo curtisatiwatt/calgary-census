@@ -198,6 +198,7 @@ const translations = {
   家庭收入: 'Household income',
   人口: 'Population',
   人口分类暂无数据: 'Population groups unavailable',
+  该区域暂无普查数据: 'No census data for this area',
   点击查看社区详情: 'Select for community details',
   '没有找到社区，可输入英文名或社区代码。': 'No community found. Try its name or community code.',
   地图暂时无法载入: 'The map could not load',
