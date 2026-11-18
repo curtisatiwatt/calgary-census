@@ -515,7 +515,7 @@ html[data-theme='dark'] .orientation-label:before {
   outline: none;
 }
 .leaflet-container:focus-visible {
-  outline: 3px solid #38a2a8;
+  outline: 3px solid var(--focus);
   outline-offset: -3px;
 }
 .leaflet-interactive:focus-visible {

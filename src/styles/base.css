@@ -88,7 +88,7 @@ button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 3px solid #38a2a8;
+  outline: 3px solid var(--focus);
   outline-offset: 3px;
 }
 [hidden] {
@@ -959,7 +959,7 @@ dialog h2 {
   --surface-soft: #f0f3ed;
   --panel: #fffffff0;
   --control-line: #ced8cd;
-  --focus: #38a2a8;
+  --focus: var(--grey-23);
 }
 .header-actions {
   gap: 10px;
@@ -979,7 +979,7 @@ html[data-theme='dark'] {
   --surface-soft: #203840;
   --panel: #172e36f5;
   --control-line: #3b545a;
-  --focus: #85d4cf;
+  --focus: var(--grey-97);
   background: var(--paper);
 }
 html[data-theme='dark'] .brand-mark {
