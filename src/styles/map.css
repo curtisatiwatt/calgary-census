@@ -555,7 +555,7 @@ html[data-theme='dark'] .orientation-label:before {
   justify-content: center;
   gap: 14px;
   background: #eef3e8;
-  color: #7c9071;
+  color: var(--grey-54);
 }
 .empty-map > span {
   font-size: 32px;
@@ -765,7 +765,7 @@ html[data-theme='dark'] .leaflet-popup-content-wrapper {
   border: 1px solid var(--grey-49);
 }
 html[data-theme='dark'] .leaflet-container a.leaflet-popup-close-button {
-  color: #bdcecc;
+  color: var(--grey-85);
 }
 html[data-theme='dark'] .station-popup .future-status {
   color: #a6d5ad;
@@ -778,7 +778,7 @@ html[data-theme='dark'] .comparison-maps {
 }
 html[data-theme='dark'] .empty-map {
   background: #172b31;
-  color: #bed0c5;
+  color: var(--grey-85);
 }
 html[data-theme='dark'] .loading-overlay {
   background: #14272ef2;
