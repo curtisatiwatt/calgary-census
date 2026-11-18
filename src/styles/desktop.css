@@ -356,7 +356,6 @@
     width: 13px;
     height: 13px;
     margin: 0;
-    accent-color: var(--accent);
   }
   .viewbar .desktop-nav-button:disabled {
     opacity: 0.38;
