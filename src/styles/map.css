@@ -501,6 +501,7 @@ html[data-theme='dark'] .orientation-label:before {
   line-height: 1.5;
   white-space: normal;
   overflow-wrap: break-word;
+  animation: fade-in 120ms ease;
 }
 /* The arrow takes the tooltip's colour on whichever side it opens. */
 .community-tooltip.leaflet-tooltip-top:before {
@@ -1068,6 +1069,7 @@ html[data-theme='dark'] .loading-overlay {
     background: var(--desktop-surface);
     color: var(--desktop-text);
     box-shadow: var(--desktop-shadow);
+    animation: fade-in var(--motion-surface) ease;
   }
   #mobile-legend-dialog .dialog-nav {
     display: flex;

@@ -512,6 +512,7 @@
   body.desktop-details-open .sidebar {
     display: flex;
     flex-direction: column;
+    animation: fade-in var(--motion-surface) ease;
   }
   .sidebar .detail-panel,
   .sidebar.collapsed .detail-panel {
@@ -678,6 +679,8 @@
     background: var(--desktop-surface);
     box-shadow: 0 5px 24px #2f303425;
     z-index: 2200;
+    animation: surface-in var(--motion-surface) var(--ease-out);
+    transform-origin: top left;
   }
   .viewbar > .groups-panel > .dialog-nav,
   .viewbar > .layers-panel > .dialog-nav {

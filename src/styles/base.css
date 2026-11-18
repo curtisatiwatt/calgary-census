@@ -962,7 +962,9 @@ dialog h2 {
 /* Motion is short and quiet: colours ease, a pressed control gives a little
    and surfaces fade in. The reduced-motion rule below switches all of it off. */
 :root {
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
   --motion-quick: 140ms;
+  --motion-surface: 200ms;
 }
 button,
 a,
@@ -995,6 +997,41 @@ select,
   background: var(--grey-93);
 }
 
+/* Surfaces arrive with a fade: a small rise for popovers and dialogs, a longer
+   one for the sheets and the drawer on a phone. */
+@keyframes surface-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.985);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+@keyframes drawer-in {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+}
+.search-results:not([hidden]) {
+  animation: surface-in var(--motion-quick) var(--ease-out);
+  transform-origin: top center;
+}
+dialog[open]::backdrop {
+  animation: fade-in var(--motion-surface) ease;
+}
+#method-dialog[open] {
+  animation: surface-in var(--motion-surface) var(--ease-out);
+}
 @media (prefers-reduced-motion: reduce) {
   *,
   *:before,

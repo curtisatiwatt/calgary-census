@@ -789,6 +789,7 @@
     border-radius: 22px 22px 0 0;
     overscroll-behavior: contain;
     box-shadow: 0 -4px 28px #25262a40;
+    animation: sheet-in 240ms var(--ease-out);
   }
   .mobile-sheet::backdrop {
     background: #25262a47;
@@ -1264,6 +1265,7 @@
     border-radius: 18px 0 0 18px;
     overflow: hidden;
     background: var(--mobile-surface);
+    animation-name: drawer-in;
   }
   #mobile-more-dialog::backdrop {
     background: #25262a45;
