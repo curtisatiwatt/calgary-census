@@ -1057,6 +1057,11 @@ dialog[open]::backdrop {
 #method-dialog[open] {
   animation: surface-in var(--motion-surface) var(--ease-out);
 }
+/* Switching theme cross-fades the whole page (see theme.js). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 220ms;
+}
 @media (prefers-reduced-motion: reduce) {
   *,
   *:before,

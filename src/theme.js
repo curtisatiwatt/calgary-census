@@ -26,12 +26,24 @@ export function refreshThemeControl() {
 
 function applyTheme(theme) {
   const previous = document.documentElement.dataset.theme;
-  document.documentElement.dataset.theme = theme;
-  document.documentElement.style.colorScheme = theme;
-  // The page colour of each theme: --paper in base.css (--grey-25 at night, --grey-99 by day).
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#202126' : '#fbfcfe');
-  refreshThemeControl();
-  if (previous !== theme) window.dispatchEvent(new CustomEvent('atlas-themechange', { detail: { theme } }));
+  const apply = () => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    // The page colour of each theme: --paper in base.css (--grey-25 at night, --grey-99 by day).
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', theme === 'dark' ? '#202126' : '#fbfcfe');
+    refreshThemeControl();
+    if (previous !== theme) window.dispatchEvent(new CustomEvent('atlas-themechange', { detail: { theme } }));
+  };
+  // Switching themes cross-fades the whole page; the first paint, and anyone who asked for less motion, switch at once.
+  const fade =
+    previous &&
+    previous !== theme &&
+    typeof document.startViewTransition === 'function' &&
+    !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  if (fade) document.startViewTransition(apply);
+  else apply();
 }
 
 export function setTheme(theme) {
