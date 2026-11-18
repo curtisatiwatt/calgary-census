@@ -702,18 +702,18 @@ html[data-theme='dark'] .orientation-label:before {
 
 html[data-theme='dark'] .map-status {
   background: var(--panel);
-  border-color: #385056;
-  color: #b7cac2;
+  border-color: var(--grey-41);
+  color: var(--grey-82);
   box-shadow: 0 2px 12px #0000001c;
 }
 html[data-theme='dark'] .map-button {
-  background: #20363ef5;
-  border-color: #40585f;
+  background: #2f3034f5;
+  border-color: var(--grey-45);
   box-shadow: 0 2px 8px #00000024;
-  color: #e1eeeb;
+  color: var(--grey-93);
 }
 html[data-theme='dark'] .map-button:hover {
-  background: #314a4f;
+  background: var(--grey-39);
 }
 html[data-theme='dark'] .map-warning {
   background: #453d27;
@@ -721,48 +721,48 @@ html[data-theme='dark'] .map-warning {
   color: #eed8a1;
 }
 html[data-theme='dark'] .leaflet-control-attribution {
-  background: #14272edb !important;
-  color: #a4bab5;
+  background: #25262adb !important;
+  color: var(--grey-76);
 }
 html[data-theme='dark'] .leaflet-control-attribution a {
-  color: #b9cfc2 !important;
+  color: var(--grey-82) !important;
 }
 html[data-theme='dark'] .leaflet-container:focus-visible {
   outline-color: var(--focus);
 }
 html[data-theme='dark'] .leaflet-interactive:focus-visible,
 html[data-theme='dark'] .transit-station:focus-visible {
-  outline-color: #d5edd9;
+  outline-color: var(--grey-92);
 }
 html[data-theme='dark'] .community-tooltip.leaflet-tooltip {
-  background: #223c45;
-  border: 1px solid #658384;
-  color: #edf5ef;
+  background: var(--grey-33);
+  border: 1px solid var(--grey-59);
+  color: var(--grey-96);
   box-shadow: 0 6px 24px #00000055;
 }
 html[data-theme='dark'] .community-tooltip.leaflet-tooltip-top:before {
-  border-top-color: #658384;
+  border-top-color: var(--grey-59);
 }
 html[data-theme='dark'] .community-tooltip.leaflet-tooltip-bottom:before {
-  border-bottom-color: #658384;
+  border-bottom-color: var(--grey-59);
 }
 html[data-theme='dark'] .community-tooltip.leaflet-tooltip-left:before {
-  border-left-color: #658384;
+  border-left-color: var(--grey-59);
 }
 html[data-theme='dark'] .community-tooltip.leaflet-tooltip-right:before {
-  border-right-color: #658384;
+  border-right-color: var(--grey-59);
 }
 html[data-theme='dark'] .tip-note {
-  color: #b9d3c7;
+  color: var(--grey-85);
 }
 html[data-theme='dark'] .leaflet-popup-content-wrapper,
 html[data-theme='dark'] .leaflet-popup-tip {
-  background: #1b343d;
+  background: var(--grey-31);
   color: var(--ink);
   box-shadow: 0 3px 14px #00000055;
 }
 html[data-theme='dark'] .leaflet-popup-content-wrapper {
-  border: 1px solid #4d6b71;
+  border: 1px solid var(--grey-49);
 }
 html[data-theme='dark'] .leaflet-container a.leaflet-popup-close-button {
   color: #bdcecc;
@@ -771,7 +771,7 @@ html[data-theme='dark'] .station-popup .future-status {
   color: #a6d5ad;
 }
 html[data-theme='dark'] .context-legend {
-  color: #b8cbc4;
+  color: var(--grey-82);
 }
 html[data-theme='dark'] .comparison-maps {
   background: #355056;

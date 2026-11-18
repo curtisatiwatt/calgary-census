@@ -315,9 +315,9 @@
     --mobile-muted: var(--grey-49);
   }
   html[data-theme='dark'] {
-    --mobile-surface: #17282e;
-    --mobile-ink: #f0f5f3;
-    --mobile-muted: #c1cfca;
+    --mobile-surface: var(--grey-27);
+    --mobile-ink: var(--grey-97);
+    --mobile-muted: var(--grey-85);
   }
   html,
   body {
@@ -476,7 +476,7 @@
     background: var(--mobile-surface);
   }
   html[data-theme='dark'] .view-tabs button.active {
-    background: #34554d;
+    background: var(--grey-43);
     color: #fff;
   }
   .view-controls {
@@ -512,7 +512,7 @@
     background: var(--grey-95);
   }
   html[data-theme='dark'] #group-count {
-    background: #30483f;
+    background: var(--grey-37);
   }
   .mode-description {
     display: none;
@@ -541,7 +541,7 @@
     color: var(--grey-23);
   }
   html[data-theme='dark'] body.mobile-map-ui #income-control:has(input:checked) {
-    background: #34554d;
+    background: var(--grey-43);
     color: #fff;
   }
   body.mobile-map-ui .view-controls #groups-button {
@@ -821,7 +821,7 @@
   }
   html[data-theme='dark'] .mobile-sheet-heading button,
   html[data-theme='dark'] .mobile-sheet .icon-button {
-    background: #30464b;
+    background: var(--grey-37);
   }
   .mobile-settings-row {
     display: flex;
@@ -1345,7 +1345,7 @@
   }
   html[data-theme='dark'] #mobile-more-dialog .view-tabs button.active,
   html[data-theme='dark'] #mobile-more-dialog #income-control:has(input:checked) {
-    background: #34554d;
+    background: var(--grey-43);
     color: #fff;
   }
   #mobile-more-dialog .desktop-nav-icon,
@@ -1552,7 +1552,7 @@
     pointer-events: none;
   }
   html[data-theme='dark'] .sidebar .mobile-detail-handle .handle-bar {
-    background: #747b83;
+    background: var(--grey-59);
   }
   .sidebar .community-sheet-header h1 {
     grid-column: 1;
@@ -1586,7 +1586,7 @@
     touch-action: manipulation;
   }
   html[data-theme='dark'] .sidebar .community-sheet-close {
-    background: #304047;
+    background: var(--grey-37);
   }
   .community-sheet-close svg {
     width: 24px;

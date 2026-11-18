@@ -119,12 +119,12 @@
     --desktop-shadow: 0 2px 12px #2a2b2f18;
   }
   html[data-theme='dark'] {
-    --desktop-surface: #192b31;
-    --desktop-text: #f0f4f2;
-    --desktop-muted: #bdcbc5;
-    --desktop-hover: #263e43;
-    --desktop-selected: #31534b;
-    --desktop-border: #365055;
+    --desktop-surface: var(--grey-27);
+    --desktop-text: var(--grey-96);
+    --desktop-muted: var(--grey-82);
+    --desktop-hover: var(--grey-35);
+    --desktop-selected: var(--grey-41);
+    --desktop-border: var(--grey-41);
     --desktop-shadow: 0 2px 14px #0004;
   }
   body.desktop-menu-expanded {

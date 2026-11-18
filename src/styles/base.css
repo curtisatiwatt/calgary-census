@@ -969,16 +969,16 @@ dialog h2 {
 }
 html[data-theme='dark'] {
   color-scheme: dark;
-  --ink: #e0eae8;
-  --muted: #a3b5b5;
-  --paper: #11232a;
-  --line: #2b4148;
+  --ink: var(--grey-93);
+  --muted: var(--grey-76);
+  --paper: var(--grey-25);
+  --line: var(--grey-37);
   --accent: var(--grey-97);
   --shadow: 0 8px 32px #00000045;
-  --surface: #1d333b;
-  --surface-soft: #203840;
-  --panel: #172e36f5;
-  --control-line: #3b545a;
+  --surface: var(--grey-31);
+  --surface-soft: var(--grey-33);
+  --panel: #2a2b2ff5;
+  --control-line: var(--grey-43);
   --focus: var(--grey-97);
   background: var(--paper);
 }
@@ -992,25 +992,25 @@ html[data-theme='dark'] .brand-mark > span {
 html[data-theme='dark'] .search-wrap input,
 html[data-theme='dark'] .groups-panel > input {
   background: var(--surface-soft);
-  border-color: #314c53;
+  border-color: var(--grey-39);
   color: var(--ink);
 }
 html[data-theme='dark'] input::placeholder {
-  color: #a0b2b4;
+  color: var(--grey-76);
   opacity: 1;
 }
 html[data-theme='dark'] .search-wrap input:focus,
 html[data-theme='dark'] .groups-panel > input:focus {
-  background: #1d353d;
-  border-color: #7ab5a6;
-  box-shadow: 0 0 0 3px #91cbbb24;
+  background: var(--grey-31);
+  border-color: var(--grey-72);
+  box-shadow: 0 0 0 3px #b9babf24;
 }
 html[data-theme='dark'] .search-icon {
-  color: #adc2c1;
+  color: var(--grey-79);
 }
 html[data-theme='dark'] .search-wrap kbd {
-  border-color: #52656a;
-  color: #b0c1c1;
+  border-color: var(--grey-49);
+  color: var(--grey-79);
 }
 html[data-theme='dark'] .search-results,
 html[data-theme='dark'] .search-result {
@@ -1018,20 +1018,20 @@ html[data-theme='dark'] .search-result {
 }
 html[data-theme='dark'] .search-result:hover,
 html[data-theme='dark'] .search-result.active {
-  background: #264139;
+  background: var(--grey-35);
 }
 html[data-theme='dark'] .viewbar {
-  background: #142930;
+  background: var(--grey-27);
 }
 html[data-theme='dark'] .view-tabs {
-  background: #20363c;
+  background: var(--grey-31);
 }
 html[data-theme='dark'] .view-tabs button {
-  color: #acbdbc;
+  color: var(--grey-79);
 }
 html[data-theme='dark'] .view-tabs button.active {
-  background: #335049;
-  color: #edfaf3;
+  background: var(--grey-41);
+  color: var(--grey-97);
   box-shadow: 0 1px 6px #00000024;
 }
 html[data-theme='dark'] .filter-button,
@@ -1042,15 +1042,15 @@ html[data-theme='dark'] .comparison-pager select {
   color: var(--ink);
 }
 html[data-theme='dark'] .filter-button[aria-expanded='true'] {
-  border-color: #8bbcad;
-  box-shadow: 0 0 0 3px #91cbbb16;
+  border-color: var(--grey-76);
+  box-shadow: 0 0 0 3px #b9babf16;
 }
 html[data-theme='dark'] #group-count {
-  background: #304a42;
-  color: #d8ece0;
+  background: var(--grey-39);
+  color: var(--grey-92);
 }
 html[data-theme='dark'] .plain-toggle {
-  color: #b9cec4;
+  color: var(--grey-82);
 }
 html[data-theme='dark'] .plain-toggle input,
 html[data-theme='dark'] .group-option input,
@@ -1063,25 +1063,25 @@ html[data-theme='dark'] .layers-panel {
   border-color: var(--control-line);
 }
 html[data-theme='dark'] .icon-button {
-  background: #2b444b;
-  color: #d9e7e4;
+  background: var(--grey-37);
+  color: var(--grey-92);
 }
 html[data-theme='dark'] .group-option {
-  border-color: #2a4146;
+  border-color: var(--grey-35);
 }
 html[data-theme='dark'] .group-option:hover {
-  background: #203a3b;
+  background: var(--grey-33);
 }
 html[data-theme='dark'] .mode-description,
 html[data-theme='dark'] .filter-note,
 html[data-theme='dark'] .group-name small,
 html[data-theme='dark'] .group-city {
-  color: #acbeb6;
+  color: var(--grey-79);
 }
 html[data-theme='dark'] .sidebar {
   background: var(--paper);
   border-color: var(--line);
-  scrollbar-color: #506c70 transparent;
+  scrollbar-color: var(--grey-49) transparent;
 }
 html[data-theme='dark'] .eyebrow,
 html[data-theme='dark'] .metric-label,
@@ -1090,31 +1090,31 @@ html[data-theme='dark'] .metric-basis,
 html[data-theme='dark'] .detail-empty,
 html[data-theme='dark'] .metric-context,
 html[data-theme='dark'] .bar-heading small {
-  color: #a7b9b5;
+  color: var(--grey-76);
 }
 html[data-theme='dark'] .bar-track {
-  background: #2c4247;
+  background: var(--grey-37);
 }
 html[data-theme='dark'] .city-reference,
 html[data-theme='dark'] .city-reference-symbol {
-  background: #ecf3df;
-  box-shadow: 0 0 0 1px #19303599;
+  background: var(--grey-95);
+  box-shadow: 0 0 0 1px #2a2b2f99;
 }
 html[data-theme='dark'] .income-value {
-  color: #c2e6d7;
+  color: var(--grey-90);
 }
 html[data-theme='dark'] .data-caveat {
   color: #d4bb88;
 }
 html[data-theme='dark'] .source-link {
-  color: #a8ccbc;
+  color: var(--grey-82);
 }
 html[data-theme='dark'] .handle-bar {
-  background: #5a7676;
+  background: var(--grey-54);
 }
 html[data-theme='dark'] .mobile-detail-handle,
 html[data-theme='dark'] .sidebar.collapsed .collapsed-summary {
-  color: #b5c8bd;
+  color: var(--grey-82);
 }
 html[data-theme='dark'] .map-workspace,
 html[data-theme='dark'] .map-canvas,
@@ -1139,27 +1139,27 @@ html[data-theme='dark'] .railway-swatch {
   border-color: #94a3a7;
 }
 html[data-theme='dark'] .comparison-toolbar {
-  background: #172d34;
+  background: var(--grey-29);
   border-color: var(--line);
 }
 html[data-theme='dark'] .comparison-toolbar > div:first-child span,
 html[data-theme='dark'] .comparison-pager > span {
-  color: #afc1b6;
+  color: var(--grey-79);
 }
 html[data-theme='dark'] .loader {
-  border-color: #395b5d;
-  border-top-color: #a4cfbd;
+  border-color: var(--grey-45);
+  border-top-color: var(--grey-82);
 }
 html[data-theme='dark'] dialog {
-  border-color: #3b555d;
+  border-color: var(--grey-43);
   box-shadow: 0 25px 90px #00000075;
 }
 html[data-theme='dark'] dialog::backdrop {
-  background: #07141bc7;
+  background: #111216c7;
 }
 html[data-theme='dark'] .method-grid p,
 html[data-theme='dark'] .method-sources p {
-  color: #b6c7bd;
+  color: var(--grey-82);
 }
 
 @media (max-width: 1150px) {
@@ -1218,8 +1218,8 @@ html[data-theme='dark'] .method-sources p {
   color: var(--grey-23);
 }
 html[data-theme='dark'] #income-control:has(input:checked) {
-  background: #34554d;
-  border-color: #8bbcad;
+  background: var(--grey-43);
+  border-color: var(--grey-76);
   color: #fff;
 }
 #mobile-more-dialog select {
